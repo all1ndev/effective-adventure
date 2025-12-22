@@ -1,4 +1,5 @@
 {
 	"editor.formatOnSave": true,
-	"editor.defaultFormatter": "prettier.prettier-vscode"
+	"editor.defaultFormatter": "prettier.prettier-vscode",
+	"editor.renderWhitespace": "all"
 }
