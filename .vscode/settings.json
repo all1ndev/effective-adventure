@@ -1,5 +1,6 @@
 {
 	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "prettier.prettier-vscode",
-	"editor.renderWhitespace": "all"
+	"editor.renderWhitespace": "all",
+	"css.lint.unknownAtRules": "ignore"
 }
