@@ -23,7 +23,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
 					<HugeiconsIcon
 						icon={CheckmarkCircle02Icon}
 						strokeWidth={2}
-						remixicon="RiCheckboxCircleLine"
 						className="size-4"
 					/>
 				),
@@ -31,7 +30,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
 					<HugeiconsIcon
 						icon={InformationCircleIcon}
 						strokeWidth={2}
-						remixicon="RiInformationLine"
 						className="size-4"
 					/>
 				),
@@ -39,7 +37,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
 					<HugeiconsIcon
 						icon={Alert02Icon}
 						strokeWidth={2}
-						remixicon="RiErrorWarningLine"
 						className="size-4"
 					/>
 				),
@@ -47,7 +44,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
 					<HugeiconsIcon
 						icon={MultiplicationSignCircleIcon}
 						strokeWidth={2}
-						remixicon="RiCloseCircleLine"
 						className="size-4"
 					/>
 				),
@@ -55,7 +51,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
 					<HugeiconsIcon
 						icon={Loading03Icon}
 						strokeWidth={2}
-						remixicon="RiLoaderLine"
 						className="size-4 animate-spin"
 					/>
 				),

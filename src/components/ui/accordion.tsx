@@ -53,14 +53,12 @@ function AccordionTrigger({
 					icon={ArrowDown01Icon}
 					strokeWidth={2}
 					data-slot="accordion-trigger-icon"
-					remixicon="RiArrowDownSLine"
 					className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
 				/>
 				<HugeiconsIcon
 					icon={ArrowUp01Icon}
 					strokeWidth={2}
 					data-slot="accordion-trigger-icon"
-					remixicon="RiArrowUpSLine"
 					className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
 				/>
 			</AccordionPrimitive.Trigger>

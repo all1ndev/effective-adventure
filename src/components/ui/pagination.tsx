@@ -80,7 +80,6 @@ function PaginationPrevious({
 			<HugeiconsIcon
 				icon={ArrowLeft01Icon}
 				strokeWidth={2}
-				remixicon="RiArrowLeftSLine"
 				data-icon="inline-start"
 			/>
 			<span className="hidden sm:block">Previous</span>
@@ -103,7 +102,6 @@ function PaginationNext({
 			<HugeiconsIcon
 				icon={ArrowRight01Icon}
 				strokeWidth={2}
-				remixicon="RiArrowRightSLine"
 				data-icon="inline-end"
 			/>
 		</PaginationLink>
@@ -124,11 +122,7 @@ function PaginationEllipsis({
 			)}
 			{...props}
 		>
-			<HugeiconsIcon
-				icon={MoreHorizontalCircle01Icon}
-				strokeWidth={2}
-				remixicon="RiMoreLine"
-			/>
+			<HugeiconsIcon icon={MoreHorizontalCircle01Icon} strokeWidth={2} />
 			<span className="sr-only">More pages</span>
 		</span>
 	);

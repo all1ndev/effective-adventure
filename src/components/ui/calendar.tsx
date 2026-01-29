@@ -152,7 +152,6 @@ function Calendar({
 							<HugeiconsIcon
 								icon={ArrowLeftIcon}
 								strokeWidth={2}
-								remixicon="RiArrowLeftSLine"
 								className={cn("size-4", className)}
 								{...props}
 							/>
@@ -164,7 +163,6 @@ function Calendar({
 							<HugeiconsIcon
 								icon={ArrowRightIcon}
 								strokeWidth={2}
-								remixicon="RiArrowRightSLine"
 								className={cn("size-4", className)}
 								{...props}
 							/>
@@ -175,7 +173,6 @@ function Calendar({
 						<HugeiconsIcon
 							icon={ArrowDownIcon}
 							strokeWidth={2}
-							remixicon="RiArrowDownSLine"
 							className={cn("size-4", className)}
 							{...props}
 						/>

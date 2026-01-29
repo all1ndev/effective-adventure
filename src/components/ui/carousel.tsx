@@ -196,11 +196,7 @@ function CarouselPrevious({
 			onClick={scrollPrev}
 			{...props}
 		>
-			<HugeiconsIcon
-				icon={ArrowLeft01Icon}
-				strokeWidth={2}
-				remixicon="RiArrowLeftSLine"
-			/>
+			<HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
 			<span className="sr-only">Previous slide</span>
 		</Button>
 	);
@@ -230,11 +226,7 @@ function CarouselNext({
 			onClick={scrollNext}
 			{...props}
 		>
-			<HugeiconsIcon
-				icon={ArrowRight01Icon}
-				strokeWidth={2}
-				remixicon="RiArrowRightSLine"
-			/>
+			<HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
 			<span className="sr-only">Next slide</span>
 		</Button>
 	);

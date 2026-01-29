@@ -130,11 +130,7 @@ function MenubarCheckboxItem({
 		>
 			<span className="left-1.5 size-4 [&_svg:not([class*='size-'])]:size-4 pointer-events-none absolute flex items-center justify-center">
 				<MenubarPrimitive.ItemIndicator>
-					<HugeiconsIcon
-						icon={Tick02Icon}
-						strokeWidth={2}
-						remixicon="RiCheckLine"
-					/>
+					<HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
 				</MenubarPrimitive.ItemIndicator>
 			</span>
 			{children}
@@ -158,11 +154,7 @@ function MenubarRadioItem({
 		>
 			<span className="left-1.5 size-4 [&_svg:not([class*='size-'])]:size-4 pointer-events-none absolute flex items-center justify-center">
 				<MenubarPrimitive.ItemIndicator>
-					<HugeiconsIcon
-						icon={Tick02Icon}
-						strokeWidth={2}
-						remixicon="RiCheckLine"
-					/>
+					<HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
 				</MenubarPrimitive.ItemIndicator>
 			</span>
 			{children}
@@ -247,7 +239,6 @@ function MenubarSubTrigger({
 			<HugeiconsIcon
 				icon={ArrowRight01Icon}
 				strokeWidth={2}
-				remixicon="RiArrowRightSLine"
 				className="ml-auto size-4"
 			/>
 		</MenubarPrimitive.SubTrigger>
