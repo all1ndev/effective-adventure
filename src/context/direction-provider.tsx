@@ -1,3 +1,4 @@
+"use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { DirectionProvider as RdxDirProvider } from "@radix-ui/react-direction";
 import { getCookie, setCookie, removeCookie } from "@/lib/cookies";
@@ -51,7 +52,6 @@ export function DirectionProvider({ children }: { children: React.ReactNode }) {
 	);
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useDirection() {
 	const context = useContext(DirectionContext);
 	if (!context) {

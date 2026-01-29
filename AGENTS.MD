@@ -15,6 +15,4 @@ This is a Next.js application with a modular agent system. Agents are autonomous
 
 - TypeScript strict mode enabled
 - Use functional components and hooks
-- Single quotes, no semicolons
-- Modular structure with agents in `lib/agents/`
 - Components in `components/`, UI components in `components/ui/`

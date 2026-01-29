@@ -1,5 +1,5 @@
 import { type ChangeEvent, useState } from "react";
-import { getRouteApi } from "@tanstack/react-router";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, ArrowUpAZ, ArrowDownAZ } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +19,6 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { apps } from "./data/apps";
 
-const route = getRouteApi("/_authenticated/apps/");
-
 type AppType = "all" | "connected" | "notConnected";
 
 const appText = new Map<AppType, string>([
@@ -30,12 +28,18 @@ const appText = new Map<AppType, string>([
 ]);
 
 export function Apps() {
-	const {
-		filter = "",
-		type = "all",
-		sort: initSort = "asc",
-	} = route.useSearch();
-	const navigate = route.useNavigate();
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
+	const filter = searchParams.get("filter") ?? "";
+	const typeParam = searchParams.get("type");
+	const type: AppType =
+		typeParam === "connected" || typeParam === "notConnected"
+			? typeParam
+			: "all";
+	const sortParam = searchParams.get("sort");
+	const initSort = sortParam === "desc" ? "desc" : "asc";
 
 	const [sort, setSort] = useState(initSort);
 	const [appType, setAppType] = useState(type);
@@ -58,27 +62,34 @@ export function Apps() {
 
 	const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
 		setSearchTerm(e.target.value);
-		navigate({
-			search: (prev) => ({
-				...prev,
-				filter: e.target.value || undefined,
-			}),
-		});
+		const params = new URLSearchParams(searchParams.toString());
+		if (e.target.value) {
+			params.set("filter", e.target.value);
+		} else {
+			params.delete("filter");
+		}
+		const query = params.toString();
+		router.replace(query ? `${pathname}?${query}` : pathname);
 	};
 
 	const handleTypeChange = (value: AppType) => {
 		setAppType(value);
-		navigate({
-			search: (prev) => ({
-				...prev,
-				type: value === "all" ? undefined : value,
-			}),
-		});
+		const params = new URLSearchParams(searchParams.toString());
+		if (value === "all") {
+			params.delete("type");
+		} else {
+			params.set("type", value);
+		}
+		const query = params.toString();
+		router.replace(query ? `${pathname}?${query}` : pathname);
 	};
 
 	const handleSortChange = (sort: "asc" | "desc") => {
 		setSort(sort);
-		navigate({ search: (prev) => ({ ...prev, sort }) });
+		const params = new URLSearchParams(searchParams.toString());
+		params.set("sort", sort);
+		const query = params.toString();
+		router.replace(`${pathname}?${query}`);
 	};
 
 	return (

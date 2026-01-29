@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
-import { Link, useLocation } from "@tanstack/react-router";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import {
 	Collapsible,
@@ -35,7 +36,10 @@ import {
 
 export function NavGroup({ title, items }: NavGroupProps) {
 	const { state, isMobile } = useSidebar();
-	const href = useLocation({ select: (location) => location.href });
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+	const search = searchParams.toString();
+	const href = `${pathname}${search ? `?${search}` : ""}`;
 	return (
 		<SidebarGroup>
 			<SidebarGroupLabel>{title}</SidebarGroupLabel>
@@ -71,7 +75,7 @@ function SidebarMenuLink({ item, href }: { item: NavLink; href: string }) {
 				isActive={checkIsActive(href, item)}
 				tooltip={item.title}
 			>
-				<Link to={item.url} onClick={() => setOpenMobile(false)}>
+				<Link href={item.url} onClick={() => setOpenMobile(false)}>
 					{item.icon && <item.icon />}
 					<span>{item.title}</span>
 					{item.badge && <NavBadge>{item.badge}</NavBadge>}
@@ -112,7 +116,7 @@ function SidebarMenuCollapsible({
 									asChild
 									isActive={checkIsActive(href, subItem)}
 								>
-									<Link to={subItem.url} onClick={() => setOpenMobile(false)}>
+									<Link href={subItem.url} onClick={() => setOpenMobile(false)}>
 										{subItem.icon && <subItem.icon />}
 										<span>{subItem.title}</span>
 										{subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
@@ -156,7 +160,7 @@ function SidebarMenuCollapsedDropdown({
 					{item.items.map((sub) => (
 						<DropdownMenuItem key={`${sub.title}-${sub.url}`} asChild>
 							<Link
-								to={sub.url}
+								href={sub.url}
 								className={`${checkIsActive(href, sub) ? "bg-secondary" : ""}`}
 							>
 								{sub.icon && <sub.icon />}
@@ -173,13 +177,26 @@ function SidebarMenuCollapsedDropdown({
 	);
 }
 
+function resolveUrl(url: NavItem["url"] | undefined) {
+	if (!url) return null;
+	if (typeof url === "string") return url;
+	if (typeof url === "object" && "pathname" in url) {
+		return typeof url.pathname === "string" ? url.pathname : null;
+	}
+	return null;
+}
+
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
+	const currentPath = href.split("?")[0];
+	const itemUrl = resolveUrl(item.url);
+	const childUrls = item.items?.map((child) => resolveUrl(child.url));
+
 	return (
-		href === item.url || // /endpint?search=param
-		href.split("?")[0] === item.url || // endpoint
-		!!item?.items?.filter((i) => i.url === href).length || // if child nav is active
+		(itemUrl !== null && (href === itemUrl || currentPath === itemUrl)) ||
+		!!childUrls?.filter((url) => url === href || url === currentPath).length ||
 		(mainNav &&
-			href.split("/")[1] !== "" &&
-			href.split("/")[1] === item?.url?.split("/")[1])
+			itemUrl !== null &&
+			currentPath.split("/")[1] !== "" &&
+			currentPath.split("/")[1] === itemUrl.split("/")[1])
 	);
 }

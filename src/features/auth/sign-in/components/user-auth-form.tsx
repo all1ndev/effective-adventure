@@ -2,7 +2,8 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "@tanstack/react-router";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Loader2, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import { IconFacebook, IconGithub } from "@/assets/brand-icons";
@@ -40,7 +41,7 @@ export function UserAuthForm({
 	...props
 }: UserAuthFormProps) {
 	const [isLoading, setIsLoading] = useState(false);
-	const navigate = useNavigate();
+	const router = useRouter();
 	const { auth } = useAuthStore();
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -73,7 +74,7 @@ export function UserAuthForm({
 
 				// Redirect to the stored location or default to dashboard
 				const targetPath = redirectTo || "/";
-				navigate({ to: targetPath, replace: true });
+				router.replace(targetPath);
 
 				return `Welcome back, ${data.email}!`;
 			},
@@ -112,7 +113,7 @@ export function UserAuthForm({
 							</FormControl>
 							<FormMessage />
 							<Link
-								to="/forgot-password"
+								href="/forgot-password"
 								className="absolute end-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75"
 							>
 								Forgot password?
