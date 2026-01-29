@@ -25,29 +25,57 @@ Pacienții post-transplant hepatic și echipa lor medicală.
 
 ## 3. Funcționalitățile Cheie
 
-### 3.1 Monitorizarea Sănătății
+### 3.1 Funcționalități pentru Pacienți
+
+#### 3.1.1 Monitorizarea Sănătății
 
 - **Trackere pentru semne vitale**: Pacienții pot introduce și urmări zilnic valorile tensiunii arteriale, temperaturii, pulsului și greutății prin interfața web.
 - **Simptome și stare generală**: Pacienții pot nota simptome precum febră, oboseală, dureri abdominale, icter, etc., iar aplicația va alerta echipa medicală (prin notificări in-app) dacă apar semnale de alarmă.
 
-### 3.2 Managementul Medicației
+#### 3.1.2 Managementul Medicației
 
 - **Calendar de administrare**: Aplicația va include un calendar personalizat pentru administrarea imunosupresoarelor, antivirale și altor medicamente prescrise.
 - **Memento pentru reînnoirea prescripțiilor**: Vizualizarea datelor de expirare a prescripțiilor și alerte in-app pentru reînnoire.
 
-### 3.3 Monitorizarea Testelor de Laborator
+#### 3.1.3 Urmărirea Testelor de Laborator
 
-- **Urmărirea rezultatelor analizelor**: Pacienții și echipa medicală pot vizualiza rezultatele testelor de sânge, precum enzimele hepatice și nivelurile de imunosupresoare, etc., într-o secțiune specială.
+- **Vizualizare rezultate analize**: Pacienții pot vizualiza rezultatele testelor de sânge, precum enzimele hepatice și nivelurile de imunosupresoare, etc., într-o secțiune specială.
 
-### 3.4 Alertare și Comunicarea cu Echipa Medicală
+#### 3.1.4 Comunicarea cu Echipa Medicală
 
-- **Alerte pentru echipa medicală**: Dacă valorile introduse sunt anormale sau dacă pacientul raportează simptome grave, aplicația va genera alerte automate vizibile în dashboard-ul medicului.
 - **Mesagerie securizată**: Pacienții pot folosi o funcție de mesagerie securizată în cadrul aplicației pentru a trimite întrebări non-urgente medicului, economisind timp pentru ambele părți.
 
-### 3.5 Educație și Suport
+#### 3.1.5 Educație și Suport Personal
 
 - **Resurse educaționale**: Pacienții vor avea acces la materiale informative despre îngrijirea post-transplant, prevenția complicațiilor și gestionarea stilului de viață.
 - **Jurnal personal**: Pacienții pot folosi un jurnal pentru a-și înregistra starea de spirit sau pentru a nota recomandări personale de la echipa medicală.
+
+### 3.2 Funcționalități pentru Medici
+
+#### 3.2.1 Dashboard și Monitorizare Pacienți
+
+- **Dashboard doctor**: Vizualizare centralizată a tuturor pacienților asignați cu un overview al stării lor de sănătate.
+- **Urmărirea semnelor vitale**: Acces la toate datele de semne vitale introduse de pacienți, cu visualizare grafică a tendințelor.
+
+#### 3.2.2 Alerte și Notificări
+
+- **Alerte automate**: Dacă valorile introduse sunt anormale sau dacă pacientul raportează simptome grave, aplicația va genera alerte automate vizibile în dashboard-ul medicului.
+- **Sistem de prioritizare**: Alerte cu nivele de severitate diferite pentru a ajuta medicul să prioritizeze cazurile urgente.
+
+#### 3.2.3 Gestionarea Medicației și Prescripțiilor
+
+- **Vizualizare complianță medicație**: Doctor poate vedea istoric al medicamentelor administrate de pacient și alertele pentru prescripții expirate.
+- **Update prescripții**: Doctor poate actualiza prescripțiile și modifica planul de tratament pentru pacienți.
+
+#### 3.2.4 Revizuirea Testelor de Laborator
+
+- **Acces la rezultate analize**: Medicul poate vizualiza și interpreta rezultatele testelor de laborator ale pacienților, inclusiv valorile de referință și tendinții în timp.
+- **Notificări pentru valori anormale**: Alertă automată pentru rezultate anormale care necesită atenție.
+
+#### 3.2.5 Comunicare și Notări Clinice
+
+- **Mesagerie securizată**: Doctor poate răspunde și comunica cu pacienții prin mesagerie sigură.
+- **Notări clinice**: Posibilitatea de a adăuga notări clinice și observații în fișierul pacientului.
 
 ## 4. Beneficii și Impact
 
