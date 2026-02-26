@@ -123,3 +123,30 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+@keyframes auth-gradient-shift {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+.auth-gradient {
+	background: linear-gradient(
+		135deg,
+		#f0f9ff,
+		#e0f2fe,
+		#d1fae5,
+		#e0f2fe,
+		#f0f9ff,
+		#ecfdf5,
+		#e0f2fe
+	);
+	background-size: 400% 400%;
+	animation: auth-gradient-shift 12s ease infinite;
+}
