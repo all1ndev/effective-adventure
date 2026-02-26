@@ -55,9 +55,9 @@ export function ConfigDrawer() {
 			</SheetTrigger>
 			<SheetContent className="flex flex-col">
 				<SheetHeader className="pb-0 text-start">
-					<SheetTitle>Theme Settings</SheetTitle>
+					<SheetTitle>Setări temă</SheetTitle>
 					<SheetDescription id="config-drawer-description">
-						Adjust the appearance and layout to suit your preferences.
+						Ajustați aspectul și layout-ul conform preferințelor dvs.
 					</SheetDescription>
 				</SheetHeader>
 				<div className="space-y-6 overflow-y-auto px-4">
@@ -173,7 +173,7 @@ function ThemeConfig() {
 	return (
 		<div>
 			<SectionTitle
-				title="Theme"
+				title="Temă"
 				showReset={theme !== defaultTheme}
 				onReset={() => setTheme(defaultTheme)}
 			/>
@@ -187,17 +187,17 @@ function ThemeConfig() {
 				{[
 					{
 						value: "system",
-						label: "System",
+						label: "Sistem",
 						icon: IconThemeSystem,
 					},
 					{
 						value: "light",
-						label: "Light",
+						label: "Luminos",
 						icon: IconThemeLight,
 					},
 					{
 						value: "dark",
-						label: "Dark",
+						label: "Întunecat",
 						icon: IconThemeDark,
 					},
 				].map((item) => (
@@ -216,7 +216,7 @@ function SidebarConfig() {
 	return (
 		<div className="max-md:hidden">
 			<SectionTitle
-				title="Sidebar"
+				title="Bara laterală"
 				showReset={defaultVariant !== variant}
 				onReset={() => setVariant(defaultVariant)}
 			/>
@@ -230,17 +230,17 @@ function SidebarConfig() {
 				{[
 					{
 						value: "inset",
-						label: "Inset",
+						label: "Inserat",
 						icon: IconSidebarInset,
 					},
 					{
 						value: "floating",
-						label: "Floating",
+						label: "Flotant",
 						icon: IconSidebarFloating,
 					},
 					{
 						value: "sidebar",
-						label: "Sidebar",
+						label: "Bară laterală",
 						icon: IconSidebarSidebar,
 					},
 				].map((item) => (
@@ -263,7 +263,7 @@ function LayoutConfig() {
 	return (
 		<div className="max-md:hidden">
 			<SectionTitle
-				title="Layout"
+				title="Aspect"
 				showReset={radioState !== "default"}
 				onReset={() => {
 					setOpen(true);
@@ -287,7 +287,7 @@ function LayoutConfig() {
 				{[
 					{
 						value: "default",
-						label: "Default",
+						label: "Implicit",
 						icon: IconLayoutDefault,
 					},
 					{
@@ -297,7 +297,7 @@ function LayoutConfig() {
 					},
 					{
 						value: "offcanvas",
-						label: "Full layout",
+						label: "Aspect complet",
 						icon: IconLayoutFull,
 					},
 				].map((item) => (
@@ -316,7 +316,7 @@ function DirConfig() {
 	return (
 		<div>
 			<SectionTitle
-				title="Direction"
+				title="Direcție"
 				showReset={defaultDir !== dir}
 				onReset={() => setDir(defaultDir)}
 			/>
@@ -330,14 +330,14 @@ function DirConfig() {
 				{[
 					{
 						value: "ltr",
-						label: "Left to Right",
+						label: "Stânga la dreapta",
 						icon: (props: SVGProps<SVGSVGElement>) => (
 							<IconDir dir="ltr" {...props} />
 						),
 					},
 					{
 						value: "rtl",
-						label: "Right to Left",
+						label: "Dreapta la stânga",
 						icon: (props: SVGProps<SVGSVGElement>) => (
 							<IconDir dir="rtl" {...props} />
 						),

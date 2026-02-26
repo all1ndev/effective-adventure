@@ -16,11 +16,11 @@ export function Otp() {
 			<Card className="gap-4">
 				<CardHeader>
 					<CardTitle className="text-base tracking-tight">
-						Two-factor Authentication
+						Autentificare în doi pași
 					</CardTitle>
 					<CardDescription>
-						Please enter the authentication code. <br /> We have sent the
-						authentication code to your email.
+						Introduceți codul de autentificare. <br /> Am trimis codul pe adresa
+						dvs. de e-mail.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -28,12 +28,12 @@ export function Otp() {
 				</CardContent>
 				<CardFooter>
 					<p className="px-8 text-center text-sm text-muted-foreground">
-						Haven't received it?{" "}
+						Nu l-ați primit?{" "}
 						<Link
 							href="/sign-in"
 							className="underline underline-offset-4 hover:text-primary"
 						>
-							Resend a new code.
+							Retrimiteți un cod nou.
 						</Link>
 						.
 					</p>

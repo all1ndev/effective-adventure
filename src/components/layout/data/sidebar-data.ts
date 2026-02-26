@@ -53,45 +53,45 @@ export const sidebarData: SidebarData = {
 			title: "General",
 			items: [
 				{
-					title: "Dashboard",
+					title: "Panou de control",
 					url: "/",
 					icon: LayoutDashboard,
 				},
 				{
-					title: "Tasks",
+					title: "Sarcini",
 					url: "/tasks",
 					icon: ListTodo,
 				},
 				{
-					title: "Apps",
+					title: "Aplicații",
 					url: "/apps",
 					icon: Package,
 				},
 				{
-					title: "Chats",
+					title: "Mesaje",
 					url: "/chats",
 					badge: "3",
 					icon: MessagesSquare,
 				},
 				{
-					title: "Users",
+					title: "Utilizatori",
 					url: "/users",
 					icon: Users,
 				},
 				{
-					title: "Secured by Clerk",
+					title: "Securizat de Clerk",
 					icon: ClerkLogo,
 					items: [
 						{
-							title: "Sign In",
+							title: "Conectare",
 							url: "/clerk/sign-in",
 						},
 						{
-							title: "Sign Up",
+							title: "Înregistrare",
 							url: "/clerk/sign-up",
 						},
 						{
-							title: "User Management",
+							title: "Gestionare utilizatori",
 							url: "/clerk/user-management",
 						},
 					],
@@ -99,26 +99,26 @@ export const sidebarData: SidebarData = {
 			],
 		},
 		{
-			title: "Pages",
+			title: "Pagini",
 			items: [
 				{
-					title: "Auth",
+					title: "Autentificare",
 					icon: ShieldCheck,
 					items: [
 						{
-							title: "Sign In",
+							title: "Conectare",
 							url: "/sign-in",
 						},
 						{
-							title: "Sign In (2 Col)",
+							title: "Conectare (2 col.)",
 							url: "/sign-in-2",
 						},
 						{
-							title: "Sign Up",
+							title: "Înregistrare",
 							url: "/sign-up",
 						},
 						{
-							title: "Forgot Password",
+							title: "Parolă uitată",
 							url: "/forgot-password",
 						},
 						{
@@ -128,31 +128,31 @@ export const sidebarData: SidebarData = {
 					],
 				},
 				{
-					title: "Errors",
+					title: "Erori",
 					icon: Bug,
 					items: [
 						{
-							title: "Unauthorized",
+							title: "Neautorizat",
 							url: "/errors/unauthorized",
 							icon: Lock,
 						},
 						{
-							title: "Forbidden",
+							title: "Interzis",
 							url: "/errors/forbidden",
 							icon: UserX,
 						},
 						{
-							title: "Not Found",
+							title: "Nu a fost găsit",
 							url: "/errors/not-found",
 							icon: FileX,
 						},
 						{
-							title: "Internal Server Error",
+							title: "Eroare server intern",
 							url: "/errors/internal-server-error",
 							icon: ServerOff,
 						},
 						{
-							title: "Maintenance Error",
+							title: "Eroare mentenanță",
 							url: "/errors/maintenance-error",
 							icon: Construction,
 						},
@@ -161,41 +161,41 @@ export const sidebarData: SidebarData = {
 			],
 		},
 		{
-			title: "Other",
+			title: "Altele",
 			items: [
 				{
-					title: "Settings",
+					title: "Setări",
 					icon: Settings,
 					items: [
 						{
-							title: "Profile",
+							title: "Profil",
 							url: "/settings",
 							icon: UserCog,
 						},
 						{
-							title: "Account",
+							title: "Cont",
 							url: "/settings/account",
 							icon: Wrench,
 						},
 						{
-							title: "Appearance",
+							title: "Aspect",
 							url: "/settings/appearance",
 							icon: Palette,
 						},
 						{
-							title: "Notifications",
+							title: "Notificări",
 							url: "/settings/notifications",
 							icon: Bell,
 						},
 						{
-							title: "Display",
+							title: "Afișaj",
 							url: "/settings/display",
 							icon: Monitor,
 						},
 					],
 				},
 				{
-					title: "Help Center",
+					title: "Centru de ajutor",
 					url: "/help-center",
 					icon: HelpCircle,
 				},

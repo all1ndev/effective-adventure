@@ -20,16 +20,16 @@ const formSchema = z
 	.object({
 		email: z.email({
 			error: (iss) =>
-				iss.input === "" ? "Please enter your email" : undefined,
+				iss.input === "" ? "Introduceți adresa de e-mail" : undefined,
 		}),
 		password: z
 			.string()
-			.min(1, "Please enter your password")
-			.min(7, "Password must be at least 7 characters long"),
-		confirmPassword: z.string().min(1, "Please confirm your password"),
+			.min(1, "Introduceți parola")
+			.min(7, "Parola trebuie să aibă cel puțin 7 caractere"),
+		confirmPassword: z.string().min(1, "Confirmați parola"),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
-		message: "Passwords don't match.",
+		message: "Parolele nu se potrivesc.",
 		path: ["confirmPassword"],
 	});
 
@@ -70,9 +70,9 @@ export function SignUpForm({
 					name="email"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Email</FormLabel>
+							<FormLabel>E-mail</FormLabel>
 							<FormControl>
-								<Input placeholder="name@example.com" {...field} />
+								<Input placeholder="nume@exemplu.com" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -83,7 +83,7 @@ export function SignUpForm({
 					name="password"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Password</FormLabel>
+							<FormLabel>Parolă</FormLabel>
 							<FormControl>
 								<PasswordInput placeholder="********" {...field} />
 							</FormControl>
@@ -96,7 +96,7 @@ export function SignUpForm({
 					name="confirmPassword"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Confirm Password</FormLabel>
+							<FormLabel>Confirmă parola</FormLabel>
 							<FormControl>
 								<PasswordInput placeholder="********" {...field} />
 							</FormControl>

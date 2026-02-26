@@ -26,20 +26,20 @@ import { Textarea } from "@/components/ui/textarea";
 
 const profileFormSchema = z.object({
 	username: z
-		.string("Please enter your username.")
-		.min(2, "Username must be at least 2 characters.")
-		.max(30, "Username must not be longer than 30 characters."),
+		.string("Introduceți numele de utilizator.")
+		.min(2, "Numele de utilizator trebuie să aibă cel puțin 2 caractere.")
+		.max(30, "Numele de utilizator nu poate depăși 30 de caractere."),
 	email: z.email({
 		error: (iss) =>
 			iss.input === undefined
-				? "Please select an email to display."
+				? "Selectați un e-mail pentru afișare."
 				: undefined,
 	}),
 	bio: z.string().max(160).min(4),
 	urls: z
 		.array(
 			z.object({
-				value: z.url("Please enter a valid URL."),
+				value: z.url("Introduceți un URL valid."),
 			}),
 		)
 		.optional(),
@@ -79,7 +79,7 @@ export function ProfileForm() {
 					name="username"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Username</FormLabel>
+							<FormLabel>Nume utilizator</FormLabel>
 							<FormControl>
 								<Input placeholder="shadcn" {...field} />
 							</FormControl>
@@ -96,11 +96,11 @@ export function ProfileForm() {
 					name="email"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Email</FormLabel>
+							<FormLabel>E-mail</FormLabel>
 							<Select onValueChange={field.onChange} defaultValue={field.value}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Select a verified email to display" />
+										<SelectValue placeholder="Selectați un e-mail verificat" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -122,10 +122,10 @@ export function ProfileForm() {
 					name="bio"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Bio</FormLabel>
+							<FormLabel>Biografie</FormLabel>
 							<FormControl>
 								<Textarea
-									placeholder="Tell us a little bit about yourself"
+									placeholder="Spune-ne puțin despre tine"
 									className="resize-none"
 									{...field}
 								/>
@@ -150,7 +150,8 @@ export function ProfileForm() {
 										URLs
 									</FormLabel>
 									<FormDescription className={cn(index !== 0 && "sr-only")}>
-										Add links to your website, blog, or social media profiles.
+										Adaugă linkuri către site-ul tău, blog sau profiluri
+										sociale.
 									</FormDescription>
 									<FormControl className={cn(index !== 0 && "mt-1.5")}>
 										<Input {...field} />
@@ -170,7 +171,7 @@ export function ProfileForm() {
 						Add URL
 					</Button>
 				</div>
-				<Button type="submit">Update profile</Button>
+				<Button type="submit">Actualizează profilul</Button>
 			</form>
 		</Form>
 	);

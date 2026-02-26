@@ -26,9 +26,9 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
 		<ConfirmDialog
 			open={open}
 			onOpenChange={onOpenChange}
-			title="Sign out"
-			desc="Are you sure you want to sign out? You will need to sign in again to access your account."
-			confirmText="Sign out"
+			title="Deconectare"
+			desc="Ești sigur că vrei să te deconectezi? Va trebui să te conectezi din nou pentru a accesa contul."
+			confirmText="Deconectare"
 			destructive
 			handleConfirm={handleSignOut}
 			className="sm:max-w-sm"

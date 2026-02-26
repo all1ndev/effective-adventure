@@ -77,7 +77,8 @@ export function AppearanceForm() {
 								<ChevronDownIcon className="absolute end-3 top-2.5 h-4 w-4 opacity-50" />
 							</div>
 							<FormDescription className="font-manrope">
-								Set the font you want to use in the dashboard.
+								Setați fontul pe care doriți să îl utilizați în panoul de
+								control.
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -88,9 +89,9 @@ export function AppearanceForm() {
 					name="theme"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Theme</FormLabel>
+							<FormLabel>Temă</FormLabel>
 							<FormDescription>
-								Select the theme for the dashboard.
+								Selectați tema pentru panoul de control.
 							</FormDescription>
 							<FormMessage />
 							<RadioGroup
@@ -155,7 +156,7 @@ export function AppearanceForm() {
 					)}
 				/>
 
-				<Button type="submit">Update preferences</Button>
+				<Button type="submit">Actualizează preferințele</Button>
 			</form>
 		</Form>
 	);

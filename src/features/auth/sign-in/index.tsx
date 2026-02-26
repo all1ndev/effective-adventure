@@ -18,10 +18,10 @@ export function SignIn() {
 		<AuthLayout>
 			<Card className="gap-4">
 				<CardHeader>
-					<CardTitle className="text-lg tracking-tight">Sign in</CardTitle>
+					<CardTitle className="text-lg tracking-tight">Conectare</CardTitle>
 					<CardDescription>
-						Enter your email and password below to <br />
-						log into your account
+						Introduceți adresa de e-mail și parola <br />
+						pentru a vă conecta la cont
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -29,19 +29,19 @@ export function SignIn() {
 				</CardContent>
 				<CardFooter>
 					<p className="px-8 text-center text-sm text-muted-foreground">
-						By clicking sign in, you agree to our{" "}
+						Prin conectare, ești de acord cu{" "}
 						<a
 							href="/terms"
 							className="underline underline-offset-4 hover:text-primary"
 						>
-							Terms of Service
+							Termenii de utilizare
 						</a>{" "}
-						and{" "}
+						și{" "}
 						<a
 							href="/privacy"
 							className="underline underline-offset-4 hover:text-primary"
 						>
-							Privacy Policy
+							Politica de confidențialitate
 						</a>
 						.
 					</p>
