@@ -6,6 +6,7 @@ import { SearchProvider } from "@/context/search-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SkipToMain } from "@/components/skip-to-main";
+import { useAuthStore } from "@/stores/auth-store";
 
 type AuthenticatedLayoutProps = {
 	children: React.ReactNode;
@@ -13,12 +14,13 @@ type AuthenticatedLayoutProps = {
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
 	const defaultOpen = getCookie("sidebar_state") !== "false";
+	const accessToken = useAuthStore((s) => s.auth.accessToken);
 	return (
 		<SearchProvider>
 			<LayoutProvider>
 				<SidebarProvider defaultOpen={defaultOpen}>
 					<SkipToMain />
-					<AppSidebar />
+					{accessToken && <AppSidebar />}
 					<SidebarInset
 						className={cn(
 							// Set content container, so we can use container queries

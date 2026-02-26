@@ -22,9 +22,9 @@ import { apps } from "./data/apps";
 type AppType = "all" | "connected" | "notConnected";
 
 const appText = new Map<AppType, string>([
-	["all", "All Apps"],
-	["connected", "Connected"],
-	["notConnected", "Not Connected"],
+	["all", "Toate aplicațiile"],
+	["connected", "Conectat"],
+	["notConnected", "Neconectat"],
 ]);
 
 export function Apps() {
@@ -108,7 +108,7 @@ export function Apps() {
 			<Main fixed>
 				<div>
 					<h1 className="text-2xl font-bold tracking-tight">
-						App Integrations
+						Integrări de aplicații
 					</h1>
 					<p className="text-muted-foreground">
 						Here&apos;s a list of your apps for the integration!
@@ -117,7 +117,7 @@ export function Apps() {
 				<div className="my-4 flex items-end justify-between sm:my-0 sm:items-center">
 					<div className="flex flex-col gap-4 sm:my-4 sm:flex-row">
 						<Input
-							placeholder="Filter apps..."
+							placeholder="Filtrează aplicații..."
 							className="h-9 w-40 lg:w-[250px]"
 							value={searchTerm}
 							onChange={handleSearch}
@@ -127,9 +127,9 @@ export function Apps() {
 								<SelectValue>{appText.get(appType)}</SelectValue>
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">All Apps</SelectItem>
-								<SelectItem value="connected">Connected</SelectItem>
-								<SelectItem value="notConnected">Not Connected</SelectItem>
+								<SelectItem value="all">Toate aplicațiile</SelectItem>
+								<SelectItem value="connected">Conectat</SelectItem>
+								<SelectItem value="notConnected">Neconectat</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -144,13 +144,13 @@ export function Apps() {
 							<SelectItem value="asc">
 								<div className="flex items-center gap-4">
 									<ArrowUpAZ size={16} />
-									<span>Ascending</span>
+									<span>Ascendent</span>
 								</div>
 							</SelectItem>
 							<SelectItem value="desc">
 								<div className="flex items-center gap-4">
 									<ArrowDownAZ size={16} />
-									<span>Descending</span>
+									<span>Descendent</span>
 								</div>
 							</SelectItem>
 						</SelectContent>
@@ -174,7 +174,7 @@ export function Apps() {
 									size="sm"
 									className={`${app.connected ? "border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900" : ""}`}
 								>
-									{app.connected ? "Connected" : "Connect"}
+									{app.connected ? "Conectat" : "Conectează"}
 								</Button>
 							</div>
 							<div>

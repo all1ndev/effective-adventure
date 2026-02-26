@@ -16,16 +16,16 @@ export function SignUp() {
 			<Card className="gap-4">
 				<CardHeader>
 					<CardTitle className="text-lg tracking-tight">
-						Create an account
+						Creează un cont
 					</CardTitle>
 					<CardDescription>
-						Enter your email and password to create an account. <br />
-						Already have an account?{" "}
+						Introduceți e-mailul și parola pentru a crea un cont. <br />
+						Ai deja un cont?{" "}
 						<Link
 							href="/sign-in"
 							className="underline underline-offset-4 hover:text-primary"
 						>
-							Sign In
+							Conectare
 						</Link>
 					</CardDescription>
 				</CardHeader>
@@ -34,19 +34,19 @@ export function SignUp() {
 				</CardContent>
 				<CardFooter>
 					<p className="px-8 text-center text-sm text-muted-foreground">
-						By creating an account, you agree to our{" "}
+						Prin crearea unui cont, ești de acord cu{" "}
 						<a
 							href="/terms"
 							className="underline underline-offset-4 hover:text-primary"
 						>
-							Terms of Service
+							Termenii de utilizare
 						</a>{" "}
-						and{" "}
+						și{" "}
 						<a
 							href="/privacy"
 							className="underline underline-offset-4 hover:text-primary"
 						>
-							Privacy Policy
+							Politica de confidențialitate
 						</a>
 						.
 					</p>

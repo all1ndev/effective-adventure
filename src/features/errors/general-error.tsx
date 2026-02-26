@@ -17,16 +17,17 @@ export function GeneralError({
 				{!minimal && (
 					<h1 className="text-[7rem] leading-tight font-bold">500</h1>
 				)}
-				<span className="font-medium">Oops! Something went wrong {`:')`}</span>
+				<span className="font-medium">Ceva a mers prost {`:')`}</span>
 				<p className="text-center text-muted-foreground">
-					We apologize for the inconvenience. <br /> Please try again later.
+					Ne cerem scuze pentru neplăcere. <br /> Te rugăm să încerci din nou
+					mai târziu.
 				</p>
 				{!minimal && (
 					<div className="mt-6 flex gap-4">
 						<Button variant="outline" onClick={() => router.back()}>
-							Go Back
+							Înapoi
 						</Button>
-						<Button onClick={() => router.push("/")}>Back to Home</Button>
+						<Button onClick={() => router.push("/")}>Acasă</Button>
 					</div>
 				)}
 			</div>

@@ -19,7 +19,8 @@ import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
 	email: z.email({
-		error: (iss) => (iss.input === "" ? "Please enter your email" : undefined),
+		error: (iss) =>
+			iss.input === "" ? "Introduceți adresa de e-mail" : undefined,
 	}),
 });
 
@@ -41,14 +42,14 @@ export function ForgotPasswordForm({
 		console.log(data);
 
 		toast.promise(sleep(2000), {
-			loading: "Sending email...",
+			loading: "Se trimite e-mailul...",
 			success: () => {
 				setIsLoading(false);
 				form.reset();
 				router.push("/otp");
-				return `Email sent to ${data.email}`;
+				return `E-mail trimis la ${data.email}`;
 			},
-			error: "Error",
+			error: "Eroare",
 		});
 	}
 
@@ -64,9 +65,9 @@ export function ForgotPasswordForm({
 					name="email"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Email</FormLabel>
+							<FormLabel>E-mail</FormLabel>
 							<FormControl>
-								<Input placeholder="name@example.com" {...field} />
+								<Input placeholder="nume@exemplu.com" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>

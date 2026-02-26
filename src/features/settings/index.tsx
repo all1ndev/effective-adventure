@@ -10,37 +10,37 @@ import { SidebarNav } from "./components/sidebar-nav";
 
 const sidebarNavItems = [
 	{
-		title: "Profile",
+		title: "Profil",
 		href: "/settings",
 		icon: <UserCog size={18} />,
 	},
 	{
-		title: "Account",
+		title: "Cont",
 		href: "/settings/account",
 		icon: <Wrench size={18} />,
 	},
 	{
-		title: "Appearance",
+		title: "Aspect",
 		href: "/settings/appearance",
 		icon: <Palette size={18} />,
 	},
 	{
-		title: "Notifications",
+		title: "Notificări",
 		href: "/settings/notifications",
 		icon: <Bell size={18} />,
 	},
 	{
-		title: "Display",
+		title: "Afișaj",
 		href: "/settings/display",
 		icon: <Monitor size={18} />,
 	},
 ];
 
-type SettingsProps = {
+type SetăriProps = {
 	children: React.ReactNode;
 };
 
-export function Settings({ children }: SettingsProps) {
+export function Setări({ children }: SetăriProps) {
 	return (
 		<>
 			{/* ===== Top Heading ===== */}
@@ -56,10 +56,10 @@ export function Settings({ children }: SettingsProps) {
 			<Main fixed>
 				<div className="space-y-0.5">
 					<h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-						Settings
+						Setări
 					</h1>
 					<p className="text-muted-foreground">
-						Manage your account settings and set e-mail preferences.
+						Gestionați setările contului și preferințele de e-mail.
 					</p>
 				</div>
 				<Separator className="my-4 lg:my-6" />

@@ -30,10 +30,10 @@ export function CommandMenu() {
 
 	return (
 		<CommandDialog modal open={open} onOpenChange={setOpen}>
-			<CommandInput placeholder="Type a command or search..." />
+			<CommandInput placeholder="Tastează o comandă sau caută..." />
 			<CommandList>
 				<ScrollArea type="hover" className="h-72 pe-1">
-					<CommandEmpty>No results found.</CommandEmpty>
+					<CommandEmpty>Nu s-au găsit rezultate.</CommandEmpty>
 					{sidebarData.navGroups.map((group) => (
 						<CommandGroup key={group.title} heading={group.title}>
 							{group.items.map((navItem, i) => {
@@ -71,17 +71,17 @@ export function CommandMenu() {
 						</CommandGroup>
 					))}
 					<CommandSeparator />
-					<CommandGroup heading="Theme">
+					<CommandGroup heading="Temă">
 						<CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
-							<Sun /> <span>Light</span>
+							<Sun /> <span>Luminos</span>
 						</CommandItem>
 						<CommandItem onSelect={() => runCommand(() => setTheme("dark"))}>
 							<Moon className="scale-90" />
-							<span>Dark</span>
+							<span>Întunecat</span>
 						</CommandItem>
 						<CommandItem onSelect={() => runCommand(() => setTheme("system"))}>
 							<Laptop />
-							<span>System</span>
+							<span>Sistem</span>
 						</CommandItem>
 					</CommandGroup>
 				</ScrollArea>

@@ -20,9 +20,7 @@ import { Switch } from "@/components/ui/switch";
 const notificationsFormSchema = z.object({
 	type: z.enum(["all", "mentions", "none"], {
 		error: (iss) =>
-			iss.input === undefined
-				? "Please select a notification type."
-				: undefined,
+			iss.input === undefined ? "Selectați un tip de notificare." : undefined,
 	}),
 	mobile: z.boolean().default(false).optional(),
 	communication_emails: z.boolean().default(false).optional(),
@@ -58,7 +56,7 @@ export function NotificationsForm() {
 					name="type"
 					render={({ field }) => (
 						<FormItem className="relative space-y-3">
-							<FormLabel>Notify me about...</FormLabel>
+							<FormLabel>Notifică-mă despre...</FormLabel>
 							<FormControl>
 								<RadioGroup
 									onValueChange={field.onChange}
@@ -85,7 +83,7 @@ export function NotificationsForm() {
 										<FormControl>
 											<RadioGroupItem value="none" />
 										</FormControl>
-										<FormLabel className="font-normal">Nothing</FormLabel>
+										<FormLabel className="font-normal">Nimic</FormLabel>
 									</FormItem>
 								</RadioGroup>
 							</FormControl>
@@ -94,7 +92,7 @@ export function NotificationsForm() {
 					)}
 				/>
 				<div className="relative">
-					<h3 className="mb-4 text-lg font-medium">Email Notifications</h3>
+					<h3 className="mb-4 text-lg font-medium">Notificări prin e-mail</h3>
 					<div className="space-y-4">
 						<FormField
 							control={form.control}
@@ -106,7 +104,7 @@ export function NotificationsForm() {
 											Communication emails
 										</FormLabel>
 										<FormDescription>
-											Receive emails about your account activity.
+											Primiți e-mailuri despre activitatea contului dvs.
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -128,7 +126,8 @@ export function NotificationsForm() {
 											Marketing emails
 										</FormLabel>
 										<FormDescription>
-											Receive emails about new products, features, and more.
+											Primiți e-mailuri despre produse noi, funcționalități și
+											altele.
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -146,9 +145,12 @@ export function NotificationsForm() {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 									<div className="space-y-0.5">
-										<FormLabel className="text-base">Social emails</FormLabel>
+										<FormLabel className="text-base">
+											E-mailuri sociale
+										</FormLabel>
 										<FormDescription>
-											Receive emails for friend requests, follows, and more.
+											Primiți e-mailuri pentru cereri de prietenie, urmăriri și
+											altele.
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -166,9 +168,12 @@ export function NotificationsForm() {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 									<div className="space-y-0.5">
-										<FormLabel className="text-base">Security emails</FormLabel>
+										<FormLabel className="text-base">
+											E-mailuri de securitate
+										</FormLabel>
 										<FormDescription>
-											Receive emails about your account activity and security.
+											Primiți e-mailuri despre activitatea și securitatea
+											contului dvs.
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -213,7 +218,7 @@ export function NotificationsForm() {
 						</FormItem>
 					)}
 				/>
-				<Button type="submit">Update notifications</Button>
+				<Button type="submit">Actualizează notificările</Button>
 			</form>
 		</Form>
 	);

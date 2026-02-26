@@ -17,15 +17,15 @@ import {
 const items = [
 	{
 		id: "recents",
-		label: "Recents",
+		label: "Recente",
 	},
 	{
 		id: "home",
-		label: "Home",
+		label: "Acasă",
 	},
 	{
 		id: "applications",
-		label: "Applications",
+		label: "Aplicații",
 	},
 	{
 		id: "desktop",
@@ -33,17 +33,17 @@ const items = [
 	},
 	{
 		id: "downloads",
-		label: "Downloads",
+		label: "Descărcări",
 	},
 	{
 		id: "documents",
-		label: "Documents",
+		label: "Documente",
 	},
 ] as const;
 
 const displayFormSchema = z.object({
 	items: z.array(z.string()).refine((value) => value.some((item) => item), {
-		message: "You have to select at least one item.",
+		message: "Trebuie să selectezi cel puțin un element.",
 	}),
 });
 
@@ -72,9 +72,10 @@ export function DisplayForm() {
 					render={() => (
 						<FormItem>
 							<div className="mb-4">
-								<FormLabel className="text-base">Sidebar</FormLabel>
+								<FormLabel className="text-base">Bara laterală</FormLabel>
 								<FormDescription>
-									Select the items you want to display in the sidebar.
+									Selectați elementele pe care doriți să le afișați în bara
+									laterală.
 								</FormDescription>
 							</div>
 							{items.map((item) => (
@@ -114,7 +115,7 @@ export function DisplayForm() {
 						</FormItem>
 					)}
 				/>
-				<Button type="submit">Update display</Button>
+				<Button type="submit">Actualizează afișajul</Button>
 			</form>
 		</Form>
 	);
