@@ -1,3 +1,5 @@
+"use client";
+
 import { useLayout } from "@/context/layout-provider";
 import {
 	Sidebar,
@@ -5,31 +7,58 @@ import {
 	SidebarFooter,
 	SidebarHeader,
 	SidebarRail,
+	useSidebar,
 } from "@/components/ui/sidebar";
-// import { AppTitle } from './app-title'
-import { sidebarData } from "./data/sidebar-data";
+import { getSidebarData } from "./data/sidebar-data";
 import { NavGroup } from "./nav-group";
 import { NavUser } from "./nav-user";
-import { TeamSwitcher } from "./team-switcher";
+import { useAuthStore } from "@/stores/auth-store";
+import { getUserRole } from "@/lib/roles";
+import { Stethoscope, User } from "lucide-react";
+
+function SidebarHeaderContent({ role }: { role: string }) {
+	const { state } = useSidebar();
+	const collapsed = state === "collapsed";
+	const isMedic = role === "medic";
+
+	if (collapsed) {
+		return (
+			<div className="flex items-center justify-center py-2">
+				{isMedic ? (
+					<Stethoscope className="h-5 w-5 text-muted-foreground" />
+				) : (
+					<User className="h-5 w-5 text-muted-foreground" />
+				)}
+			</div>
+		);
+	}
+
+	return (
+		<div className="px-3 py-2">
+			<p className="text-sm font-semibold">TransplantCare</p>
+			<p className="text-xs text-muted-foreground capitalize">{role}</p>
+		</div>
+	);
+}
 
 export function AppSidebar() {
 	const { collapsible, variant } = useLayout();
+	const { auth } = useAuthStore();
+	const role = getUserRole(auth.user) ?? "pacient";
+	const data = getSidebarData(role);
+
 	return (
 		<Sidebar collapsible={collapsible} variant={variant}>
 			<SidebarHeader>
-				<TeamSwitcher teams={sidebarData.teams} />
-
-				{/* Replace <TeamSwitch /> with the following <AppTitle />
-         /* if you want to use the normal app title instead of TeamSwitch dropdown */}
-				{/* <AppTitle /> */}
+				<SidebarHeaderContent role={role} />
 			</SidebarHeader>
 			<SidebarContent>
-				{sidebarData.navGroups.map((props) => (
+				{data.navGroups.map((props) => (
 					<NavGroup key={props.title} {...props} />
 				))}
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={sidebarData.user} />
+				<NavUser user={data.user} />
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>
