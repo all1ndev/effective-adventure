@@ -41,6 +41,9 @@ export function UserAuthForm({
 	...props
 }: UserAuthFormProps) {
 	const [isLoading, setIsLoading] = useState(false);
+	const [selectedRole, setSelectedRole] = useState<"medic" | "pacient">(
+		"pacient",
+	);
 	const router = useRouter();
 	const { auth } = useAuthStore();
 
@@ -64,7 +67,7 @@ export function UserAuthForm({
 				const mockUser = {
 					accountNo: "ACC001",
 					email: data.email,
-					role: ["user"],
+					role: [selectedRole],
 					exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
 				};
 
@@ -121,6 +124,22 @@ export function UserAuthForm({
 						</FormItem>
 					)}
 				/>
+				<div className="grid grid-cols-2 gap-2">
+					<Button
+						type="button"
+						variant={selectedRole === "medic" ? "default" : "outline"}
+						onClick={() => setSelectedRole("medic")}
+					>
+						Medic
+					</Button>
+					<Button
+						type="button"
+						variant={selectedRole === "pacient" ? "default" : "outline"}
+						onClick={() => setSelectedRole("pacient")}
+					>
+						Pacient
+					</Button>
+				</div>
 				<Button className="mt-2" disabled={isLoading}>
 					{isLoading ? <Loader2 className="animate-spin" /> : <LogIn />}
 					Sign in
