@@ -1,0 +1,16 @@
+export const symptomOptions = [
+	"Febra",
+	"Oboseala",
+	"Durere abdominala",
+	"Icter (ingalbenirea pielii)",
+	"Greata",
+	"Varsaturi",
+	"Lipsa poftei de mancare",
+	"Edeme (umflaturi)",
+	"Durere de cap",
+	"Dificultati de respiratie",
+	"Mancarimi ale pielii",
+	"Urina inchisa la culoare",
+	"Scaun deschis la culoare",
+	"Confuzie sau dificultati de concentrare",
+] as const;
