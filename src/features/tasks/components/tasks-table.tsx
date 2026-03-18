@@ -25,13 +25,13 @@ import { DataTablePagination, DataTableToolbar } from "@/components/data-table";
 import { priorities, statuses } from "../data/data";
 import { type Task } from "../data/schema";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { tasksColumns as columns } from "./tasks-columns";
+import { sarciniColumns as columns } from "./tasks-columns";
 
 type DataTableProps = {
 	data: Task[];
 };
 
-export function TasksTable({ data }: DataTableProps) {
+export function SarciniTable({ data }: DataTableProps) {
 	// Local UI-only states
 	const [rowSelection, setRowSelection] = useState({});
 	const [sorting, setSorting] = useState<SortingState>([]);

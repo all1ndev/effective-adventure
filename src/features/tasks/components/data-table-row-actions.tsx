@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { labels } from "../data/data";
 import { taskSchema } from "../data/schema";
-import { useTasks } from "./tasks-provider";
+import { useSarcini } from "./tasks-provider";
 
 type DataTableRowActionsProps<TData> = {
 	row: Row<TData>;
@@ -28,7 +28,7 @@ export function DataTableRowActions<TData>({
 }: DataTableRowActionsProps<TData>) {
 	const task = taskSchema.parse(row.original);
 
-	const { setOpen, setCurrentRow } = useTasks();
+	const { setOpen, setCurrentRow } = useSarcini();
 
 	return (
 		<DropdownMenu modal={false}>

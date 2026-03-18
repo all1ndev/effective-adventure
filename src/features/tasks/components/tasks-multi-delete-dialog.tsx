@@ -18,7 +18,7 @@ type TaskMultiDeleteDialogProps<TData> = {
 
 const CONFIRM_WORD = "DELETE";
 
-export function TasksMultiDeleteDialog<TData>({
+export function SarciniMultiDeleteDialog<TData>({
 	open,
 	onOpenChange,
 	table,
@@ -72,7 +72,9 @@ export function TasksMultiDeleteDialog<TData>({
 					</p>
 
 					<Label className="my-4 flex flex-col items-start gap-1.5">
-						<span className="">Confirm by typing "{CONFIRM_WORD}":</span>
+						<span className="">
+							Confirm by typing &ldquo;{CONFIRM_WORD}&rdquo;:
+						</span>
 						<Input
 							value={value}
 							onChange={(e) => setValue(e.target.value)}

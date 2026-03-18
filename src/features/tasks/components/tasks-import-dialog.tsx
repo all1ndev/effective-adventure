@@ -39,7 +39,7 @@ type TaskImportDialogProps = {
 	onOpenChange: (open: boolean) => void;
 };
 
-export function TasksImportDialog({
+export function SarciniImportDialog({
 	open,
 	onOpenChange,
 }: TaskImportDialogProps) {

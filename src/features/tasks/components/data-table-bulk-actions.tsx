@@ -18,7 +18,7 @@ import {
 import { DataTableBulkActions as BulkActionsToolbar } from "@/components/data-table";
 import { priorities, statuses } from "../data/data";
 import { type Task } from "../data/schema";
-import { TasksMultiDeleteDialog } from "./tasks-multi-delete-dialog";
+import { SarciniMultiDeleteDialog } from "./tasks-multi-delete-dialog";
 
 type DataTableBulkActionsProps<TData> = {
 	table: Table<TData>;
@@ -183,7 +183,7 @@ export function DataTableBulkActions<TData>({
 				</Tooltip>
 			</BulkActionsToolbar>
 
-			<TasksMultiDeleteDialog
+			<SarciniMultiDeleteDialog
 				open={showDeleteConfirm}
 				onOpenChange={setShowDeleteConfirm}
 				table={table}
