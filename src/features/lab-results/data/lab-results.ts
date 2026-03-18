@@ -1,0 +1,110 @@
+import { type LabResult } from "./schema";
+
+export const labResults: LabResult[] = [
+	{
+		id: "1",
+		patientId: "1",
+		date: "2026-02-01",
+		tests: [
+			{ name: "ALT (SGPT)", value: 42, unit: "U/L", refMin: 7, refMax: 40 },
+			{ name: "AST (SGOT)", value: 38, unit: "U/L", refMin: 10, refMax: 40 },
+			{ name: "GGT", value: 55, unit: "U/L", refMin: 0, refMax: 50 },
+			{
+				name: "Bilirubina totala",
+				value: 1.1,
+				unit: "mg/dL",
+				refMin: 0.2,
+				refMax: 1.2,
+			},
+			{ name: "Tacrolimus", value: 7.2, unit: "ng/mL", refMin: 5, refMax: 15 },
+			{
+				name: "Creatinina",
+				value: 1.0,
+				unit: "mg/dL",
+				refMin: 0.6,
+				refMax: 1.2,
+			},
+		],
+	},
+	{
+		id: "2",
+		patientId: "1",
+		date: "2026-01-15",
+		tests: [
+			{ name: "ALT (SGPT)", value: 35, unit: "U/L", refMin: 7, refMax: 40 },
+			{ name: "AST (SGOT)", value: 30, unit: "U/L", refMin: 10, refMax: 40 },
+			{ name: "GGT", value: 48, unit: "U/L", refMin: 0, refMax: 50 },
+			{
+				name: "Bilirubina totala",
+				value: 0.9,
+				unit: "mg/dL",
+				refMin: 0.2,
+				refMax: 1.2,
+			},
+			{ name: "Tacrolimus", value: 8.5, unit: "ng/mL", refMin: 5, refMax: 15 },
+			{
+				name: "Creatinina",
+				value: 0.9,
+				unit: "mg/dL",
+				refMin: 0.6,
+				refMax: 1.2,
+			},
+		],
+	},
+	{
+		id: "3",
+		patientId: "1",
+		date: "2025-12-20",
+		tests: [
+			{ name: "ALT (SGPT)", value: 28, unit: "U/L", refMin: 7, refMax: 40 },
+			{ name: "AST (SGOT)", value: 25, unit: "U/L", refMin: 10, refMax: 40 },
+			{ name: "GGT", value: 44, unit: "U/L", refMin: 0, refMax: 50 },
+			{
+				name: "Bilirubina totala",
+				value: 0.8,
+				unit: "mg/dL",
+				refMin: 0.2,
+				refMax: 1.2,
+			},
+			{ name: "Tacrolimus", value: 9.0, unit: "ng/mL", refMin: 5, refMax: 15 },
+			{
+				name: "Creatinina",
+				value: 1.1,
+				unit: "mg/dL",
+				refMin: 0.6,
+				refMax: 1.2,
+			},
+		],
+	},
+	{
+		id: "4",
+		patientId: "2",
+		date: "2026-02-10",
+		tests: [
+			{ name: "ALT (SGPT)", value: 65, unit: "U/L", refMin: 7, refMax: 40 },
+			{ name: "AST (SGOT)", value: 58, unit: "U/L", refMin: 10, refMax: 40 },
+			{ name: "GGT", value: 80, unit: "U/L", refMin: 0, refMax: 50 },
+			{
+				name: "Bilirubina totala",
+				value: 2.1,
+				unit: "mg/dL",
+				refMin: 0.2,
+				refMax: 1.2,
+			},
+			{
+				name: "Ciclosporina",
+				value: 120,
+				unit: "ng/mL",
+				refMin: 100,
+				refMax: 200,
+			},
+			{
+				name: "Creatinina",
+				value: 1.5,
+				unit: "mg/dL",
+				refMin: 0.6,
+				refMax: 1.2,
+			},
+		],
+	},
+];
