@@ -1,0 +1,66 @@
+import { type Alert } from "./schema";
+
+export const alerts: Alert[] = [
+	{
+		id: "1",
+		patientId: "1",
+		patientName: "Alexandru Ionescu",
+		type: "simptom",
+		severity: "critical",
+		message: "Pacientul a raportat icter si urina inchisa la culoare.",
+		createdAt: "2026-02-24T10:30:00",
+		dismissed: false,
+	},
+	{
+		id: "2",
+		patientId: "2",
+		patientName: "Maria Popescu",
+		type: "laborator",
+		severity: "critical",
+		message:
+			"ALT crescut (65 U/L), bilirubina crescuta (2.1 mg/dL) — posibil rejet.",
+		createdAt: "2026-02-10T14:00:00",
+		dismissed: false,
+	},
+	{
+		id: "3",
+		patientId: "1",
+		patientName: "Alexandru Ionescu",
+		type: "vital",
+		severity: "warning",
+		message: "Tensiune arteriala crescuta: 138/90 mmHg.",
+		createdAt: "2026-02-23T09:15:00",
+		dismissed: false,
+	},
+	{
+		id: "4",
+		patientId: "2",
+		patientName: "Maria Popescu",
+		type: "simptom",
+		severity: "warning",
+		message:
+			"Pacientul a raportat edeme la glezne si dificultati de respiratie.",
+		createdAt: "2026-02-25T11:00:00",
+		dismissed: false,
+	},
+	{
+		id: "5",
+		patientId: "1",
+		patientName: "Alexandru Ionescu",
+		type: "medicatie",
+		severity: "info",
+		message: "Doza de Micofenolat mofetil omisa — 26 feb, ora 20:00.",
+		createdAt: "2026-02-26T20:30:00",
+		dismissed: false,
+	},
+	{
+		id: "6",
+		patientId: "3",
+		patientName: "Gheorghe Dumitrescu",
+		type: "vital",
+		severity: "info",
+		message: "Greutate in scadere: 3 kg in 2 saptamani.",
+		createdAt: "2026-02-20T08:00:00",
+		dismissed: true,
+	},
+];
