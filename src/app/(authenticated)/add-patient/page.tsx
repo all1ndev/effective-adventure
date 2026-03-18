@@ -4,7 +4,7 @@ import { DoctorPatients } from "@/features/add-patient";
 
 export default function DoctorPage() {
 	return (
-		<RoleGuard allowedRoles={["medic"]}>
+		<RoleGuard allowedRoles={["admin"]}>
 			<DoctorPatients />
 		</RoleGuard>
 	);

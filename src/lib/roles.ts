@@ -1,11 +1,7 @@
-export type AppRole = "medic" | "pacient";
+export type AppRole = "admin" | "user";
 
-interface AuthUser {
-	role: string[];
-}
-
-export function getUserRole(user: AuthUser | null): AppRole | null {
-	if (user?.role.includes("medic")) return "medic";
-	if (user?.role.includes("pacient")) return "pacient";
+export function getUserRole(role: string | undefined | null): AppRole | null {
+	if (role === "admin") return "admin";
+	if (role === "user") return "user";
 	return null;
 }

@@ -19,7 +19,7 @@ export default function PatientSymptomsPage({
 	const data = symptomReports.filter((r) => r.patientId === id);
 
 	return (
-		<RoleGuard allowedRoles={["medic"]}>
+		<RoleGuard allowedRoles={["admin"]}>
 			<Header fixed>
 				<Search />
 				<div className="ms-auto flex items-center space-x-4">

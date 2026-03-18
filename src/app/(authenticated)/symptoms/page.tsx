@@ -4,7 +4,7 @@ import { Symptoms } from "@/features/symptoms";
 
 export default function SymptomsPage() {
 	return (
-		<RoleGuard allowedRoles={["pacient"]}>
+		<RoleGuard allowedRoles={["user"]}>
 			<Symptoms />
 		</RoleGuard>
 	);

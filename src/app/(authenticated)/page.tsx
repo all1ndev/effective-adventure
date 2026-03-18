@@ -2,13 +2,14 @@
 
 import { DoctorDashboard } from "@/features/doctor-dashboard";
 import { PatientDashboard } from "@/features/patient-dashboard";
+import { useSession } from "@/lib/auth-client";
 import { getUserRole } from "@/lib/roles";
 
 export default function Page() {
-	// TODO: implement role system with better-auth
-	const role = getUserRole({ role: ["pacient"] });
+	const { data: session } = useSession();
+	const role = getUserRole(session?.user?.role);
 
-	if (role === "medic") return <DoctorDashboard />;
-	if (role === "pacient") return <PatientDashboard />;
+	if (role === "admin") return <DoctorDashboard />;
+	if (role === "user") return <PatientDashboard />;
 	return null;
 }

@@ -155,7 +155,7 @@ export const patientSidebarData: SidebarData = {
 };
 
 export function getSidebarData(role: AppRole): SidebarData {
-	if (role === "medic") return doctorSidebarData;
+	if (role === "admin") return doctorSidebarData;
 	return patientSidebarData;
 }
 
