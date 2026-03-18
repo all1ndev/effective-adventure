@@ -1,13 +1,12 @@
 "use client";
 
-import { useAuthStore } from "@/stores/auth-store";
-import { getUserRole } from "@/lib/roles";
 import { DoctorDashboard } from "@/features/doctor-dashboard";
 import { PatientDashboard } from "@/features/patient-dashboard";
+import { getUserRole } from "@/lib/roles";
 
 export default function Page() {
-	const { auth } = useAuthStore();
-	const role = getUserRole(auth.user);
+	// TODO: implement role system with better-auth
+	const role = getUserRole({ role: ["pacient"] });
 
 	if (role === "medic") return <DoctorDashboard />;
 	if (role === "pacient") return <PatientDashboard />;

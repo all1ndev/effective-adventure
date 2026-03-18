@@ -1,7 +1,8 @@
 "use client";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/auth-store";
+import { useSession } from "@/lib/auth-client";
 import { Suspense } from "react";
 
 export default function AuthLayout({
@@ -10,15 +11,16 @@ export default function AuthLayout({
 	children: React.ReactNode;
 }) {
 	const router = useRouter();
-	const { auth } = useAuthStore();
+	const { data: session, isPending } = useSession();
 
 	useEffect(() => {
-		if (auth.accessToken) {
+		if (session) {
 			router.replace("/");
 		}
-	}, [auth.accessToken, router]);
+	}, [session, router]);
 
-	if (auth.accessToken) return null;
+	if (isPending) return null;
+	if (session) return null;
 
 	return <Suspense>{children}</Suspense>;
 }

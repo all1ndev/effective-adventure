@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
 	Card,
@@ -21,7 +22,14 @@ export function SignIn() {
 					<CardTitle className="text-lg tracking-tight">Conectare</CardTitle>
 					<CardDescription>
 						Introduceți adresa de e-mail și parola <br />
-						pentru a vă conecta la cont
+						pentru a vă conecta la cont. <br />
+						Nu ai un cont?{" "}
+						<Link
+							href="/sign-up"
+							className="underline underline-offset-4 hover:text-primary"
+						>
+							Creează un cont
+						</Link>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

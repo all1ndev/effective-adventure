@@ -2,8 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/auth-store";
-import { getUserRole, type AppRole } from "@/lib/roles";
+import type { AppRole } from "@/lib/roles";
 
 interface RoleGuardProps {
 	allowedRoles: AppRole[];
@@ -11,10 +10,10 @@ interface RoleGuardProps {
 }
 
 export function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
-	const { auth } = useAuthStore();
 	const router = useRouter();
-	const role = getUserRole(auth.user);
-	const authorized = !!role && allowedRoles.includes(role);
+	// TODO: implement role system with better-auth
+	const role: AppRole = "pacient";
+	const authorized = allowedRoles.includes(role);
 
 	useEffect(() => {
 		if (!authorized) {

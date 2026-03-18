@@ -12,8 +12,7 @@ import {
 import { getSidebarData } from "./data/sidebar-data";
 import { NavGroup } from "./nav-group";
 import { NavUser } from "./nav-user";
-import { useAuthStore } from "@/stores/auth-store";
-import { getUserRole } from "@/lib/roles";
+import { useSession } from "@/lib/auth-client";
 import { Stethoscope, User } from "lucide-react";
 
 function SidebarHeaderContent({ role }: { role: string }) {
@@ -43,9 +42,17 @@ function SidebarHeaderContent({ role }: { role: string }) {
 
 export function AppSidebar() {
 	const { collapsible, variant } = useLayout();
-	const { auth } = useAuthStore();
-	const role = getUserRole(auth.user) ?? "pacient";
+	const { data: session } = useSession();
+	const role = "pacient"; // TODO: implement role system with better-auth
 	const data = getSidebarData(role);
+
+	const user = session?.user
+		? {
+				name: session.user.name,
+				email: session.user.email,
+				avatar: session.user.image ?? "",
+			}
+		: data.user;
 
 	return (
 		<Sidebar collapsible={collapsible} variant={variant}>
@@ -58,7 +65,7 @@ export function AppSidebar() {
 				))}
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={data.user} />
+				<NavUser user={user} />
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>
