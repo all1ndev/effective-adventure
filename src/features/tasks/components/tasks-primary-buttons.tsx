@@ -1,9 +1,9 @@
 import { Download, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTasks } from "./tasks-provider";
+import { useSarcini } from "./tasks-provider";
 
-export function TasksPrimaryButtons() {
-	const { setOpen } = useTasks();
+export function SarciniPrimaryButtons() {
+	const { setOpen } = useSarcini();
 	return (
 		<div className="flex gap-2">
 			<Button

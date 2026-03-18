@@ -39,7 +39,7 @@ const formSchema = z.object({
 });
 type TaskForm = z.infer<typeof formSchema>;
 
-export function TasksMutateDrawer({
+export function SarciniMutateDrawer({
 	open,
 	onOpenChange,
 	currentRow,

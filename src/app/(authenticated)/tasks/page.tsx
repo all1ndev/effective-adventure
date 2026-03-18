@@ -1,6 +1,6 @@
 "use client";
-import { Tasks } from "@/features/tasks";
+import { Sarcini } from "@/features/tasks";
 
 export default function TasksPage() {
-	return <Tasks />;
+	return <Sarcini />;
 }

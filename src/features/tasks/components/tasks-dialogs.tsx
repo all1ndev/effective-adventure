@@ -1,20 +1,20 @@
 import { showSubmittedData } from "@/lib/show-submitted-data";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { TasksImportDialog } from "./tasks-import-dialog";
-import { TasksMutateDrawer } from "./tasks-mutate-drawer";
-import { useTasks } from "./tasks-provider";
+import { SarciniImportDialog } from "./tasks-import-dialog";
+import { SarciniMutateDrawer } from "./tasks-mutate-drawer";
+import { useSarcini } from "./tasks-provider";
 
-export function TasksDialogs() {
-	const { open, setOpen, currentRow, setCurrentRow } = useTasks();
+export function SarciniDialogs() {
+	const { open, setOpen, currentRow, setCurrentRow } = useSarcini();
 	return (
 		<>
-			<TasksMutateDrawer
+			<SarciniMutateDrawer
 				key="task-create"
 				open={open === "create"}
 				onOpenChange={() => setOpen("create")}
 			/>
 
-			<TasksImportDialog
+			<SarciniImportDialog
 				key="tasks-import"
 				open={open === "import"}
 				onOpenChange={() => setOpen("import")}
@@ -22,7 +22,7 @@ export function TasksDialogs() {
 
 			{currentRow && (
 				<>
-					<TasksMutateDrawer
+					<SarciniMutateDrawer
 						key={`task-update-${currentRow.id}`}
 						open={open === "update"}
 						onOpenChange={() => {

@@ -2,35 +2,35 @@ import React, { useState } from "react";
 import useDialogState from "@/hooks/use-dialog-state";
 import { type Task } from "../data/schema";
 
-type TasksDialogType = "create" | "update" | "delete" | "import";
+type SarciniDialogType = "create" | "update" | "delete" | "import";
 
-type TasksContextType = {
-	open: TasksDialogType | null;
-	setOpen: (str: TasksDialogType | null) => void;
+type SarciniContextType = {
+	open: SarciniDialogType | null;
+	setOpen: (str: SarciniDialogType | null) => void;
 	currentRow: Task | null;
 	setCurrentRow: React.Dispatch<React.SetStateAction<Task | null>>;
 };
 
-const TasksContext = React.createContext<TasksContextType | null>(null);
+const SarciniContext = React.createContext<SarciniContextType | null>(null);
 
-export function TasksProvider({ children }: { children: React.ReactNode }) {
-	const [open, setOpen] = useDialogState<TasksDialogType>(null);
+export function SarciniProvider({ children }: { children: React.ReactNode }) {
+	const [open, setOpen] = useDialogState<SarciniDialogType>(null);
 	const [currentRow, setCurrentRow] = useState<Task | null>(null);
 
 	return (
-		<TasksContext value={{ open, setOpen, currentRow, setCurrentRow }}>
+		<SarciniContext value={{ open, setOpen, currentRow, setCurrentRow }}>
 			{children}
-		</TasksContext>
+		</SarciniContext>
 	);
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useTasks = () => {
-	const tasksContext = React.useContext(TasksContext);
+ 
+export const useSarcini = () => {
+	const sarciniContext = React.useContext(SarciniContext);
 
-	if (!tasksContext) {
-		throw new Error("useTasks has to be used within <TasksContext>");
+	if (!sarciniContext) {
+		throw new Error("useSarcini has to be used within <SarciniContext>");
 	}
 
-	return tasksContext;
+	return sarciniContext;
 };
