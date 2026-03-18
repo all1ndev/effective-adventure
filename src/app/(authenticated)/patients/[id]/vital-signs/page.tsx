@@ -20,7 +20,7 @@ export default function PatientVitalSignsPage({
 	const data = vitalSigns.filter((v) => v.patientId === id);
 
 	return (
-		<RoleGuard allowedRoles={["medic"]}>
+		<RoleGuard allowedRoles={["admin"]}>
 			<Header fixed>
 				<Search />
 				<div className="ms-auto flex items-center space-x-4">

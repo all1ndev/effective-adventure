@@ -4,7 +4,7 @@ import { Alerts } from "@/features/alerts";
 
 export default function AlertsPage() {
 	return (
-		<RoleGuard allowedRoles={["medic"]}>
+		<RoleGuard allowedRoles={["admin"]}>
 			<Alerts />
 		</RoleGuard>
 	);

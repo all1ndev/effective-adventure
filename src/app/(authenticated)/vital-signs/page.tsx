@@ -4,7 +4,7 @@ import { VitalSigns } from "@/features/vital-signs";
 
 export default function VitalSignsPage() {
 	return (
-		<RoleGuard allowedRoles={["pacient"]}>
+		<RoleGuard allowedRoles={["user"]}>
 			<VitalSigns />
 		</RoleGuard>
 	);

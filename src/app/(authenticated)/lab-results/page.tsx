@@ -4,7 +4,7 @@ import { LabResults } from "@/features/lab-results";
 
 export default function LabResultsPage() {
 	return (
-		<RoleGuard allowedRoles={["pacient"]}>
+		<RoleGuard allowedRoles={["user"]}>
 			<LabResults />
 		</RoleGuard>
 	);

@@ -10,7 +10,7 @@ export default function PatientNotesPage({
 }) {
 	const { id } = use(params);
 	return (
-		<RoleGuard allowedRoles={["medic"]}>
+		<RoleGuard allowedRoles={["admin"]}>
 			<ClinicalNotes patientId={id} />
 		</RoleGuard>
 	);

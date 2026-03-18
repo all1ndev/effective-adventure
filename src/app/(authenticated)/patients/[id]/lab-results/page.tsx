@@ -22,7 +22,7 @@ export default function PatientLabResultsPage({
 	const latest = results[0];
 
 	return (
-		<RoleGuard allowedRoles={["medic"]}>
+		<RoleGuard allowedRoles={["admin"]}>
 			<Header fixed>
 				<Search />
 				<div className="ms-auto flex items-center space-x-4">

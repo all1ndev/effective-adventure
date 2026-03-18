@@ -13,12 +13,13 @@ import { getSidebarData } from "./data/sidebar-data";
 import { NavGroup } from "./nav-group";
 import { NavUser } from "./nav-user";
 import { useSession } from "@/lib/auth-client";
+import { getUserRole } from "@/lib/roles";
 import { Stethoscope, User } from "lucide-react";
 
 function SidebarHeaderContent({ role }: { role: string }) {
 	const { state } = useSidebar();
 	const collapsed = state === "collapsed";
-	const isMedic = role === "medic";
+	const isMedic = role === "admin";
 
 	if (collapsed) {
 		return (
@@ -43,7 +44,7 @@ function SidebarHeaderContent({ role }: { role: string }) {
 export function AppSidebar() {
 	const { collapsible, variant } = useLayout();
 	const { data: session } = useSession();
-	const role = "pacient"; // TODO: implement role system with better-auth
+	const role = getUserRole(session?.user?.role) ?? "user";
 	const data = getSidebarData(role);
 
 	const user = session?.user

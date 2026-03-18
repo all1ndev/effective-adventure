@@ -4,7 +4,7 @@ import { Education } from "@/features/education";
 
 export default function EducationPage() {
 	return (
-		<RoleGuard allowedRoles={["pacient"]}>
+		<RoleGuard allowedRoles={["user"]}>
 			<Education />
 		</RoleGuard>
 	);
