@@ -1,53 +1,76 @@
 import {
-	Construction,
-	LayoutDashboard,
-	Monitor,
-	Bug,
-	ListTodo,
-	FileX,
 	HelpCircle,
-	Lock,
-	Bell,
-	Package,
-	Palette,
-	ServerOff,
 	Settings,
-	Wrench,
 	UserCog,
-	UserX,
-	Users,
-	MessagesSquare,
-	ShieldCheck,
-	AudioWaveform,
-	Command,
-	GalleryVerticalEnd,
+	Wrench,
+	Palette,
+	Monitor,
+	Bell,
+	UserCheck,
+	Stethoscope,
+	LayoutDashboard,
+	Activity,
+	Thermometer,
+	Pill,
+	FlaskConical,
+	MessageSquare,
+	BookOpen,
+	NotebookPen,
 } from "lucide-react";
-import { ClerkLogo } from "@/assets/clerk-logo";
 import { type SidebarData } from "../types";
+import { type AppRole } from "@/lib/roles";
 
-export const sidebarData: SidebarData = {
-	user: {
-		name: "satnaing",
-		email: "satnaingdev@gmail.com",
-		avatar: "/avatars/shadcn.jpg",
-	},
-	teams: [
+const otherGroup = {
+	title: "Other",
+	items: [
 		{
-			name: "Shadcn Admin",
-			logo: Command,
-			plan: "Vite + ShadcnUI",
+			title: "Settings",
+			icon: Settings,
+			items: [
+				{
+					title: "Profile",
+					url: "/settings",
+					icon: UserCog,
+				},
+				{
+					title: "Account",
+					url: "/settings/account",
+					icon: Wrench,
+				},
+				{
+					title: "Appearance",
+					url: "/settings/appearance",
+					icon: Palette,
+				},
+				{
+					title: "Notifications",
+					url: "/settings/notifications",
+					icon: Bell,
+				},
+				{
+					title: "Display",
+					url: "/settings/display",
+					icon: Monitor,
+				},
+			],
 		},
 		{
-			name: "Acme Inc",
-			logo: GalleryVerticalEnd,
-			plan: "Enterprise",
-		},
-		{
-			name: "Acme Corp.",
-			logo: AudioWaveform,
-			plan: "Startup",
+			title: "Help Center",
+			url: "/help-center",
+			icon: HelpCircle,
 		},
 	],
+};
+
+const sharedUser = {
+	name: "TransplantCare",
+	email: "transplantcare@hospital.ro",
+	avatar: "/avatars/shadcn.jpg",
+};
+
+export const doctorSidebarData: SidebarData = {
+	user: sharedUser,
+	teams: [],
 	navGroups: [
 		{
 			title: "General",
@@ -58,148 +81,83 @@ export const sidebarData: SidebarData = {
 					icon: LayoutDashboard,
 				},
 				{
-					title: "Sarcini",
-					url: "/tasks",
-					icon: ListTodo,
+					title: "Lista Pacienti",
+					url: "/patients",
+					icon: Stethoscope,
 				},
 				{
-					title: "Aplicații",
-					url: "/apps",
-					icon: Package,
+					title: "Add Patient",
+					url: "/add-patient",
+					icon: UserCheck,
 				},
 				{
-					title: "Mesaje",
-					url: "/chats",
-					badge: "3",
-					icon: MessagesSquare,
+					title: "Alerte",
+					url: "/alerts",
+					icon: Bell,
 				},
 				{
-					title: "Utilizatori",
-					url: "/users",
-					icon: Users,
-				},
-				{
-					title: "Securizat de Clerk",
-					icon: ClerkLogo,
-					items: [
-						{
-							title: "Conectare",
-							url: "/clerk/sign-in",
-						},
-						{
-							title: "Înregistrare",
-							url: "/clerk/sign-up",
-						},
-						{
-							title: "Gestionare utilizatori",
-							url: "/clerk/user-management",
-						},
-					],
+					title: "Mesagerie",
+					url: "/messaging",
+					icon: MessageSquare,
 				},
 			],
 		},
-		{
-			title: "Pagini",
-			items: [
-				{
-					title: "Autentificare",
-					icon: ShieldCheck,
-					items: [
-						{
-							title: "Conectare",
-							url: "/sign-in",
-						},
-						{
-							title: "Conectare (2 col.)",
-							url: "/sign-in-2",
-						},
-						{
-							title: "Înregistrare",
-							url: "/sign-up",
-						},
-						{
-							title: "Parolă uitată",
-							url: "/forgot-password",
-						},
-						{
-							title: "OTP",
-							url: "/otp",
-						},
-					],
-				},
-				{
-					title: "Erori",
-					icon: Bug,
-					items: [
-						{
-							title: "Neautorizat",
-							url: "/errors/unauthorized",
-							icon: Lock,
-						},
-						{
-							title: "Interzis",
-							url: "/errors/forbidden",
-							icon: UserX,
-						},
-						{
-							title: "Nu a fost găsit",
-							url: "/errors/not-found",
-							icon: FileX,
-						},
-						{
-							title: "Eroare server intern",
-							url: "/errors/internal-server-error",
-							icon: ServerOff,
-						},
-						{
-							title: "Eroare mentenanță",
-							url: "/errors/maintenance-error",
-							icon: Construction,
-						},
-					],
-				},
-			],
-		},
-		{
-			title: "Altele",
-			items: [
-				{
-					title: "Setări",
-					icon: Settings,
-					items: [
-						{
-							title: "Profil",
-							url: "/settings",
-							icon: UserCog,
-						},
-						{
-							title: "Cont",
-							url: "/settings/account",
-							icon: Wrench,
-						},
-						{
-							title: "Aspect",
-							url: "/settings/appearance",
-							icon: Palette,
-						},
-						{
-							title: "Notificări",
-							url: "/settings/notifications",
-							icon: Bell,
-						},
-						{
-							title: "Afișaj",
-							url: "/settings/display",
-							icon: Monitor,
-						},
-					],
-				},
-				{
-					title: "Centru de ajutor",
-					url: "/help-center",
-					icon: HelpCircle,
-				},
-			],
-		},
+		otherGroup,
 	],
 };
+
+export const patientSidebarData: SidebarData = {
+	user: sharedUser,
+	teams: [],
+	navGroups: [
+		{
+			title: "General",
+			items: [
+				{
+					title: "Semne Vitale",
+					url: "/vital-signs",
+					icon: Activity,
+				},
+				{
+					title: "Simptome",
+					url: "/symptoms",
+					icon: Thermometer,
+				},
+				{
+					title: "Medicatie",
+					url: "/medication",
+					icon: Pill,
+				},
+				{
+					title: "Rezultate Laborator",
+					url: "/lab-results",
+					icon: FlaskConical,
+				},
+				{
+					title: "Mesagerie",
+					url: "/messaging",
+					icon: MessageSquare,
+				},
+				{
+					title: "Educatie",
+					url: "/education",
+					icon: BookOpen,
+				},
+				{
+					title: "Jurnal",
+					url: "/journal",
+					icon: NotebookPen,
+				},
+			],
+		},
+		otherGroup,
+	],
+};
+
+export function getSidebarData(role: AppRole): SidebarData {
+	if (role === "medic") return doctorSidebarData;
+	return patientSidebarData;
+}
+
+// Fallback export so any existing import of `sidebarData` still compiles
+export const sidebarData = doctorSidebarData;
