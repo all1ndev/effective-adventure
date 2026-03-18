@@ -2,6 +2,9 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { signUp } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +20,7 @@ import { PasswordInput } from "@/components/password-input";
 
 const formSchema = z
 	.object({
+		name: z.string().min(1, "Introduceți numele"),
 		email: z.email({
 			error: (iss) =>
 				iss.input === "" ? "Introduceți adresa de e-mail" : undefined,
@@ -37,24 +41,36 @@ export function SignUpForm({
 	...props
 }: React.HTMLAttributes<HTMLFormElement>) {
 	const [isLoading, setIsLoading] = useState(false);
+	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
+			name: "",
 			email: "",
 			password: "",
 			confirmPassword: "",
 		},
 	});
 
-	function onSubmit(data: z.infer<typeof formSchema>) {
+	async function onSubmit(data: z.infer<typeof formSchema>) {
 		setIsLoading(true);
 
-		console.log(data);
+		const { error } = await signUp.email({
+			name: data.name,
+			email: data.email,
+			password: data.password,
+		});
 
-		setTimeout(() => {
+		if (error) {
 			setIsLoading(false);
-		}, 3000);
+			toast.error(error.message ?? "Eroare la crearea contului");
+			return;
+		}
+
+		toast.success("Cont creat cu succes!");
+		router.replace("/");
+		setIsLoading(false);
 	}
 
 	return (
@@ -64,6 +80,19 @@ export function SignUpForm({
 				className={cn("grid gap-3", className)}
 				{...props}
 			>
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nume</FormLabel>
+							<FormControl>
+								<Input placeholder="Ion Popescu" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 				<FormField
 					control={form.control}
 					name="email"
@@ -104,7 +133,7 @@ export function SignUpForm({
 					)}
 				/>
 				<Button className="mt-2" disabled={isLoading}>
-					Create Account
+					Creează cont
 				</Button>
 			</form>
 		</Form>

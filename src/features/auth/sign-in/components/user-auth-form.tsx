@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, LogIn } from "lucide-react";
 import { toast } from "sonner";
-import { useAuthStore } from "@/stores/auth-store";
-import { sleep, cn } from "@/lib/utils";
+import { signIn } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -41,11 +41,7 @@ export function UserAuthForm({
 	...props
 }: UserAuthFormProps) {
 	const [isLoading, setIsLoading] = useState(false);
-	const [selectedRole, setSelectedRole] = useState<"medic" | "pacient">(
-		"pacient",
-	);
 	const router = useRouter();
-	const { auth } = useAuthStore();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -55,34 +51,23 @@ export function UserAuthForm({
 		},
 	});
 
-	function onSubmit(data: z.infer<typeof formSchema>) {
+	async function onSubmit(data: z.infer<typeof formSchema>) {
 		setIsLoading(true);
 
-		toast.promise(sleep(2000), {
-			loading: "Conectare în curs...",
-			success: () => {
-				setIsLoading(false);
-
-				// Mock successful authentication with expiry computed at success time
-				const mockUser = {
-					accountNo: "ACC001",
-					email: data.email,
-					role: [selectedRole],
-					exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
-				};
-
-				// Set user and access token
-				auth.setUser(mockUser);
-				auth.setAccessToken("mock-access-token");
-
-				// Redirect to the stored location or default to dashboard
-				const targetPath = redirectTo || "/";
-				router.replace(targetPath);
-
-				return `Bun venit înapoi, ${data.email}!`;
-			},
-			error: "Eroare",
+		const { error } = await signIn.email({
+			email: data.email,
+			password: data.password,
 		});
+
+		if (error) {
+			setIsLoading(false);
+			toast.error(error.message ?? "Eroare la conectare");
+			return;
+		}
+
+		toast.success(`Bun venit înapoi!`);
+		router.replace(redirectTo || "/");
+		setIsLoading(false);
 	}
 
 	return (
@@ -124,22 +109,6 @@ export function UserAuthForm({
 						</FormItem>
 					)}
 				/>
-				<div className="grid grid-cols-2 gap-2">
-					<Button
-						type="button"
-						variant={selectedRole === "medic" ? "default" : "outline"}
-						onClick={() => setSelectedRole("medic")}
-					>
-						Medic
-					</Button>
-					<Button
-						type="button"
-						variant={selectedRole === "pacient" ? "default" : "outline"}
-						onClick={() => setSelectedRole("pacient")}
-					>
-						Pacient
-					</Button>
-				</div>
 				<Button className="mt-2" disabled={isLoading}>
 					{isLoading ? <Loader2 className="animate-spin" /> : <LogIn />}
 					Conectare

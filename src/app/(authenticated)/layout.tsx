@@ -1,10 +1,11 @@
 "use client";
+
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
 import { DirectionProvider } from "@/context/direction-provider";
 import { ThemeProvider } from "@/context/theme-provider";
-import { useAuthStore } from "@/stores/auth-store";
+import { useSession } from "@/lib/auth-client";
 
 import { Suspense } from "react";
 
@@ -15,16 +16,16 @@ export default function AuthenticatedRootLayout({
 }>) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const { auth } = useAuthStore();
+	const { data: session, isPending } = useSession();
 
 	useEffect(() => {
-		if (!auth.accessToken) {
+		if (!isPending && !session) {
 			const params = new URLSearchParams({ redirect: pathname });
 			router.replace(`/sign-in?${params.toString()}`);
 		}
-	}, [auth.accessToken, router, pathname]);
+	}, [session, isPending, router, pathname]);
 
-	if (!auth.accessToken) return null;
+	if (isPending || !session) return null;
 
 	return (
 		<Suspense>
