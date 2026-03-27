@@ -1,9 +1,13 @@
 import { AlertTriangle, Bell, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type Alert } from "@/features/alerts/data/schema";
+
+interface AlertItem {
+	severity: "critical" | "warning" | "info";
+	dismissed: boolean;
+}
 
 interface AlertSummaryWidgetProps {
-	alerts: Alert[];
+	alerts: AlertItem[];
 }
 
 export function AlertSummaryWidget({ alerts }: AlertSummaryWidgetProps) {

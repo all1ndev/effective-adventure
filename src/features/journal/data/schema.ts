@@ -21,7 +21,7 @@ export const journalEntryListSchema = z.array(journalEntrySchema);
 
 export const journalEntryFormSchema = z.object({
 	mood: moodSchema,
-	content: z.string().min(1, "Continutul este obligatoriu."),
+	content: z.string().min(1, "Câmpul este obligatoriu."),
 });
 
 export type JournalEntryFormValues = z.infer<typeof journalEntryFormSchema>;

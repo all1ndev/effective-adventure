@@ -12,7 +12,13 @@ import {
 	Cell,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type PatientSummary } from "../data/summary";
+
+interface PatientSummary {
+	id: string;
+	name: string;
+	status: "activ" | "inactiv";
+	complianceRate: number;
+}
 
 interface ComplianceChartProps {
 	patients: PatientSummary[];

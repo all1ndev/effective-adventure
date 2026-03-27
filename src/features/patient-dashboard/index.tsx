@@ -9,28 +9,16 @@ import { ProfileDropdown } from "@/components/profile-dropdown";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Button } from "@/components/ui/button";
-import { getVitalSigns } from "@/features/vital-signs/actions";
-import type { VitalEntry } from "@/features/vital-signs/data/schema";
-import { medications } from "@/features/medication/data/medications";
-import { conversations } from "@/features/messaging/data/messages";
+import { getPatientDashboardData } from "./actions";
+
+type DashboardData = Awaited<ReturnType<typeof getPatientDashboardData>>;
 
 export function PatientDashboard() {
-	const [latestVital, setLatestVital] = useState<VitalEntry | null>(null);
+	const [data, setData] = useState<DashboardData | null>(null);
 
 	useEffect(() => {
-		getVitalSigns().then((data) => {
-			if (data.length > 0) {
-				setLatestVital(data[0]);
-			}
-		});
+		getPatientDashboardData().then(setData);
 	}, []);
-
-	const todayMeds = medications.filter((m) => m.patientId === "1");
-
-	const unreadMessages = conversations.reduce(
-		(sum, c) => sum + (c.unreadCount ?? 0),
-		0,
-	);
 
 	return (
 		<>
@@ -55,16 +43,16 @@ export function PatientDashboard() {
 						<Activity className="mt-1 h-5 w-5 text-blue-500 shrink-0" />
 						<div>
 							<p className="text-sm text-muted-foreground">Ultima tensiune</p>
-							{latestVital ? (
+							{data?.latestVital ? (
 								<p className="text-2xl font-bold">
-									{latestVital.systolic}/{latestVital.diastolic}
+									{data.latestVital.systolic}/{data.latestVital.diastolic}
 								</p>
 							) : (
 								<p className="text-2xl font-bold text-muted-foreground">—</p>
 							)}
-							{latestVital && (
+							{data?.latestVital && (
 								<p className="text-xs text-muted-foreground">
-									{latestVital.date}
+									{data.latestVital.date}
 								</p>
 							)}
 						</div>
@@ -73,8 +61,12 @@ export function PatientDashboard() {
 					<div className="rounded-lg border p-4 flex items-start gap-3">
 						<Pill className="mt-1 h-5 w-5 text-green-500 shrink-0" />
 						<div>
-							<p className="text-sm text-muted-foreground">Medicamente azi</p>
-							<p className="text-2xl font-bold">{todayMeds.length}</p>
+							<p className="text-sm text-muted-foreground">
+								Medicamente active
+							</p>
+							<p className="text-2xl font-bold">
+								{data ? data.activeMedsCount : "—"}
+							</p>
 							<p className="text-xs text-muted-foreground">
 								prescriptii active
 							</p>
@@ -85,8 +77,12 @@ export function PatientDashboard() {
 						<MessageSquare className="mt-1 h-5 w-5 text-purple-500 shrink-0" />
 						<div>
 							<p className="text-sm text-muted-foreground">Mesaje necitite</p>
-							<p className="text-2xl font-bold">{unreadMessages}</p>
-							<p className="text-xs text-muted-foreground">de la medic</p>
+							<p className="text-2xl font-bold">
+								{data ? data.unreadMessages : "—"}
+							</p>
+							<p className="text-xs text-muted-foreground">
+								{data?.doctorName ? `de la ${data.doctorName}` : "de la medic"}
+							</p>
 						</div>
 					</div>
 				</div>
