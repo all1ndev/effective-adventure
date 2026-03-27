@@ -19,6 +19,22 @@ async function getSessionOrThrow() {
 	return session;
 }
 
+export async function getAdmins() {
+	const session = await getSessionOrThrow();
+	if (session.user.role !== "admin") {
+		throw new Error("Neautorizat");
+	}
+
+	const { user } = await import("@/db/auth-schema");
+	const admins = await db
+		.select({ id: user.id, name: user.name, email: user.email })
+		.from(user)
+		.where(eq(user.role, "admin"))
+		.orderBy(asc(user.name));
+
+	return admins;
+}
+
 export async function getPatients() {
 	const session = await getSessionOrThrow();
 	if (session.user.role !== "admin") {

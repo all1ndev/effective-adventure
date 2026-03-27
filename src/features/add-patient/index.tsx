@@ -176,7 +176,13 @@ function updateNumberField(
 	onChange(Number.isNaN(parsed) ? undefined : parsed);
 }
 
-export function DoctorPatients() {
+interface Admin {
+	id: string;
+	name: string;
+	email: string;
+}
+
+export function DoctorPatients({ admins }: { admins: Admin[] }) {
 	const form = useForm<PatientFormValues>({
 		resolver: zodResolver(patientFormSchema),
 		defaultValues,
@@ -270,12 +276,23 @@ export function DoctorPatients() {
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Medic responsabil (Admin)</FormLabel>
-														<FormControl>
-															<Input
-																placeholder="nume.medic@spital.ro"
-																{...field}
-															/>
-														</FormControl>
+														<Select
+															onValueChange={field.onChange}
+															value={field.value}
+														>
+															<FormControl>
+																<SelectTrigger>
+																	<SelectValue placeholder="Selecteaza medicul" />
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																{admins.map((admin) => (
+																	<SelectItem key={admin.id} value={admin.id}>
+																		{admin.name} ({admin.email})
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
 														<FormMessage />
 													</FormItem>
 												)}
