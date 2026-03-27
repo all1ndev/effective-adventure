@@ -46,7 +46,11 @@ export default function PatientMedicationPage({
 					})),
 				),
 			),
-		]).then(() => setLoading(false));
+		])
+			.catch(() => {
+				// Allow the page to render even if fetch fails
+			})
+			.finally(() => setLoading(false));
 	}
 
 	useEffect(fetchData, [id]);

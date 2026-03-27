@@ -24,7 +24,7 @@ export function RenewalAlert({ medications }: RenewalAlertProps) {
 			<div className="flex items-center gap-2">
 				<AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
 				<h3 className="font-medium text-orange-800 dark:text-orange-200">
-					Prescriptii ce expira curand
+					Prescripții ce expiră curând
 				</h3>
 			</div>
 			<ul className="mt-2 space-y-1">
@@ -33,7 +33,7 @@ export function RenewalAlert({ medications }: RenewalAlertProps) {
 						key={m.id}
 						className="text-sm text-orange-700 dark:text-orange-300"
 					>
-						<strong>{m.name}</strong> ({m.dose}) — expira {m.endDate}
+						<strong>{m.name}</strong> ({m.dose}) — expiră {m.endDate}
 					</li>
 				))}
 			</ul>

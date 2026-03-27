@@ -13,10 +13,13 @@ import { ComplianceTable } from "./components/compliance-table";
 import { RenewalAlert } from "./components/renewal-alert";
 import { DailyLogForm } from "./components/daily-log-form";
 import { getMedications, getMedicationLogs } from "./actions";
-import type { Medication, MedicationLog } from "./data/schema";
+import type {
+	Medication as MedicationType,
+	MedicationLog,
+} from "./data/schema";
 
 export function Medication() {
-	const [meds, setMeds] = useState<Medication[]>([]);
+	const [meds, setMeds] = useState<MedicationType[]>([]);
 	const [logs, setLogs] = useState<MedicationLog[]>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -35,7 +38,11 @@ export function Medication() {
 					})),
 				),
 			),
-		]).then(() => setLoading(false));
+		])
+			.catch(() => {
+				// Allow the page to render even if fetch fails
+			})
+			.finally(() => setLoading(false));
 	}
 
 	useEffect(fetchData, []);

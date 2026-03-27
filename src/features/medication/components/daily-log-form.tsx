@@ -38,7 +38,7 @@ type LogEntry = {
 const statusOptions = [
 	{ value: "luat", label: "Luat" },
 	{ value: "omis", label: "Omis" },
-	{ value: "intarziat", label: "Intarziat" },
+	{ value: "intarziat", label: "Întârziat" },
 ];
 
 export function DailyLogForm({
@@ -123,9 +123,9 @@ export function DailyLogForm({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Jurnal zilnic de medicatie</CardTitle>
+				<CardTitle>Jurnal zilnic de medicație</CardTitle>
 				<CardDescription>
-					Inregistreaza medicamentele luate astazi,{" "}
+					Înregistrează medicamentele luate astăzi,{" "}
 					{new Date().toLocaleDateString("ro-RO", {
 						day: "numeric",
 						month: "long",
@@ -137,13 +137,13 @@ export function DailyLogForm({
 			<CardContent>
 				{submitted && (
 					<div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
-						Jurnalul de astazi a fost salvat cu succes.
+						Jurnalul de astăzi a fost salvat cu succes.
 					</div>
 				)}
 
 				{!hasUnlogged && !submitted && (
 					<p className="text-sm text-muted-foreground">
-						Toate medicamentele de astazi au fost deja inregistrate.
+						Toate medicamentele de astăzi au fost deja înregistrate.
 					</p>
 				)}
 
@@ -172,7 +172,7 @@ export function DailyLogForm({
 
 										{isLogged ? (
 											<p className="text-sm text-green-700 dark:text-green-400">
-												Deja inregistrat astazi
+												Deja înregistrat astăzi
 											</p>
 										) : (
 											<div className="grid gap-3 sm:grid-cols-2">
@@ -189,7 +189,7 @@ export function DailyLogForm({
 															id={`status-${med.id}`}
 															className="w-full"
 														>
-															<SelectValue placeholder="Selecteaza status" />
+															<SelectValue placeholder="Selectează status" />
 														</SelectTrigger>
 														<SelectContent>
 															{statusOptions.map((opt) => (
@@ -219,10 +219,10 @@ export function DailyLogForm({
 						</div>
 
 						<div className="space-y-1.5">
-							<Label htmlFor="notes">Observatii (optional)</Label>
+							<Label htmlFor="notes">Observații (opțional)</Label>
 							<Textarea
 								id="notes"
-								placeholder="ex: Am luat Tacrolimus cu 30 de minute intarziere din cauza..."
+								placeholder="ex: Am luat Tacrolimus cu 30 de minute întârziere din cauza..."
 								value={notes}
 								onChange={(e) => setNotes(e.target.value)}
 								rows={3}
@@ -239,7 +239,7 @@ export function DailyLogForm({
 								).length === 0
 							}
 						>
-							{isPending ? "Se salveaza..." : "Salveaza jurnalul de astazi"}
+							{isPending ? "Se salvează..." : "Salvează jurnalul de astăzi"}
 						</Button>
 					</form>
 				)}

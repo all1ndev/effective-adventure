@@ -55,7 +55,7 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 				return;
 			}
 
-			toast.success("Prescriptia a fost adaugata cu succes.");
+			toast.success("Prescripția a fost adăugată cu succes.");
 			reset();
 			onSuccess?.();
 		});
@@ -64,9 +64,9 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Adauga prescriptie</CardTitle>
+				<CardTitle>Adaugă prescripție</CardTitle>
 				<CardDescription>
-					Adaugati un medicament nou in schema pacientului.
+					Adăugați un medicament nou în schema pacientului.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -93,7 +93,7 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 						)}
 					</div>
 					<div className="space-y-1.5">
-						<Label htmlFor="frequency">Frecventa</Label>
+						<Label htmlFor="frequency">Frecvență</Label>
 						<Input
 							id="frequency"
 							placeholder="ex: De 2 ori pe zi"
@@ -106,7 +106,7 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 						)}
 					</div>
 					<div className="space-y-1.5">
-						<Label htmlFor="startDate">Data incepere</Label>
+						<Label htmlFor="startDate">Data începere</Label>
 						<Input id="startDate" type="date" {...register("startDate")} />
 						{errors.startDate && (
 							<p className="text-sm text-destructive">
@@ -115,12 +115,12 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 						)}
 					</div>
 					<div className="space-y-1.5">
-						<Label htmlFor="endDate">Data expirare (optional)</Label>
+						<Label htmlFor="endDate">Data expirare (opțional)</Label>
 						<Input id="endDate" type="date" {...register("endDate")} />
 					</div>
 					<div className="sm:col-span-2">
 						<Button type="submit" disabled={isPending}>
-							{isPending ? "Se salveaza..." : "Adauga prescriptie"}
+							{isPending ? "Se salvează..." : "Adaugă prescripție"}
 						</Button>
 					</div>
 				</form>
