@@ -7,6 +7,7 @@ import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { Spinner } from "@/components/ui/spinner";
 import { AlertsList } from "./components/alerts-list";
 import { getAlerts } from "./actions";
 
@@ -14,12 +15,15 @@ type AlertRow = Awaited<ReturnType<typeof getAlerts>>[number];
 
 export function Alerts() {
 	const [alerts, setAlerts] = useState<AlertRow[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	function fetchData() {
-		getAlerts().then(setAlerts);
+		getAlerts().then((data) => {
+			setAlerts(data);
+			setLoading(false);
+		});
 	}
 
-	 
 	useEffect(fetchData, []);
 
 	const activeCount = alerts.filter((a) => !a.dismissed).length;
@@ -49,7 +53,13 @@ export function Alerts() {
 						Alerte clinice prioritizate pentru pacientii monitorizati.
 					</p>
 				</div>
-				<AlertsList data={alerts} onUpdate={fetchData} />
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
+					</div>
+				) : (
+					<AlertsList data={alerts} onUpdate={fetchData} />
+				)}
 			</Main>
 		</>
 	);

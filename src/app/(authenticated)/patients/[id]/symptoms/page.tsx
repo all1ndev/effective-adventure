@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { SymptomsList } from "@/features/symptoms/components/symptoms-list";
 import { getSymptomReportsByPatientId } from "@/features/symptoms/actions";
@@ -20,9 +21,13 @@ export default function PatientSymptomsPage({
 	const [data, setData] = useState<
 		Awaited<ReturnType<typeof getSymptomReportsByPatientId>>
 	>([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		getSymptomReportsByPatientId(id).then(setData);
+		getSymptomReportsByPatientId(id).then((d) => {
+			setData(d);
+			setLoading(false);
+		});
 	}, [id]);
 
 	return (
@@ -44,7 +49,13 @@ export default function PatientSymptomsPage({
 						Rapoarte de simptome ale pacientului.
 					</p>
 				</div>
-				<SymptomsList data={data} />
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
+					</div>
+				) : (
+					<SymptomsList data={data} />
+				)}
 			</Main>
 		</RoleGuard>
 	);

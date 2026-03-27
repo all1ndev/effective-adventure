@@ -7,6 +7,7 @@ import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { Spinner } from "@/components/ui/spinner";
 import { VitalSignsForm } from "./components/vital-signs-form";
 import { VitalSignsTable } from "./components/vital-signs-table";
 import { VitalSignsChart } from "./components/vital-signs-chart";
@@ -15,12 +16,15 @@ import type { VitalEntry } from "./data/schema";
 
 export function VitalSigns() {
 	const [vitalSigns, setVitalSigns] = useState<VitalEntry[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	function fetchData() {
-		getVitalSigns().then(setVitalSigns);
+		getVitalSigns().then((data) => {
+			setVitalSigns(data);
+			setLoading(false);
+		});
 	}
 
-	 
 	useEffect(fetchData, []);
 
 	return (
@@ -42,8 +46,16 @@ export function VitalSigns() {
 					</p>
 				</div>
 				<VitalSignsForm onSuccess={fetchData} />
-				<VitalSignsChart data={vitalSigns} />
-				<VitalSignsTable data={vitalSigns} onUpdate={fetchData} />
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
+					</div>
+				) : (
+					<>
+						<VitalSignsChart data={vitalSigns} />
+						<VitalSignsTable data={vitalSigns} onUpdate={fetchData} />
+					</>
+				)}
 			</Main>
 		</>
 	);

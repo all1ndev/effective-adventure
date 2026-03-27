@@ -7,6 +7,7 @@ import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { Spinner } from "@/components/ui/spinner";
 import { PatientsTable } from "./components/patients-table";
 import { getPatients, getAdmins } from "./actions";
 import type { Patient } from "./data/schema";
@@ -20,6 +21,7 @@ interface Admin {
 export function Patients() {
 	const [patients, setPatients] = useState<Patient[]>([]);
 	const [admins, setAdmins] = useState<Admin[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	function fetchData() {
 		getPatients().then((data) => {
@@ -31,6 +33,7 @@ export function Patients() {
 				return result as Patient;
 			});
 			setPatients(mapped);
+			setLoading(false);
 		});
 	}
 
@@ -59,7 +62,17 @@ export function Patients() {
 						Vizualizati si gestionati pacientii cu transplant hepatic.
 					</p>
 				</div>
-				<PatientsTable data={patients} admins={admins} onRefresh={fetchData} />
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
+					</div>
+				) : (
+					<PatientsTable
+						data={patients}
+						admins={admins}
+						onRefresh={fetchData}
+					/>
+				)}
 			</Main>
 		</>
 	);
