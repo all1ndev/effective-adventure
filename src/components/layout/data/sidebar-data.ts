@@ -1,10 +1,4 @@
 import {
-	HelpCircle,
-	Settings,
-	UserCog,
-	Wrench,
-	Palette,
-	Monitor,
 	Bell,
 	UserCheck,
 	Stethoscope,
@@ -19,48 +13,6 @@ import {
 } from "lucide-react";
 import { type SidebarData } from "../types";
 import { type AppRole } from "@/lib/roles";
-
-const otherGroup = {
-	title: "Other",
-	items: [
-		{
-			title: "Settings",
-			icon: Settings,
-			items: [
-				{
-					title: "Profile",
-					url: "/settings",
-					icon: UserCog,
-				},
-				{
-					title: "Account",
-					url: "/settings/account",
-					icon: Wrench,
-				},
-				{
-					title: "Appearance",
-					url: "/settings/appearance",
-					icon: Palette,
-				},
-				{
-					title: "Notifications",
-					url: "/settings/notifications",
-					icon: Bell,
-				},
-				{
-					title: "Display",
-					url: "/settings/display",
-					icon: Monitor,
-				},
-			],
-		},
-		{
-			title: "Help Center",
-			url: "/help-center",
-			icon: HelpCircle,
-		},
-	],
-};
 
 const sharedUser = {
 	name: "TransplantCare",
@@ -102,7 +54,6 @@ export const doctorSidebarData: SidebarData = {
 				},
 			],
 		},
-		otherGroup,
 	],
 };
 
@@ -155,7 +106,6 @@ export const patientSidebarData: SidebarData = {
 				},
 			],
 		},
-		otherGroup,
 	],
 };
 

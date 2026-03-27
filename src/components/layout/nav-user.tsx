@@ -1,18 +1,9 @@
-import Link from "next/link";
-import {
-	BadgeCheck,
-	Bell,
-	ChevronsUpDown,
-	CreditCard,
-	LogOut,
-	Sparkles,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 import useDialogState from "@/hooks/use-dialog-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -34,9 +25,18 @@ type NavUserProps = {
 	};
 };
 
+function getInitials(name: string): string {
+	const parts = name.trim().split(/\s+/);
+	if (parts.length >= 2) {
+		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+	}
+	return name.slice(0, 2).toUpperCase();
+}
+
 export function NavUser({ user }: NavUserProps) {
 	const { isMobile } = useSidebar();
 	const [open, setOpen] = useDialogState();
+	const initials = getInitials(user.name);
 
 	return (
 		<>
@@ -50,7 +50,9 @@ export function NavUser({ user }: NavUserProps) {
 							>
 								<Avatar className="h-8 w-8 rounded-lg">
 									<AvatarImage src={user.avatar} alt={user.name} />
-									<AvatarFallback className="rounded-lg">SN</AvatarFallback>
+									<AvatarFallback className="rounded-lg">
+										{initials}
+									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-start text-sm leading-tight">
 									<span className="truncate font-semibold">{user.name}</span>
@@ -69,7 +71,9 @@ export function NavUser({ user }: NavUserProps) {
 								<div className="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
 									<Avatar className="h-8 w-8 rounded-lg">
 										<AvatarImage src={user.avatar} alt={user.name} />
-										<AvatarFallback className="rounded-lg">SN</AvatarFallback>
+										<AvatarFallback className="rounded-lg">
+											{initials}
+										</AvatarFallback>
 									</Avatar>
 									<div className="grid flex-1 text-start text-sm leading-tight">
 										<span className="truncate font-semibold">{user.name}</span>
@@ -77,34 +81,6 @@ export function NavUser({ user }: NavUserProps) {
 									</div>
 								</div>
 							</DropdownMenuLabel>
-							<DropdownMenuSeparator />
-							<DropdownMenuGroup>
-								<DropdownMenuItem>
-									<Sparkles />
-									Upgrade to Pro
-								</DropdownMenuItem>
-							</DropdownMenuGroup>
-							<DropdownMenuSeparator />
-							<DropdownMenuGroup>
-								<DropdownMenuItem asChild>
-									<Link href="/settings/account">
-										<BadgeCheck />
-										Account
-									</Link>
-								</DropdownMenuItem>
-								<DropdownMenuItem asChild>
-									<Link href="/settings">
-										<CreditCard />
-										Billing
-									</Link>
-								</DropdownMenuItem>
-								<DropdownMenuItem asChild>
-									<Link href="/settings/notifications">
-										<Bell />
-										Notifications
-									</Link>
-								</DropdownMenuItem>
-							</DropdownMenuGroup>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
 								variant="destructive"
