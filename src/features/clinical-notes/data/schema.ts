@@ -10,3 +10,10 @@ export const clinicalNoteSchema = z.object({
 
 export type ClinicalNote = z.infer<typeof clinicalNoteSchema>;
 export const clinicalNoteListSchema = z.array(clinicalNoteSchema);
+
+export const clinicalNoteFormSchema = z.object({
+	visitDate: z.string().min(1, "Data vizitei este obligatorie."),
+	content: z.string().min(1, "Observatiile sunt obligatorii."),
+});
+
+export type ClinicalNoteFormValues = z.infer<typeof clinicalNoteFormSchema>;

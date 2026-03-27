@@ -1,8 +1,9 @@
 "use client";
-import { use } from "react";
+
+import { use, useEffect, useState } from "react";
 import { RoleGuard } from "@/components/role-guard";
 import { SymptomsList } from "@/features/symptoms/components/symptoms-list";
-import { symptomReports } from "@/features/symptoms/data/symptoms";
+import { getSymptomReportsByPatientId } from "@/features/symptoms/actions";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
@@ -16,7 +17,13 @@ export default function PatientSymptomsPage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = use(params);
-	const data = symptomReports.filter((r) => r.patientId === id);
+	const [data, setData] = useState<
+		Awaited<ReturnType<typeof getSymptomReportsByPatientId>>
+	>([]);
+
+	useEffect(() => {
+		getSymptomReportsByPatientId(id).then(setData);
+	}, [id]);
 
 	return (
 		<RoleGuard allowedRoles={["admin"]}>

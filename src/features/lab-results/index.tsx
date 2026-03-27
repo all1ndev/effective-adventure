@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -6,11 +9,20 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { LabResultsTable } from "./components/lab-results-table";
 import { LabResultsChart } from "./components/lab-results-chart";
-import { labResults } from "./data/lab-results";
+import { getLabResults } from "./actions";
+import type { LabResult } from "./data/schema";
 
 export function LabResults() {
-	const patientResults = labResults.filter((r) => r.patientId === "1");
-	const latest = patientResults[0];
+	const [results, setResults] = useState<LabResult[]>([]);
+
+	function fetchData() {
+		getLabResults().then(setResults);
+	}
+
+	 
+	useEffect(fetchData, []);
+
+	const latest = results[0];
 
 	return (
 		<>
@@ -34,10 +46,10 @@ export function LabResults() {
 				</div>
 				{latest && <LabResultsTable result={latest} />}
 				<div className="grid gap-4 lg:grid-cols-2">
-					<LabResultsChart results={patientResults} testName="ALT (SGPT)" />
-					<LabResultsChart results={patientResults} testName="Tacrolimus" />
+					<LabResultsChart results={results} testName="ALT (SGPT)" />
+					<LabResultsChart results={results} testName="Tacrolimus" />
 				</div>
-				{patientResults.slice(1).map((r) => (
+				{results.slice(1).map((r) => (
 					<LabResultsTable key={r.id} result={r} />
 				))}
 			</Main>

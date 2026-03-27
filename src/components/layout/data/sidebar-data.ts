@@ -114,6 +114,11 @@ export const patientSidebarData: SidebarData = {
 			title: "General",
 			items: [
 				{
+					title: "Panou de control",
+					url: "/",
+					icon: LayoutDashboard,
+				},
+				{
 					title: "Semne Vitale",
 					url: "/vital-signs",
 					icon: Activity,

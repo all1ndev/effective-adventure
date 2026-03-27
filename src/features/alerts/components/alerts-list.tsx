@@ -1,29 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useTransition } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { type Alert } from "../data/schema";
 import { AlertBadge } from "./alert-badge";
+import { dismissAlert } from "../actions";
 
-interface AlertsListProps {
-	data: Alert[];
+interface AlertItem {
+	id: string;
+	patientName: string;
+	type: "vital" | "simptom" | "laborator" | "medicatie";
+	severity: "critical" | "warning" | "info";
+	message: string;
+	createdAt: Date | string;
+	dismissed: boolean;
 }
 
-export function AlertsList({ data }: AlertsListProps) {
-	const [dismissed, setDismissed] = useState<string[]>(
-		data.filter((a) => a.dismissed).map((a) => a.id),
-	);
+interface AlertsListProps {
+	data: AlertItem[];
+	onUpdate?: () => void;
+}
+
+export function AlertsList({ data, onUpdate }: AlertsListProps) {
+	const [isPending, startTransition] = useTransition();
+
+	function handleDismiss(id: string) {
+		startTransition(async () => {
+			const result = await dismissAlert(id);
+			if ("error" in result) {
+				toast.error(String(result.error));
+				return;
+			}
+			onUpdate?.();
+		});
+	}
 
 	const active = data
-		.filter((a) => !dismissed.includes(a.id))
+		.filter((a) => !a.dismissed)
 		.sort((a, b) => {
 			const order = { critical: 0, warning: 1, info: 2 };
 			return order[a.severity] - order[b.severity];
 		});
 
-	const dismissedAlerts = data.filter((a) => dismissed.includes(a.id));
+	const dismissedAlerts = data.filter((a) => a.dismissed);
 
 	return (
 		<div className="space-y-6">
@@ -61,7 +82,8 @@ export function AlertsList({ data }: AlertsListProps) {
 								variant="ghost"
 								size="icon"
 								className="shrink-0"
-								onClick={() => setDismissed((prev) => [...prev, alert.id])}
+								onClick={() => handleDismiss(alert.id)}
+								disabled={isPending}
 							>
 								<X className="h-4 w-4" />
 								<span className="sr-only">Respinge</span>

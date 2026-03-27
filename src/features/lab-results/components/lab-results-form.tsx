@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { createLabResult, createLabResultForPatient } from "../actions";
 
 interface TestRow {
 	id: number;
@@ -22,8 +24,15 @@ interface TestRow {
 	refMax: string;
 }
 
-export function LabResultsForm() {
+interface LabResultsFormProps {
+	patientId?: string;
+	onSuccess?: () => void;
+}
+
+export function LabResultsForm({ patientId, onSuccess }: LabResultsFormProps) {
+	const [isPending, startTransition] = useTransition();
 	const [submitted, setSubmitted] = useState(false);
+	const [date, setDate] = useState("");
 	const [rows, setRows] = useState<TestRow[]>([
 		{ id: 1, name: "", value: "", unit: "", refMin: "", refMax: "" },
 	]);
@@ -41,8 +50,33 @@ export function LabResultsForm() {
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		setSubmitted(true);
-		setTimeout(() => setSubmitted(false), 3000);
+		startTransition(async () => {
+			const tests = rows.map((r) => ({
+				name: r.name,
+				value: Number(r.value),
+				unit: r.unit,
+				refMin: Number(r.refMin),
+				refMax: Number(r.refMax),
+			}));
+
+			const values = { date, tests };
+			const result = patientId
+				? await createLabResultForPatient(patientId, values)
+				: await createLabResult(values);
+
+			if (result.error) {
+				toast.error(result.error);
+				return;
+			}
+
+			setDate("");
+			setRows([
+				{ id: 1, name: "", value: "", unit: "", refMin: "", refMax: "" },
+			]);
+			setSubmitted(true);
+			setTimeout(() => setSubmitted(false), 4000);
+			onSuccess?.();
+		});
 	}
 
 	return (
@@ -62,7 +96,13 @@ export function LabResultsForm() {
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-1.5">
 						<Label htmlFor="date">Data recoltarii</Label>
-						<Input id="date" type="date" required />
+						<Input
+							id="date"
+							type="date"
+							value={date}
+							onChange={(e) => setDate(e.target.value)}
+							required
+						/>
 					</div>
 					<div className="space-y-3">
 						{rows.map((row, i) => (
@@ -156,7 +196,9 @@ export function LabResultsForm() {
 						<Button type="button" variant="outline" size="sm" onClick={addRow}>
 							<Plus className="mr-1 h-4 w-4" /> Adauga parametru
 						</Button>
-						<Button type="submit">Salveaza rezultate</Button>
+						<Button type="submit" disabled={isPending}>
+							{isPending ? "Se salveaza..." : "Salveaza rezultate"}
+						</Button>
 					</div>
 				</form>
 			</CardContent>

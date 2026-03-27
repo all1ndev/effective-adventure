@@ -1,10 +1,16 @@
 import { MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { type Conversation } from "../data/schema";
+interface ConversationItem {
+	id: string;
+	patientName: string;
+	lastMessage: string;
+	lastMessageAt: Date | string;
+	unreadCount: number;
+}
 
 interface ConversationListProps {
-	conversations: Conversation[];
+	conversations: ConversationItem[];
 	activeId?: string;
 	onSelect: (id: string) => void;
 }

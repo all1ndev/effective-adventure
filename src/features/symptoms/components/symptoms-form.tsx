@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
 	Card,
@@ -19,31 +21,72 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { symptomOptions } from "../data/symptom-options";
+import {
+	symptomReportFormSchema,
+	type SymptomReportFormValues,
+} from "../data/schema";
+import { createSymptomReport, updateSymptomReport } from "../actions";
 
-export function SymptomsForm() {
-	const [selected, setSelected] = useState<string[]>([]);
+interface SymptomsFormProps {
+	editId?: string;
+	defaultValues?: SymptomReportFormValues;
+	onSuccess?: () => void;
+}
+
+export function SymptomsForm({
+	editId,
+	defaultValues,
+	onSuccess,
+}: SymptomsFormProps) {
+	const [isPending, startTransition] = useTransition();
 	const [submitted, setSubmitted] = useState(false);
 
-	function toggle(symptom: string) {
-		setSelected((prev) =>
-			prev.includes(symptom)
-				? prev.filter((s) => s !== symptom)
-				: [...prev, symptom],
-		);
-	}
+	const form = useForm<SymptomReportFormValues>({
+		resolver: zodResolver(symptomReportFormSchema),
+		defaultValues: defaultValues ?? {
+			symptoms: [],
+			severity: undefined as unknown as SymptomReportFormValues["severity"],
+			notes: "",
+		},
+	});
 
-	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		setSubmitted(true);
-		setSelected([]);
-		setTimeout(() => setSubmitted(false), 3000);
+	function onSubmit(values: SymptomReportFormValues) {
+		startTransition(async () => {
+			const result = editId
+				? await updateSymptomReport(editId, values)
+				: await createSymptomReport(values);
+
+			if (result.error) {
+				toast.error(result.error);
+				return;
+			}
+
+			form.reset({
+				symptoms: [],
+				severity: undefined as unknown as SymptomReportFormValues["severity"],
+				notes: "",
+			});
+			setSubmitted(true);
+			setTimeout(() => setSubmitted(false), 4000);
+			onSuccess?.();
+		});
 	}
 
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Raporteaza simptome</CardTitle>
+				<CardTitle>
+					{editId ? "Editeaza raport simptome" : "Raporteaza simptome"}
+				</CardTitle>
 				<CardDescription>
 					Selectati simptomele pe care le resimtiti astazi.
 				</CardDescription>
@@ -51,52 +94,100 @@ export function SymptomsForm() {
 			<CardContent>
 				{submitted && (
 					<div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
-						Simptomele au fost raportate cu succes.
+						{editId
+							? "Raportul a fost actualizat cu succes."
+							: "Simptomele au fost raportate cu succes."}
 					</div>
 				)}
-				<form onSubmit={handleSubmit} className="space-y-6">
-					<div className="grid gap-3 sm:grid-cols-2">
-						{symptomOptions.map((symptom) => (
-							<div key={symptom} className="flex items-center space-x-2">
-								<Checkbox
-									id={symptom}
-									checked={selected.includes(symptom)}
-									onCheckedChange={() => toggle(symptom)}
-								/>
-								<Label
-									htmlFor={symptom}
-									className="cursor-pointer text-sm font-normal"
-								>
-									{symptom}
-								</Label>
-							</div>
-						))}
-					</div>
-					<div className="space-y-1.5">
-						<Label htmlFor="severity">Severitate</Label>
-						<Select required>
-							<SelectTrigger id="severity">
-								<SelectValue placeholder="Selectati severitatea" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="usoara">Usoara</SelectItem>
-								<SelectItem value="moderata">Moderata</SelectItem>
-								<SelectItem value="severa">Severa</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-					<div className="space-y-1.5">
-						<Label htmlFor="notes">Note suplimentare</Label>
-						<Textarea
-							id="notes"
-							placeholder="Descrieti mai detaliat ce simtiti..."
-							rows={3}
+				<Form {...form}>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+						<FormField
+							control={form.control}
+							name="symptoms"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Simptome</FormLabel>
+									<div className="grid gap-3 sm:grid-cols-2">
+										{symptomOptions.map((symptom) => (
+											<div
+												key={symptom}
+												className="flex items-center space-x-2"
+											>
+												<Checkbox
+													id={symptom}
+													checked={field.value.includes(symptom)}
+													onCheckedChange={(checked) => {
+														field.onChange(
+															checked
+																? [...field.value, symptom]
+																: field.value.filter((s) => s !== symptom),
+														);
+													}}
+												/>
+												<label
+													htmlFor={symptom}
+													className="cursor-pointer text-sm font-normal"
+												>
+													{symptom}
+												</label>
+											</div>
+										))}
+									</div>
+									<FormMessage />
+								</FormItem>
+							)}
 						/>
-					</div>
-					<Button type="submit" disabled={selected.length === 0}>
-						Trimite raport
-					</Button>
-				</form>
+						<FormField
+							control={form.control}
+							name="severity"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Severitate</FormLabel>
+									<Select
+										onValueChange={field.onChange}
+										value={field.value ?? ""}
+									>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Selectati severitatea" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											<SelectItem value="usoara">Usoara</SelectItem>
+											<SelectItem value="moderata">Moderata</SelectItem>
+											<SelectItem value="severa">Severa</SelectItem>
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="notes"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Note suplimentare</FormLabel>
+									<FormControl>
+										<Textarea
+											placeholder="Descrieti mai detaliat ce simtiti..."
+											rows={3}
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<Button type="submit" disabled={isPending}>
+							{isPending
+								? "Se salveaza..."
+								: editId
+									? "Actualizeaza"
+									: "Trimite raport"}
+						</Button>
+					</form>
+				</Form>
 			</CardContent>
 		</Card>
 	);

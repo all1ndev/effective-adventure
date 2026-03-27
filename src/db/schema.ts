@@ -7,3 +7,43 @@ export {
 	sessionRelations,
 	accountRelations,
 } from "./auth-schema";
+
+export { vitalSign, vitalSignRelations } from "./vital-signs-schema";
+export {
+	severityEnum,
+	symptomReport,
+	symptomReportRelations,
+} from "./symptoms-schema";
+export {
+	sexEnum,
+	etiologyEnum,
+	patientStatusEnum,
+	patient,
+	patientRelations,
+} from "./patient-schema";
+export {
+	medication,
+	medicationLogStatusEnum,
+	medicationLog,
+	medicationRelations,
+	medicationLogRelations,
+} from "./medication-schema";
+export { labResult, labResultRelations } from "./lab-result-schema";
+export {
+	moodEnum,
+	journalEntry,
+	journalEntryRelations,
+} from "./journal-schema";
+export { clinicalNote, clinicalNoteRelations } from "./clinical-note-schema";
+export {
+	alertTypeEnum,
+	alertSeverityEnum,
+	alert,
+	alertRelations,
+} from "./alert-schema";
+export {
+	conversation,
+	message,
+	conversationRelations,
+	messageRelations,
+} from "./messaging-schema";

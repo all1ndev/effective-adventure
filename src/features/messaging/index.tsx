@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -10,27 +10,51 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { ConversationList } from "./components/conversation-list";
 import { MessageThread } from "./components/message-thread";
 import { MessageInput } from "./components/message-input";
-import { conversations, messages } from "./data/messages";
-import { type Message } from "./data/schema";
+import { getConversations, getMessages, sendMessage } from "./actions";
+
+type ConversationRow = Awaited<ReturnType<typeof getConversations>>[number];
+type MessageRow = Awaited<ReturnType<typeof getMessages>>[number];
 
 export function Messaging() {
-	const [activeId, setActiveId] = useState<string>(conversations[0]?.id ?? "");
-	const [threadMessages, setThreadMessages] = useState<Message[]>(messages);
+	const [conversations, setConversations] = useState<ConversationRow[]>([]);
+	const [activeId, setActiveId] = useState<string>("");
+	const [threadMessages, setThreadMessages] = useState<MessageRow[]>([]);
+
+	 
+	useEffect(() => {
+		getConversations().then((data) => {
+			setConversations(data);
+			if (data.length > 0) setActiveId(data[0].id);
+		});
+	}, []);
+
+	useEffect(() => {
+		if (activeId) {
+			getMessages(activeId).then(setThreadMessages);
+		}
+	}, [activeId]);
 
 	const activeConv = conversations.find((c) => c.id === activeId);
-	const thread = threadMessages.filter((m) => m.conversationId === activeId);
 
-	function handleSend(body: string) {
-		const newMsg: Message = {
-			id: String(Date.now()),
-			conversationId: activeId,
-			senderId: "doctor-1",
-			senderName: "Dr. Andrei Marin",
-			body,
-			sentAt: new Date().toISOString(),
-			read: true,
-		};
-		setThreadMessages((prev) => [...prev, newMsg]);
+	async function handleSend(body: string) {
+		if (!activeId) return;
+		const result = await sendMessage(activeId, body);
+		if (result.success && result.message) {
+			setThreadMessages((prev) => [
+				...prev,
+				{
+					...result.message,
+					sentAt: new Date(),
+				},
+			]);
+			setConversations((prev) =>
+				prev.map((c) =>
+					c.id === activeId
+						? { ...c, lastMessage: body, lastMessageAt: new Date() }
+						: c,
+				),
+			);
+		}
 	}
 
 	return (
@@ -62,7 +86,7 @@ export function Messaging() {
 									<p className="text-xs text-muted-foreground">Pacient</p>
 								</div>
 								<div className="flex-1 overflow-y-auto">
-									<MessageThread messages={thread} />
+									<MessageThread messages={threadMessages} />
 								</div>
 								<MessageInput onSend={handleSend} />
 							</>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -5,9 +8,20 @@ import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { AlertsList } from "./components/alerts-list";
-import { alerts } from "./data/alerts";
+import { getAlerts } from "./actions";
+
+type AlertRow = Awaited<ReturnType<typeof getAlerts>>[number];
 
 export function Alerts() {
+	const [alerts, setAlerts] = useState<AlertRow[]>([]);
+
+	function fetchData() {
+		getAlerts().then(setAlerts);
+	}
+
+	 
+	useEffect(fetchData, []);
+
 	const activeCount = alerts.filter((a) => !a.dismissed).length;
 
 	return (
@@ -35,7 +49,7 @@ export function Alerts() {
 						Alerte clinice prioritizate pentru pacientii monitorizati.
 					</p>
 				</div>
-				<AlertsList data={alerts} />
+				<AlertsList data={alerts} onUpdate={fetchData} />
 			</Main>
 		</>
 	);

@@ -1,9 +1,26 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type SymptomReport } from "../data/schema";
+import { deleteSymptomReport } from "../actions";
+import { SymptomsForm } from "./symptoms-form";
+
+interface SymptomReportItem {
+	id: string;
+	patientId: string;
+	date: string;
+	symptoms: string[];
+	severity: "usoara" | "moderata" | "severa";
+	notes: string | null | undefined;
+}
 
 interface SymptomsListProps {
-	data: SymptomReport[];
+	data: SymptomReportItem[];
+	onUpdate?: () => void;
 }
 
 const severityConfig = {
@@ -12,9 +29,48 @@ const severityConfig = {
 	severa: { label: "Severa", variant: "destructive" as const },
 };
 
-export function SymptomsList({ data }: SymptomsListProps) {
+export function SymptomsList({ data, onUpdate }: SymptomsListProps) {
+	const [editingReport, setEditingReport] = useState<SymptomReportItem | null>(
+		null,
+	);
+	const [isPending, startTransition] = useTransition();
+
+	function handleDelete(id: string) {
+		startTransition(async () => {
+			const result = await deleteSymptomReport(id);
+			if (result.error) {
+				toast.error(result.error);
+				return;
+			}
+			toast.success("Raportul a fost sters.");
+			onUpdate?.();
+		});
+	}
+
+	if (editingReport) {
+		return (
+			<SymptomsForm
+				editId={editingReport.id}
+				defaultValues={{
+					symptoms: editingReport.symptoms,
+					severity: editingReport.severity,
+					notes: editingReport.notes ?? "",
+				}}
+				onSuccess={() => {
+					setEditingReport(null);
+					onUpdate?.();
+				}}
+			/>
+		);
+	}
+
 	return (
 		<div className="space-y-3">
+			{data.length === 0 && (
+				<p className="text-sm text-muted-foreground">
+					Nu exista rapoarte de simptome.
+				</p>
+			)}
 			{data.map((report) => {
 				const config = severityConfig[report.severity];
 				return (
@@ -24,7 +80,30 @@ export function SymptomsList({ data }: SymptomsListProps) {
 								<CardTitle className="text-sm font-medium">
 									{report.date}
 								</CardTitle>
-								<Badge variant={config.variant}>{config.label}</Badge>
+								<div className="flex items-center gap-2">
+									<Badge variant={config.variant}>{config.label}</Badge>
+									{onUpdate && (
+										<>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8"
+												onClick={() => setEditingReport(report)}
+											>
+												<Pencil className="h-4 w-4" />
+											</Button>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8 text-destructive hover:text-destructive"
+												onClick={() => handleDelete(report.id)}
+												disabled={isPending}
+											>
+												<Trash2 className="h-4 w-4" />
+											</Button>
+										</>
+									)}
+								</div>
 							</div>
 						</CardHeader>
 						<CardContent>

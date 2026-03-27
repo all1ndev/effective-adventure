@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Activity, Pill, MessageSquare, ArrowRight } from "lucide-react";
 import { Header } from "@/components/layout/header";
@@ -6,18 +9,23 @@ import { ProfileDropdown } from "@/components/profile-dropdown";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Button } from "@/components/ui/button";
-import { vitalSigns } from "@/features/vital-signs/data/vital-signs";
+import { getVitalSigns } from "@/features/vital-signs/actions";
+import type { VitalEntry } from "@/features/vital-signs/data/schema";
 import { medications } from "@/features/medication/data/medications";
 import { conversations } from "@/features/messaging/data/messages";
 
-const patientId = "1";
-
 export function PatientDashboard() {
-	const latestVital = vitalSigns
-		.filter((v) => v.patientId === patientId)
-		.sort((a, b) => b.date.localeCompare(a.date))[0];
+	const [latestVital, setLatestVital] = useState<VitalEntry | null>(null);
 
-	const todayMeds = medications.filter((m) => m.patientId === patientId);
+	useEffect(() => {
+		getVitalSigns().then((data) => {
+			if (data.length > 0) {
+				setLatestVital(data[0]);
+			}
+		});
+	}, []);
+
+	const todayMeds = medications.filter((m) => m.patientId === "1");
 
 	const unreadMessages = conversations.reduce(
 		(sum, c) => sum + (c.unreadCount ?? 0),

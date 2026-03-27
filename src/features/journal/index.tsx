@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -6,9 +9,19 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { JournalEditor } from "./components/journal-editor";
 import { JournalList } from "./components/journal-list";
-import { journalEntries } from "./data/entries";
+import { getJournalEntries } from "./actions";
+import type { JournalEntry } from "./data/schema";
 
 export function Journal() {
+	const [entries, setEntries] = useState<JournalEntry[]>([]);
+
+	function fetchData() {
+		getJournalEntries().then(setEntries);
+	}
+
+	 
+	useEffect(fetchData, []);
+
 	return (
 		<>
 			<Header fixed>
@@ -27,10 +40,10 @@ export function Journal() {
 						Jurnalul personal de sanatate — stare, note si observatii zilnice.
 					</p>
 				</div>
-				<JournalEditor />
+				<JournalEditor onSuccess={fetchData} />
 				<div>
 					<h3 className="mb-3 text-lg font-semibold">Intrari anterioare</h3>
-					<JournalList entries={journalEntries} />
+					<JournalList entries={entries} />
 				</div>
 			</Main>
 		</>
