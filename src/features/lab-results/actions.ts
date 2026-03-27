@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { labResult } from "@/db/lab-result-schema";
 import { labResultFormSchema } from "./data/schema";
+import { generateLabResultAlerts } from "@/features/alerts/generate-alerts";
 
 async function getSessionOrThrow() {
 	const session = await auth.api.getSession({
@@ -50,7 +51,11 @@ export async function createLabResult(values: unknown) {
 		patientId: session.user.id,
 		...parsed.data,
 	});
+
+	await generateLabResultAlerts(session.user.id, parsed.data.tests);
+
 	revalidatePath("/lab-results");
+	revalidatePath("/alerts");
 	return { success: true };
 }
 
@@ -71,7 +76,11 @@ export async function createLabResultForPatient(
 		patientId,
 		...parsed.data,
 	});
+
+	await generateLabResultAlerts(patientId, parsed.data.tests);
+
 	revalidatePath(`/patients/${patientId}/lab-results`);
+	revalidatePath("/alerts");
 	return { success: true };
 }
 

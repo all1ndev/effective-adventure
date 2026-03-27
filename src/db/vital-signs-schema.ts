@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
 	pgTable,
+	pgEnum,
 	text,
 	timestamp,
 	integer,
@@ -8,6 +9,12 @@ import {
 	index,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
+
+export const vitalStatusEnum = pgEnum("vital_status", [
+	"normal",
+	"warning",
+	"critical",
+]);
 
 export const vitalSign = pgTable(
 	"vital_sign",
@@ -22,6 +29,7 @@ export const vitalSign = pgTable(
 		temperature: real("temperature").notNull(),
 		pulse: integer("pulse").notNull(),
 		weight: real("weight").notNull(),
+		status: vitalStatusEnum("status").notNull().default("normal"),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()

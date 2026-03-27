@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const vitalStatusSchema = z.enum(["normal", "warning", "critical"]);
+export type VitalStatus = z.infer<typeof vitalStatusSchema>;
+
 export const vitalEntrySchema = z.object({
 	id: z.string(),
 	patientId: z.string(),
@@ -9,6 +12,7 @@ export const vitalEntrySchema = z.object({
 	temperature: z.number().min(35).max(42),
 	pulse: z.number().min(30).max(200),
 	weight: z.number().min(20).max(300),
+	status: vitalStatusSchema,
 });
 
 export type VitalEntry = z.infer<typeof vitalEntrySchema>;
