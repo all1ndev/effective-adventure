@@ -77,7 +77,7 @@ export function LabResultsChart({ results, testName }: LabResultsChartProps) {
 							dataKey="value"
 							stroke="hsl(var(--primary))"
 							strokeWidth={2}
-							dot={{ r: 4 }}
+							dot={{ r: 4, fill: "hsl(var(--primary))" }}
 						/>
 					</LineChart>
 				</ResponsiveContainer>
