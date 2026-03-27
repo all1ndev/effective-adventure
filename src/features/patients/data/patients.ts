@@ -3,6 +3,7 @@ import { type Patient } from "./schema";
 export const patients: Patient[] = [
 	{
 		id: "1",
+		patientCode: "AI-001",
 		firstName: "Alexandru",
 		lastName: "Ionescu",
 		patientPhone: "+40721234567",
@@ -14,6 +15,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "2",
+		patientCode: "MP-002",
 		firstName: "Maria",
 		lastName: "Popescu",
 		patientPhone: "+40732345678",
@@ -25,6 +27,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "3",
+		patientCode: "GD-003",
 		firstName: "Gheorghe",
 		lastName: "Dumitrescu",
 		sex: "masculin",
@@ -35,6 +38,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "4",
+		patientCode: "EC-004",
 		firstName: "Elena",
 		lastName: "Constantin",
 		patientPhone: "+40745678901",
@@ -45,6 +49,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "5",
+		patientCode: "IP-005",
 		firstName: "Ion",
 		lastName: "Popa",
 		patientPhone: "+40756789012",
@@ -55,6 +60,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "6",
+		patientCode: "AM-006",
 		firstName: "Ana",
 		lastName: "Mihai",
 		sex: "feminin",
@@ -65,6 +71,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "7",
+		patientCode: "VS-007",
 		firstName: "Vasile",
 		lastName: "Stanescu",
 		patientPhone: "+40778901234",
@@ -76,6 +83,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "8",
+		patientCode: "CF-008",
 		firstName: "Cristina",
 		lastName: "Florescu",
 		patientPhone: "+40789012345",
@@ -87,6 +95,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "9",
+		patientCode: "MG-009",
 		firstName: "Mihai",
 		lastName: "Georgescu",
 		sex: "masculin",
@@ -96,6 +105,7 @@ export const patients: Patient[] = [
 	},
 	{
 		id: "10",
+		patientCode: "IN-010",
 		firstName: "Ioana",
 		lastName: "Niculescu",
 		patientPhone: "+40801234567",

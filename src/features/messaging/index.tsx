@@ -10,7 +10,12 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { ConversationList } from "./components/conversation-list";
 import { MessageThread } from "./components/message-thread";
 import { MessageInput } from "./components/message-input";
-import { getConversations, getMessages, sendMessage } from "./actions";
+import {
+	getCurrentUser,
+	getConversations,
+	getMessages,
+	sendMessage,
+} from "./actions";
 
 type ConversationRow = Awaited<ReturnType<typeof getConversations>>[number];
 type MessageRow = Awaited<ReturnType<typeof getMessages>>[number];
@@ -19,9 +24,14 @@ export function Messaging() {
 	const [conversations, setConversations] = useState<ConversationRow[]>([]);
 	const [activeId, setActiveId] = useState<string>("");
 	const [threadMessages, setThreadMessages] = useState<MessageRow[]>([]);
+	const [currentUserId, setCurrentUserId] = useState<string>("");
+	const [currentUserRole, setCurrentUserRole] = useState<string>("");
 
-	 
 	useEffect(() => {
+		getCurrentUser().then((u) => {
+			setCurrentUserId(u.id);
+			setCurrentUserRole(u.role ?? "");
+		});
 		getConversations().then((data) => {
 			setConversations(data);
 			if (data.length > 0) setActiveId(data[0].id);
@@ -70,29 +80,40 @@ export function Messaging() {
 
 			<Main className="flex flex-1 overflow-hidden p-0">
 				<div className="flex h-full w-full">
-					<aside className="w-72 shrink-0 border-r p-4">
-						<h2 className="mb-3 text-lg font-bold">Mesagerie</h2>
-						<ConversationList
-							conversations={conversations}
-							activeId={activeId}
-							onSelect={setActiveId}
-						/>
-					</aside>
+					{currentUserRole === "admin" && (
+						<aside className="w-72 shrink-0 border-r p-4">
+							<h2 className="mb-3 text-lg font-bold">Mesagerie</h2>
+							<ConversationList
+								conversations={conversations}
+								activeId={activeId}
+								onSelect={setActiveId}
+							/>
+						</aside>
+					)}
 					<div className="flex flex-1 flex-col overflow-hidden">
 						{activeConv ? (
 							<>
 								<div className="border-b px-4 py-3">
 									<h3 className="font-semibold">{activeConv.patientName}</h3>
-									<p className="text-xs text-muted-foreground">Pacient</p>
+									<p className="text-xs text-muted-foreground">
+										{currentUserRole === "admin"
+											? "Pacient"
+											: "Medic responsabil"}
+									</p>
 								</div>
 								<div className="flex-1 overflow-y-auto">
-									<MessageThread messages={threadMessages} />
+									<MessageThread
+										messages={threadMessages}
+										currentUserId={currentUserId}
+									/>
 								</div>
 								<MessageInput onSend={handleSend} />
 							</>
 						) : (
 							<div className="flex flex-1 items-center justify-center text-muted-foreground">
-								Selectati o conversatie
+								{currentUserRole === "admin"
+									? "Selectati o conversatie"
+									: "Nu exista o conversatie activa"}
 							</div>
 						)}
 					</div>
