@@ -7,6 +7,7 @@ import {
 	Thermometer,
 	Pill,
 	FlaskConical,
+	FileUp,
 	MessageSquare,
 	BookOpen,
 	NotebookPen,
@@ -41,6 +42,11 @@ export const doctorSidebarData: SidebarData = {
 					title: "Add Patient",
 					url: "/add-patient",
 					icon: UserCheck,
+				},
+				{
+					title: "Trimitere Analize",
+					url: "/send-lab-results",
+					icon: FileUp,
 				},
 				{
 					title: "Alerte",
