@@ -7,6 +7,7 @@ import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { Spinner } from "@/components/ui/spinner";
 import { ConversationList } from "./components/conversation-list";
 import { MessageThread } from "./components/message-thread";
 import { MessageInput } from "./components/message-input";
@@ -26,16 +27,19 @@ export function Messaging() {
 	const [threadMessages, setThreadMessages] = useState<MessageRow[]>([]);
 	const [currentUserId, setCurrentUserId] = useState<string>("");
 	const [currentUserRole, setCurrentUserRole] = useState<string>("");
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		getCurrentUser().then((u) => {
-			setCurrentUserId(u.id);
-			setCurrentUserRole(u.role ?? "");
-		});
-		getConversations().then((data) => {
-			setConversations(data);
-			if (data.length > 0) setActiveId(data[0].id);
-		});
+		Promise.all([
+			getCurrentUser().then((u) => {
+				setCurrentUserId(u.id);
+				setCurrentUserRole(u.role ?? "");
+			}),
+			getConversations().then((data) => {
+				setConversations(data);
+				if (data.length > 0) setActiveId(data[0].id);
+			}),
+		]).then(() => setLoading(false));
 	}, []);
 
 	useEffect(() => {
@@ -79,45 +83,51 @@ export function Messaging() {
 			</Header>
 
 			<Main className="flex flex-1 overflow-hidden p-0">
-				<div className="flex h-full w-full">
-					{currentUserRole === "admin" && (
-						<aside className="w-72 shrink-0 border-r p-4">
-							<h2 className="mb-3 text-lg font-bold">Mesagerie</h2>
-							<ConversationList
-								conversations={conversations}
-								activeId={activeId}
-								onSelect={setActiveId}
-							/>
-						</aside>
-					)}
-					<div className="flex flex-1 flex-col overflow-hidden">
-						{activeConv ? (
-							<>
-								<div className="border-b px-4 py-3">
-									<h3 className="font-semibold">{activeConv.patientName}</h3>
-									<p className="text-xs text-muted-foreground">
-										{currentUserRole === "admin"
-											? "Pacient"
-											: "Medic responsabil"}
-									</p>
-								</div>
-								<div className="flex-1 overflow-y-auto">
-									<MessageThread
-										messages={threadMessages}
-										currentUserId={currentUserId}
-									/>
-								</div>
-								<MessageInput onSend={handleSend} />
-							</>
-						) : (
-							<div className="flex flex-1 items-center justify-center text-muted-foreground">
-								{currentUserRole === "admin"
-									? "Selectati o conversatie"
-									: "Nu exista o conversatie activa"}
-							</div>
-						)}
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
 					</div>
-				</div>
+				) : (
+					<div className="flex h-full w-full">
+						{currentUserRole === "admin" && (
+							<aside className="w-72 shrink-0 border-r p-4">
+								<h2 className="mb-3 text-lg font-bold">Mesagerie</h2>
+								<ConversationList
+									conversations={conversations}
+									activeId={activeId}
+									onSelect={setActiveId}
+								/>
+							</aside>
+						)}
+						<div className="flex flex-1 flex-col overflow-hidden">
+							{activeConv ? (
+								<>
+									<div className="border-b px-4 py-3">
+										<h3 className="font-semibold">{activeConv.patientName}</h3>
+										<p className="text-xs text-muted-foreground">
+											{currentUserRole === "admin"
+												? "Pacient"
+												: "Medic responsabil"}
+										</p>
+									</div>
+									<div className="flex-1 overflow-y-auto">
+										<MessageThread
+											messages={threadMessages}
+											currentUserId={currentUserId}
+										/>
+									</div>
+									<MessageInput onSend={handleSend} />
+								</>
+							) : (
+								<div className="flex flex-1 items-center justify-center text-muted-foreground">
+									{currentUserRole === "admin"
+										? "Selectati o conversatie"
+										: "Nu exista o conversatie activa"}
+								</div>
+							)}
+						</div>
+					</div>
+				)}
 			</Main>
 		</>
 	);

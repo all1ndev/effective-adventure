@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { MedicationForm } from "@/features/medication/components/medication-form";
 import { ComplianceTable } from "@/features/medication/components/compliance-table";
@@ -28,24 +29,26 @@ export default function PatientMedicationPage({
 	const { id } = use(params);
 	const [meds, setMeds] = useState<Medication[]>([]);
 	const [logs, setLogs] = useState<MedicationLog[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	function fetchData() {
-		getMedicationsByPatientId(id).then((data) =>
-			setMeds(data.map((m) => ({ ...m, endDate: m.endDate ?? undefined }))),
-		);
-		getMedicationLogsByPatientId(id).then((logsData) =>
-			setLogs(
-				logsData.map((l) => ({
-					id: l.id,
-					medicationId: l.medicationId,
-					takenAt: l.takenAt,
-					status: l.status,
-				})),
+		Promise.all([
+			getMedicationsByPatientId(id).then((data) =>
+				setMeds(data.map((m) => ({ ...m, endDate: m.endDate ?? undefined }))),
 			),
-		);
+			getMedicationLogsByPatientId(id).then((logsData) =>
+				setLogs(
+					logsData.map((l) => ({
+						id: l.id,
+						medicationId: l.medicationId,
+						takenAt: l.takenAt,
+						status: l.status,
+					})),
+				),
+			),
+		]).then(() => setLoading(false));
 	}
 
-	 
 	useEffect(fetchData, [id]);
 
 	return (
@@ -61,15 +64,23 @@ export default function PatientMedicationPage({
 			<Main className="flex flex-1 flex-col gap-6">
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">
-						Medicatie — Pacient #{id}
+						Medicație — Pacient #{id}
 					</h2>
 					<p className="text-muted-foreground">
-						Gestionati prescriptiile si conformitatea.
+						Gestionați prescripțiile și conformitatea.
 					</p>
 				</div>
-				<RenewalAlert medications={meds} />
-				<MedicationForm patientId={id} onSuccess={fetchData} />
-				<ComplianceTable medications={meds} logs={logs} />
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
+					</div>
+				) : (
+					<>
+						<RenewalAlert medications={meds} />
+						<MedicationForm patientId={id} onSuccess={fetchData} />
+						<ComplianceTable medications={meds} logs={logs} />
+					</>
+				)}
 			</Main>
 		</RoleGuard>
 	);

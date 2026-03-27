@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { LabResultsTable } from "@/features/lab-results/components/lab-results-table";
 import { LabResultsChart } from "@/features/lab-results/components/lab-results-chart";
@@ -21,12 +22,15 @@ export default function PatientLabResultsPage({
 }) {
 	const { id } = use(params);
 	const [results, setResults] = useState<LabResult[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	function fetchData() {
-		getLabResultsByPatientId(id).then(setResults);
+		getLabResultsByPatientId(id).then((data) => {
+			setResults(data);
+			setLoading(false);
+		});
 	}
 
-	 
 	useEffect(fetchData, [id]);
 
 	const latest = results[0];
@@ -47,15 +51,23 @@ export default function PatientLabResultsPage({
 						Rezultate Laborator — Pacient #{id}
 					</h2>
 					<p className="text-muted-foreground">
-						Analize si interpretare cu valori de referinta.
+						Analize și interpretare cu valori de referință.
 					</p>
 				</div>
 				<LabResultsForm patientId={id} onSuccess={fetchData} />
-				{latest && <LabResultsTable result={latest} />}
-				<div className="grid gap-4 lg:grid-cols-2">
-					<LabResultsChart results={results} testName="ALT (SGPT)" />
-					<LabResultsChart results={results} testName="Tacrolimus" />
-				</div>
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
+					</div>
+				) : (
+					<>
+						{latest && <LabResultsTable result={latest} />}
+						<div className="grid gap-4 lg:grid-cols-2">
+							<LabResultsChart results={results} testName="ALT (SGPT)" />
+							<LabResultsChart results={results} testName="Tacrolimus" />
+						</div>
+					</>
+				)}
 			</Main>
 		</RoleGuard>
 	);

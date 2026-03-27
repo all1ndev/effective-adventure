@@ -10,6 +10,7 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { PatientOverviewCard } from "./components/patient-overview-card";
 import { AlertSummaryWidget } from "./components/alert-summary-widget";
 import { ComplianceChart } from "./components/compliance-chart";
+import { Spinner } from "@/components/ui/spinner";
 import { getDoctorDashboardData } from "./actions";
 
 type DashboardData = Awaited<ReturnType<typeof getDoctorDashboardData>>;
@@ -33,7 +34,7 @@ export function DoctorDashboard() {
 					</div>
 				</Header>
 				<Main className="flex flex-1 items-center justify-center">
-					<p className="text-muted-foreground">Se incarca...</p>
+					<Spinner className="size-6" />
 				</Main>
 			</>
 		);

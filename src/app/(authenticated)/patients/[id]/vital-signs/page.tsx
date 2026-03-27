@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { VitalSignsChart } from "@/features/vital-signs/components/vital-signs-chart";
 import { VitalSignsTable } from "@/features/vital-signs/components/vital-signs-table";
@@ -20,9 +21,13 @@ export default function PatientVitalSignsPage({
 }) {
 	const { id } = use(params);
 	const [data, setData] = useState<VitalEntry[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		getVitalSignsByPatientId(id).then(setData);
+		getVitalSignsByPatientId(id).then((d) => {
+			setData(d);
+			setLoading(false);
+		});
 	}, [id]);
 
 	return (
@@ -41,11 +46,19 @@ export default function PatientVitalSignsPage({
 						Semne Vitale — Pacient #{id}
 					</h2>
 					<p className="text-muted-foreground">
-						Evolutia semnelor vitale ale pacientului.
+						Evoluția semnelor vitale ale pacientului.
 					</p>
 				</div>
-				<VitalSignsChart data={data} />
-				<VitalSignsTable data={data} />
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
+					</div>
+				) : (
+					<>
+						<VitalSignsChart data={data} />
+						<VitalSignsTable data={data} />
+					</>
+				)}
 			</Main>
 		</RoleGuard>
 	);

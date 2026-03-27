@@ -7,6 +7,7 @@ import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { Spinner } from "@/components/ui/spinner";
 import { MedicationCalendar } from "./components/medication-calendar";
 import { ComplianceTable } from "./components/compliance-table";
 import { RenewalAlert } from "./components/renewal-alert";
@@ -17,24 +18,26 @@ import type { Medication, MedicationLog } from "./data/schema";
 export function Medication() {
 	const [meds, setMeds] = useState<Medication[]>([]);
 	const [logs, setLogs] = useState<MedicationLog[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	function fetchData() {
-		getMedications().then((data) =>
-			setMeds(data.map((m) => ({ ...m, endDate: m.endDate ?? undefined }))),
-		);
-		getMedicationLogs().then((logsData) =>
-			setLogs(
-				logsData.map((l) => ({
-					id: l.id,
-					medicationId: l.medicationId,
-					takenAt: l.takenAt,
-					status: l.status,
-				})),
+		Promise.all([
+			getMedications().then((data) =>
+				setMeds(data.map((m) => ({ ...m, endDate: m.endDate ?? undefined }))),
 			),
-		);
+			getMedicationLogs().then((logsData) =>
+				setLogs(
+					logsData.map((l) => ({
+						id: l.id,
+						medicationId: l.medicationId,
+						takenAt: l.takenAt,
+						status: l.status,
+					})),
+				),
+			),
+		]).then(() => setLoading(false));
 	}
 
-	 
 	useEffect(fetchData, []);
 
 	return (
@@ -50,15 +53,27 @@ export function Medication() {
 
 			<Main className="flex flex-1 flex-col gap-6">
 				<div>
-					<h2 className="text-2xl font-bold tracking-tight">Medicatie</h2>
+					<h2 className="text-2xl font-bold tracking-tight">Medicație</h2>
 					<p className="text-muted-foreground">
-						Schema de medicatie si istoricul de conformitate.
+						Schema de medicație și istoricul de conformitate.
 					</p>
 				</div>
-				<RenewalAlert medications={meds} />
-				<DailyLogForm medications={meds} logs={logs} onSuccess={fetchData} />
-				<MedicationCalendar medications={meds} logs={logs} />
-				<ComplianceTable medications={meds} logs={logs} />
+				{loading ? (
+					<div className="flex flex-1 items-center justify-center">
+						<Spinner className="size-6" />
+					</div>
+				) : (
+					<>
+						<RenewalAlert medications={meds} />
+						<DailyLogForm
+							medications={meds}
+							logs={logs}
+							onSuccess={fetchData}
+						/>
+						<MedicationCalendar medications={meds} logs={logs} />
+						<ComplianceTable medications={meds} logs={logs} />
+					</>
+				)}
 			</Main>
 		</>
 	);
