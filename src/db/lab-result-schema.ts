@@ -19,6 +19,7 @@ export const labResult = pgTable(
 			.references(() => user.id, { onDelete: "cascade" }),
 		date: text("date").notNull(),
 		tests: json("tests").$type<TestValue[]>().notNull(),
+		pdfFileName: text("pdf_file_name"),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()

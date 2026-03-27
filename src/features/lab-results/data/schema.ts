@@ -13,6 +13,7 @@ export const labResultSchema = z.object({
 	patientId: z.string(),
 	date: z.string(),
 	tests: z.array(testValueSchema),
+	pdfFileName: z.string().nullable().optional(),
 });
 
 export type TestValue = z.infer<typeof testValueSchema>;
