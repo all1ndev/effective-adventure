@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { medication, medicationLog } from "@/db/medication-schema";
 import { medicationFormSchema, medicationLogFormSchema } from "./data/schema";
+import { generateMedicationAlerts } from "@/features/alerts/generate-alerts";
 
 async function getSessionOrThrow() {
 	const session = await auth.api.getSession({
@@ -210,7 +211,13 @@ export async function createMedicationLog(values: unknown) {
 		...parsed.data,
 	});
 
+	await generateMedicationAlerts(session.user.id, {
+		medicationName: med[0].name,
+		status: parsed.data.status,
+	});
+
 	revalidatePath("/medication");
+	revalidatePath("/alerts");
 	return { success: true };
 }
 
@@ -233,7 +240,7 @@ export async function createMedicationLogsBatch(values: unknown[]) {
 	// Verify ownership of all medications
 	const medIds = [...new Set(parsedEntries.map((e) => e.medicationId))];
 	const userMeds = await db
-		.select({ id: medication.id })
+		.select({ id: medication.id, name: medication.name })
 		.from(medication)
 		.where(
 			and(
@@ -253,6 +260,19 @@ export async function createMedicationLogsBatch(values: unknown[]) {
 		})),
 	);
 
+	// Generate alerts for missed/late medications
+	const medNameMap = new Map(userMeds.map((m) => [m.id, m.name]));
+	const alertPromises = parsedEntries
+		.filter((entry) => entry.status !== "luat")
+		.map((entry) =>
+			generateMedicationAlerts(session.user.id, {
+				medicationName: medNameMap.get(entry.medicationId) ?? "Necunoscut",
+				status: entry.status,
+			}),
+		);
+	await Promise.all(alertPromises);
+
 	revalidatePath("/medication");
+	revalidatePath("/alerts");
 	return { success: true };
 }

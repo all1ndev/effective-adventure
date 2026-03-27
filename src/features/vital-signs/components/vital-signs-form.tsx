@@ -65,6 +65,18 @@ export function VitalSignsForm({
 				return;
 			}
 
+			if (result.status === "critical") {
+				toast.warning(
+					"Valorile introduse sunt critice. Medicul dumneavoastră va fi notificat.",
+					{ duration: 6000 },
+				);
+			} else if (result.status === "warning") {
+				toast.warning(
+					"Unele valori sunt în afara limitelor normale. Medicul dumneavoastră va fi notificat.",
+					{ duration: 5000 },
+				);
+			}
+
 			form.reset(emptyValues);
 			setSubmitted(true);
 			setTimeout(() => setSubmitted(false), 4000);

@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { symptomReport } from "@/db/symptoms-schema";
 import { symptomReportFormSchema } from "./data/schema";
+import { generateSymptomAlerts } from "@/features/alerts/generate-alerts";
 
 async function getSessionOrThrow() {
 	const session = await auth.api.getSession({
@@ -37,7 +38,10 @@ export async function createSymptomReport(values: unknown) {
 		...parsed.data,
 	});
 
+	await generateSymptomAlerts(session.user.id, parsed.data);
+
 	revalidatePath("/symptoms");
+	revalidatePath("/alerts");
 	return { success: true };
 }
 

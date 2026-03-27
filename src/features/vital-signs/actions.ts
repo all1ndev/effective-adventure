@@ -7,6 +7,10 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { vitalSign } from "@/db/vital-signs-schema";
 import { vitalEntryFormSchema } from "./data/schema";
+import {
+	computeVitalStatus,
+	generateVitalSignAlerts,
+} from "@/features/alerts/generate-alerts";
 
 async function getSessionOrThrow() {
 	const session = await auth.api.getSession({
@@ -29,16 +33,23 @@ export async function createVitalSign(values: unknown) {
 	}
 
 	const today = new Date().toISOString().split("T")[0];
+	const status = computeVitalStatus(parsed.data);
 
 	await db.insert(vitalSign).values({
 		id: crypto.randomUUID(),
 		patientId: session.user.id,
 		date: today,
+		status,
 		...parsed.data,
 	});
 
+	if (status !== "normal") {
+		await generateVitalSignAlerts(session.user.id, parsed.data);
+	}
+
 	revalidatePath("/vital-signs");
-	return { success: true };
+	revalidatePath("/alerts");
+	return { success: true, status };
 }
 
 export async function updateVitalSign(id: string, values: unknown) {
@@ -59,10 +70,20 @@ export async function updateVitalSign(id: string, values: unknown) {
 		return { error: "Inregistrarea nu a fost gasita." };
 	}
 
-	await db.update(vitalSign).set(parsed.data).where(eq(vitalSign.id, id));
+	const status = computeVitalStatus(parsed.data);
+
+	await db
+		.update(vitalSign)
+		.set({ ...parsed.data, status })
+		.where(eq(vitalSign.id, id));
+
+	if (status !== "normal") {
+		await generateVitalSignAlerts(session.user.id, parsed.data);
+	}
 
 	revalidatePath("/vital-signs");
-	return { success: true };
+	revalidatePath("/alerts");
+	return { success: true, status };
 }
 
 export async function deleteVitalSign(id: string) {

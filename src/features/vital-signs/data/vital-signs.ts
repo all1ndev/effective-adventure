@@ -10,6 +10,7 @@ export const vitalSigns: VitalEntry[] = [
 		temperature: 36.6,
 		pulse: 72,
 		weight: 78.5,
+		status: "normal",
 	},
 	{
 		id: "2",
@@ -20,6 +21,7 @@ export const vitalSigns: VitalEntry[] = [
 		temperature: 36.8,
 		pulse: 75,
 		weight: 78.3,
+		status: "normal",
 	},
 	{
 		id: "3",
@@ -30,6 +32,7 @@ export const vitalSigns: VitalEntry[] = [
 		temperature: 36.5,
 		pulse: 70,
 		weight: 78.6,
+		status: "normal",
 	},
 	{
 		id: "4",
@@ -40,6 +43,7 @@ export const vitalSigns: VitalEntry[] = [
 		temperature: 37.2,
 		pulse: 80,
 		weight: 78.8,
+		status: "warning",
 	},
 	{
 		id: "5",
@@ -50,6 +54,7 @@ export const vitalSigns: VitalEntry[] = [
 		temperature: 36.7,
 		pulse: 73,
 		weight: 78.4,
+		status: "normal",
 	},
 	{
 		id: "6",
@@ -60,6 +65,7 @@ export const vitalSigns: VitalEntry[] = [
 		temperature: 36.6,
 		pulse: 71,
 		weight: 78.2,
+		status: "normal",
 	},
 	{
 		id: "7",
@@ -70,5 +76,6 @@ export const vitalSigns: VitalEntry[] = [
 		temperature: 36.9,
 		pulse: 78,
 		weight: 78.5,
+		status: "normal",
 	},
 ];
