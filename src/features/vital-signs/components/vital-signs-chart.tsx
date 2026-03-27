@@ -55,7 +55,7 @@ export function VitalSignsChart({ data }: VitalSignsChartProps) {
 								dataKey="sistolica"
 								stroke="hsl(var(--primary))"
 								strokeWidth={2}
-								dot={{ r: 4 }}
+								dot={{ r: 4, fill: "hsl(var(--primary))" }}
 								activeDot={{ r: 6 }}
 							/>
 							<Line
@@ -63,7 +63,7 @@ export function VitalSignsChart({ data }: VitalSignsChartProps) {
 								dataKey="diastolica"
 								stroke="hsl(var(--muted-foreground))"
 								strokeWidth={2}
-								dot={{ r: 4 }}
+								dot={{ r: 4, fill: "hsl(var(--muted-foreground))" }}
 								activeDot={{ r: 6 }}
 							/>
 						</LineChart>
@@ -96,7 +96,7 @@ export function VitalSignsChart({ data }: VitalSignsChartProps) {
 								dataKey="puls"
 								stroke="hsl(var(--primary))"
 								strokeWidth={2}
-								dot={{ r: 4 }}
+								dot={{ r: 4, fill: "hsl(var(--primary))" }}
 								activeDot={{ r: 6 }}
 							/>
 						</LineChart>
