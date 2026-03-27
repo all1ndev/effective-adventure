@@ -31,3 +31,17 @@ const patientSchema = z.object({
 });
 export type Patient = z.infer<typeof patientSchema>;
 export const patientListSchema = z.array(patientSchema);
+
+export const patientFormSchema = z.object({
+	firstName: z.string().min(1, "Prenumele este obligatoriu"),
+	lastName: z.string().min(1, "Numele este obligatoriu"),
+	patientPhone: z.string().optional(),
+	sex: z.enum(["masculin", "feminin", "nespecificat"]),
+	age: z.number().min(0).max(130).optional(),
+	etiology: z
+		.enum(["HBV", "HDV", "HCV", "MASLD", "alcool", "autoimuna", "altele"])
+		.optional(),
+	transplantDate: z.string().optional(),
+	status: z.enum(["activ", "inactiv"]),
+});
+export type PatientFormValues = z.infer<typeof patientFormSchema>;

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -7,9 +10,19 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { VitalSignsForm } from "./components/vital-signs-form";
 import { VitalSignsTable } from "./components/vital-signs-table";
 import { VitalSignsChart } from "./components/vital-signs-chart";
-import { vitalSigns } from "./data/vital-signs";
+import { getVitalSigns } from "./actions";
+import type { VitalEntry } from "./data/schema";
 
 export function VitalSigns() {
+	const [vitalSigns, setVitalSigns] = useState<VitalEntry[]>([]);
+
+	function fetchData() {
+		getVitalSigns().then(setVitalSigns);
+	}
+
+	 
+	useEffect(fetchData, []);
+
 	return (
 		<>
 			<Header fixed>
@@ -28,9 +41,9 @@ export function VitalSigns() {
 						Monitorizati tensiunea, temperatura, pulsul si greutatea.
 					</p>
 				</div>
-				<VitalSignsForm />
+				<VitalSignsForm onSuccess={fetchData} />
 				<VitalSignsChart data={vitalSigns} />
-				<VitalSignsTable data={vitalSigns} />
+				<VitalSignsTable data={vitalSigns} onUpdate={fetchData} />
 			</Main>
 		</>
 	);

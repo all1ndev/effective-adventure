@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
 	type SortingState,
 	type VisibilityState,
@@ -25,7 +25,8 @@ import { DataTablePagination, DataTableToolbar } from "@/components/data-table";
 import { etiologies } from "../data/data";
 import { type Patient } from "../data/schema";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { patientsColumns as columns } from "./patients-columns";
+import { EditPatientSheet } from "./edit-patient-sheet";
+import { getPatientsColumns } from "./patients-columns";
 
 type DataTableProps = {
 	data: Patient[];
@@ -38,6 +39,15 @@ export function PatientsTable({ data }: DataTableProps) {
 		etiology: false,
 	});
 	const [sorting, setSorting] = useState<SortingState>([]);
+	const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+	const [editSheetOpen, setEditSheetOpen] = useState(false);
+
+	function handleEdit(patient: Patient) {
+		setEditingPatient(patient);
+		setEditSheetOpen(true);
+	}
+
+	const columns = useMemo(() => getPatientsColumns(handleEdit), []);
 
 	const {
 		columnFilters,
@@ -179,6 +189,12 @@ export function PatientsTable({ data }: DataTableProps) {
 			</div>
 			<DataTablePagination table={table} className="mt-auto" />
 			<DataTableBulkActions table={table} />
+
+			<EditPatientSheet
+				patient={editingPatient}
+				open={editSheetOpen}
+				onOpenChange={setEditSheetOpen}
+			/>
 		</div>
 	);
 }

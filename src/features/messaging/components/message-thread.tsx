@@ -1,8 +1,14 @@
 import { cn } from "@/lib/utils";
-import { type Message } from "../data/schema";
+interface MessageItem {
+	id: string;
+	senderId: string;
+	senderName: string;
+	body: string;
+	sentAt: Date | string;
+}
 
 interface MessageThreadProps {
-	messages: Message[];
+	messages: MessageItem[];
 	currentUserId?: string;
 }
 

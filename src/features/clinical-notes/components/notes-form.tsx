@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,14 +13,37 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { createClinicalNote } from "../actions";
 
-export function NotesForm() {
+interface NotesFormProps {
+	patientId: string;
+	onSuccess?: () => void;
+}
+
+export function NotesForm({ patientId, onSuccess }: NotesFormProps) {
+	const [isPending, startTransition] = useTransition();
 	const [submitted, setSubmitted] = useState(false);
+	const [visitDate, setVisitDate] = useState(
+		new Date().toISOString().split("T")[0],
+	);
+	const [content, setContent] = useState("");
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		setSubmitted(true);
-		setTimeout(() => setSubmitted(false), 3000);
+		startTransition(async () => {
+			const result = await createClinicalNote(patientId, {
+				visitDate,
+				content,
+			});
+			if (result.error) {
+				toast.error(result.error);
+				return;
+			}
+			setContent("");
+			setSubmitted(true);
+			setTimeout(() => setSubmitted(false), 4000);
+			onSuccess?.();
+		});
 	}
 
 	return (
@@ -42,7 +66,8 @@ export function NotesForm() {
 						<Input
 							id="visitDate"
 							type="date"
-							defaultValue={new Date().toISOString().split("T")[0]}
+							value={visitDate}
+							onChange={(e) => setVisitDate(e.target.value)}
 							required
 						/>
 					</div>
@@ -53,9 +78,13 @@ export function NotesForm() {
 							placeholder="Descrieti starea pacientului, evolutia, recomandarile..."
 							rows={6}
 							required
+							value={content}
+							onChange={(e) => setContent(e.target.value)}
 						/>
 					</div>
-					<Button type="submit">Salveaza nota</Button>
+					<Button type="submit" disabled={isPending}>
+						{isPending ? "Se salveaza..." : "Salveaza nota"}
+					</Button>
 				</form>
 			</CardContent>
 		</Card>

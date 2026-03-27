@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { type Mood } from "../data/schema";
+import { createJournalEntry } from "../actions";
 
 const moods: { value: Mood; emoji: string; label: string }[] = [
 	{ value: "excelent", emoji: "😄", label: "Excelent" },
@@ -22,15 +24,31 @@ const moods: { value: Mood; emoji: string; label: string }[] = [
 	{ value: "foarte-rau", emoji: "😞", label: "Foarte rau" },
 ];
 
-export function JournalEditor() {
+interface JournalEditorProps {
+	onSuccess?: () => void;
+}
+
+export function JournalEditor({ onSuccess }: JournalEditorProps) {
 	const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
+	const [content, setContent] = useState("");
+	const [isPending, startTransition] = useTransition();
 	const [submitted, setSubmitted] = useState(false);
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		setSubmitted(true);
-		setSelectedMood(null);
-		setTimeout(() => setSubmitted(false), 3000);
+		if (!selectedMood) return;
+		startTransition(async () => {
+			const result = await createJournalEntry({ mood: selectedMood, content });
+			if (result.error) {
+				toast.error(result.error);
+				return;
+			}
+			setSelectedMood(null);
+			setContent("");
+			setSubmitted(true);
+			setTimeout(() => setSubmitted(false), 4000);
+			onSuccess?.();
+		});
 	}
 
 	return (
@@ -81,10 +99,12 @@ export function JournalEditor() {
 							placeholder="Cum a fost ziua de azi? Ce ati simtit? Ce ati facut?"
 							rows={5}
 							required
+							value={content}
+							onChange={(e) => setContent(e.target.value)}
 						/>
 					</div>
-					<Button type="submit" disabled={!selectedMood}>
-						Salveaza intrarea
+					<Button type="submit" disabled={!selectedMood || isPending}>
+						{isPending ? "Se salveaza..." : "Salveaza intrarea"}
 					</Button>
 				</form>
 			</CardContent>

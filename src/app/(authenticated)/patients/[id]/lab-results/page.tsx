@@ -1,10 +1,12 @@
 "use client";
-import { use } from "react";
+
+import { use, useEffect, useState } from "react";
 import { RoleGuard } from "@/components/role-guard";
 import { LabResultsTable } from "@/features/lab-results/components/lab-results-table";
 import { LabResultsChart } from "@/features/lab-results/components/lab-results-chart";
 import { LabResultsForm } from "@/features/lab-results/components/lab-results-form";
-import { labResults } from "@/features/lab-results/data/lab-results";
+import { getLabResultsByPatientId } from "@/features/lab-results/actions";
+import type { LabResult } from "@/features/lab-results/data/schema";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
@@ -18,7 +20,15 @@ export default function PatientLabResultsPage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = use(params);
-	const results = labResults.filter((r) => r.patientId === id);
+	const [results, setResults] = useState<LabResult[]>([]);
+
+	function fetchData() {
+		getLabResultsByPatientId(id).then(setResults);
+	}
+
+	 
+	useEffect(fetchData, [id]);
+
 	const latest = results[0];
 
 	return (
@@ -40,7 +50,7 @@ export default function PatientLabResultsPage({
 						Analize si interpretare cu valori de referinta.
 					</p>
 				</div>
-				<LabResultsForm />
+				<LabResultsForm patientId={id} onSuccess={fetchData} />
 				{latest && <LabResultsTable result={latest} />}
 				<div className="grid gap-4 lg:grid-cols-2">
 					<LabResultsChart results={results} testName="ALT (SGPT)" />

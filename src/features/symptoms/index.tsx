@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -6,9 +9,20 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { SymptomsForm } from "./components/symptoms-form";
 import { SymptomsList } from "./components/symptoms-list";
-import { symptomReports } from "./data/symptoms";
+import { getSymptomReports } from "./actions";
+
+type SymptomReportRow = Awaited<ReturnType<typeof getSymptomReports>>[number];
 
 export function Symptoms() {
+	const [reports, setReports] = useState<SymptomReportRow[]>([]);
+
+	function fetchData() {
+		getSymptomReports().then(setReports);
+	}
+
+	 
+	useEffect(fetchData, []);
+
 	return (
 		<>
 			<Header fixed>
@@ -27,10 +41,10 @@ export function Symptoms() {
 						Raportati simptomele zilnice pentru monitorizare medicala.
 					</p>
 				</div>
-				<SymptomsForm />
+				<SymptomsForm onSuccess={fetchData} />
 				<div>
 					<h3 className="mb-3 text-lg font-semibold">Istoric rapoarte</h3>
-					<SymptomsList data={symptomReports} />
+					<SymptomsList data={reports} onUpdate={fetchData} />
 				</div>
 			</Main>
 		</>

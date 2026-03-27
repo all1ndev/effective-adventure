@@ -1,9 +1,11 @@
 "use client";
-import { use } from "react";
+
+import { use, useEffect, useState } from "react";
 import { RoleGuard } from "@/components/role-guard";
 import { VitalSignsChart } from "@/features/vital-signs/components/vital-signs-chart";
 import { VitalSignsTable } from "@/features/vital-signs/components/vital-signs-table";
-import { vitalSigns } from "@/features/vital-signs/data/vital-signs";
+import { getVitalSignsByPatientId } from "@/features/vital-signs/actions";
+import type { VitalEntry } from "@/features/vital-signs/data/schema";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { ProfileDropdown } from "@/components/profile-dropdown";
@@ -17,7 +19,11 @@ export default function PatientVitalSignsPage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = use(params);
-	const data = vitalSigns.filter((v) => v.patientId === id);
+	const [data, setData] = useState<VitalEntry[]>([]);
+
+	useEffect(() => {
+		getVitalSignsByPatientId(id).then(setData);
+	}, [id]);
 
 	return (
 		<RoleGuard allowedRoles={["admin"]}>

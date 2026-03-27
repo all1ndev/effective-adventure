@@ -1,0 +1,27 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1774622431628,
+			"tag": "0000_create-vital-sign",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1774624063896,
+			"tag": "0001_create-symptom-report",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1774625127924,
+			"tag": "0002_create-all-tables",
+			"breakpoints": true
+		}
+	]
+}
