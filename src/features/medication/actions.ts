@@ -106,7 +106,7 @@ export async function updateMedication(id: string, values: unknown) {
 		.limit(1);
 
 	if (existing.length === 0) {
-		return { error: "Inregistrarea nu a fost gasita." };
+		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
 	await db.update(medication).set(parsed.data).where(eq(medication.id, id));
@@ -127,7 +127,7 @@ export async function deleteMedication(id: string) {
 		.limit(1);
 
 	if (existing.length === 0) {
-		return { error: "Inregistrarea nu a fost gasita." };
+		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
 	await db.delete(medication).where(eq(medication.id, id));
@@ -203,7 +203,7 @@ export async function createMedicationLog(values: unknown) {
 		.limit(1);
 
 	if (med.length === 0) {
-		return { error: "Medicamentul nu a fost gasit." };
+		return { error: "Medicamentul nu a fost găsit." };
 	}
 
 	await db.insert(medicationLog).values({
@@ -234,7 +234,7 @@ export async function createMedicationLogsBatch(values: unknown[]) {
 	}
 
 	if (parsedEntries.length === 0) {
-		return { error: "Nu sunt inregistrari de salvat." };
+		return { error: "Nu sunt înregistrări de salvat." };
 	}
 
 	// Verify ownership of all medications
@@ -250,7 +250,7 @@ export async function createMedicationLogsBatch(values: unknown[]) {
 		);
 
 	if (userMeds.length !== medIds.length) {
-		return { error: "Unele medicamente nu au fost gasite." };
+		return { error: "Unele medicamente nu au fost găsite." };
 	}
 
 	await db.insert(medicationLog).values(

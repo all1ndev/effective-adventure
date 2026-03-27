@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -24,7 +23,7 @@ const statusConfig = {
 		className: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
 	},
 	intarziat: {
-		label: "Intarziat",
+		label: "Întârziat",
 		className:
 			"bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300",
 	},
@@ -40,7 +39,7 @@ export function MedicationCalendar({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Schema de medicatie — Astazi</CardTitle>
+				<CardTitle>Schema de medicație — Astăzi</CardTitle>
 				<CardDescription>
 					{new Date().toLocaleDateString("ro-RO", {
 						weekday: "long",
@@ -66,7 +65,7 @@ export function MedicationCalendar({
 									</p>
 									{med.endDate && (
 										<p className="text-xs text-orange-600 dark:text-orange-400">
-											Expira: {med.endDate}
+											Expiră: {med.endDate}
 										</p>
 									)}
 								</div>
@@ -89,7 +88,7 @@ export function MedicationCalendar({
 										})
 									) : (
 										<span className="text-xs text-muted-foreground">
-											Neinregistrat
+											Neînregistrat
 										</span>
 									)}
 								</div>

@@ -26,15 +26,15 @@ export function ComplianceTable({ medications, logs }: ComplianceTableProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Conformitate medicatie</CardTitle>
+				<CardTitle>Conformitate medicație</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<Table>
 					<TableHeader>
 						<TableRow>
 							<TableHead>Medicament</TableHead>
-							<TableHead>Doza</TableHead>
-							<TableHead>Frecventa</TableHead>
+							<TableHead>Doză</TableHead>
+							<TableHead>Frecvență</TableHead>
 							<TableHead className="text-right">Conformitate</TableHead>
 						</TableRow>
 					</TableHeader>
