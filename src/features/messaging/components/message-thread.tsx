@@ -14,7 +14,7 @@ interface MessageThreadProps {
 
 export function MessageThread({
 	messages,
-	currentUserId = "doctor-1",
+	currentUserId = "",
 }: MessageThreadProps) {
 	return (
 		<div className="flex flex-col gap-3 p-4">

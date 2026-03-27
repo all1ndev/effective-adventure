@@ -8,28 +8,38 @@ import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { PatientsTable } from "./components/patients-table";
-import { getPatients } from "./actions";
+import { getPatients, getAdmins } from "./actions";
 import type { Patient } from "./data/schema";
+
+interface Admin {
+	id: string;
+	name: string;
+	email: string;
+}
 
 export function Patients() {
 	const [patients, setPatients] = useState<Patient[]>([]);
+	const [admins, setAdmins] = useState<Admin[]>([]);
 
 	function fetchData() {
-		getPatients().then((data) =>
-			setPatients(
-				data.map((p) => ({
-					...p,
-					patientPhone: p.patientPhone ?? undefined,
-					age: p.age ?? undefined,
-					etiology: p.etiology ?? undefined,
-					transplantDate: p.transplantDate ?? undefined,
-				})),
-			),
-		);
+		getPatients().then((data) => {
+			const mapped: Patient[] = data.map((p) => {
+				const result: Record<string, unknown> = {};
+				for (const [key, value] of Object.entries(p)) {
+					result[key] = value === null ? undefined : value;
+				}
+				return result as Patient;
+			});
+			setPatients(mapped);
+		});
 	}
 
-	 
-	useEffect(fetchData, []);
+	useEffect(() => {
+		fetchData();
+		getAdmins()
+			.then(setAdmins)
+			.catch(() => {});
+	}, []);
 
 	return (
 		<>
@@ -49,7 +59,7 @@ export function Patients() {
 						Vizualizati si gestionati pacientii cu transplant hepatic.
 					</p>
 				</div>
-				<PatientsTable data={patients} />
+				<PatientsTable data={patients} admins={admins} onRefresh={fetchData} />
 			</Main>
 		</>
 	);

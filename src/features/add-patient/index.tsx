@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { z } from "zod";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { showSubmittedData } from "@/lib/show-submitted-data";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { AlertCircle } from "lucide-react";
+import {
+	addPatientWithUser,
+	getRecentPatients,
+} from "@/features/patients/actions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -96,11 +102,14 @@ const patientFormSchema = z.object({
 	hbIgFrequency: z.string().optional(),
 	otherMeds: z.string().optional(),
 	patientPhone: z.string().optional(),
+	patientEmail: z
+		.string()
+		.email("Adresa de email invalida.")
+		.min(1, "Email-ul este obligatoriu."),
 	patientPassword: z
 		.string()
-		.min(6, "Parola trebuie sa aiba cel putin 6 caractere.")
-		.optional(),
-	doctorAccount: z.string().optional(),
+		.min(6, "Parola trebuie sa aiba cel putin 6 caractere."),
+	doctorAccount: z.string().min(1, "Medicul responsabil este obligatoriu."),
 });
 
 type PatientFormValues = z.input<typeof patientFormSchema>;
@@ -133,36 +142,23 @@ const defaultValues: PatientFormValues = {
 	hbIgFrequency: "",
 	otherMeds: "",
 	patientPhone: "",
+	patientEmail: "",
 	patientPassword: "",
-	doctorAccount: "",
+	doctorAccount: undefined as unknown as string,
 };
 
-const recentPatients = [
-	{
-		name: "Maria I.",
-		id: "MI-024",
-		etiology: "HBV",
-		date: "2025-11-18",
-		status: "Stabil",
-		avatar: "/avatars/02.png",
-	},
-	{
-		name: "Andrei C.",
-		id: "AC-031",
-		etiology: "MASLD",
-		date: "2024-08-05",
-		status: "Monitorizare",
-		avatar: "/avatars/04.png",
-	},
-	{
-		name: "Elena R.",
-		id: "ER-019",
-		etiology: "Autoimuna",
-		date: "2023-12-12",
-		status: "Stabil",
-		avatar: "/avatars/05.png",
-	},
-];
+const REQUIRED_FIELD_LABELS: Record<string, string> = {
+	firstName: "Prenume",
+	lastName: "Nume",
+	patientId: "ID pacient",
+	patientEmail: "Email pacient",
+	patientPassword: "Parola pacient",
+	doctorAccount: "Medic responsabil",
+	sex: "Sex",
+	preferredLanguage: "Limba preferata",
+	etiology: "Etiologia bolii hepatice",
+	donorType: "Tip donator",
+};
 
 function updateNumberField(
 	value: string,
@@ -182,7 +178,21 @@ interface Admin {
 	email: string;
 }
 
+interface RecentPatient {
+	id: string;
+	firstName: string;
+	lastName: string;
+	patientCode: string;
+	etiology: string | null;
+	transplantDate: string | null;
+	status: string;
+}
+
 export function DoctorPatients({ admins }: { admins: Admin[] }) {
+	const [isPending, startTransition] = useTransition();
+	const [submitError, setSubmitError] = useState<string | null>(null);
+	const [recentPatients, setRecentPatients] = useState<RecentPatient[]>([]);
+
 	const form = useForm<PatientFormValues>({
 		resolver: zodResolver(patientFormSchema),
 		defaultValues,
@@ -196,6 +206,14 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 	});
 	const hbIg = useWatch({ control: form.control, name: "hbIg" });
 	const etiology = useWatch({ control: form.control, name: "etiology" });
+
+	const formErrors = form.formState.errors;
+	const hasValidationErrors =
+		form.formState.isSubmitted && Object.keys(formErrors).length > 0;
+
+	const missingRequiredFields = Object.entries(REQUIRED_FIELD_LABELS)
+		.filter(([key]) => key in formErrors)
+		.map(([, label]) => label);
 
 	useEffect(() => {
 		if (!weight || !height) {
@@ -214,6 +232,37 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 			form.setValue("bmi", rounded);
 		}
 	}, [form, height, weight]);
+
+	useEffect(() => {
+		getRecentPatients()
+			.then(setRecentPatients)
+			.catch(() => {});
+	}, []);
+
+	function onSubmit(data: PatientFormValues) {
+		setSubmitError(null);
+		startTransition(async () => {
+			const result = await addPatientWithUser(data);
+
+			if (!result.success) {
+				setSubmitError(result.error ?? "Eroare necunoscuta");
+				toast.error(result.error ?? "Eroare la salvarea pacientului");
+				return;
+			}
+
+			toast.success("Pacientul a fost adaugat cu succes!");
+			form.reset(defaultValues);
+
+			getRecentPatients()
+				.then(setRecentPatients)
+				.catch(() => {});
+		});
+	}
+
+	function onInvalid() {
+		setSubmitError(null);
+		toast.error("Completati toate campurile obligatorii inainte de salvare.");
+	}
 
 	return (
 		<>
@@ -243,11 +292,41 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 							<CardTitle>Fisa initiala pacient</CardTitle>
 						</CardHeader>
 						<CardContent>
+							{hasValidationErrors && (
+								<Alert variant="destructive" className="mb-6">
+									<AlertCircle className="h-4 w-4" />
+									<AlertTitle>Campuri obligatorii necompletate</AlertTitle>
+									<AlertDescription>
+										<p>Urmatoarele campuri obligatorii trebuie completate:</p>
+										<ul className="mt-2 list-disc pl-4">
+											{missingRequiredFields.map((label) => (
+												<li key={label} className="font-medium">
+													{label}
+												</li>
+											))}
+											{Object.entries(formErrors)
+												.filter(([key]) => !(key in REQUIRED_FIELD_LABELS))
+												.map(([key, err]) => (
+													<li key={key} className="font-medium">
+														{err?.message ?? key}
+													</li>
+												))}
+										</ul>
+									</AlertDescription>
+								</Alert>
+							)}
+
+							{submitError && (
+								<Alert variant="destructive" className="mb-6">
+									<AlertCircle className="h-4 w-4" />
+									<AlertTitle>Eroare la salvare</AlertTitle>
+									<AlertDescription>{submitError}</AlertDescription>
+								</Alert>
+							)}
+
 							<Form {...form}>
 								<form
-									onSubmit={form.handleSubmit((data) =>
-										showSubmittedData(data, "Date pacient initiale"),
-									)}
+									onSubmit={form.handleSubmit(onSubmit, onInvalid)}
 									className="space-y-8"
 								>
 									<section className="space-y-4">
@@ -275,7 +354,10 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="doctorAccount"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Medic responsabil (Admin)</FormLabel>
+														<FormLabel>
+															Medic responsabil (Admin){" "}
+															<span className="text-destructive">*</span>
+														</FormLabel>
 														<Select
 															onValueChange={field.onChange}
 															value={field.value}
@@ -298,23 +380,61 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												)}
 											/>
 										</div>
-										<FormField
-											control={form.control}
-											name="patientPassword"
-											render={({ field }) => (
-												<FormItem className="md:w-1/2">
-													<FormLabel>Creare parola</FormLabel>
-													<FormControl>
-														<Input
-															type="password"
-															placeholder="Minim 6 caractere"
-															{...field}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
+										<div className="grid gap-4 md:grid-cols-2">
+											<FormField
+												control={form.control}
+												name="patientEmail"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>
+															Email pacient{" "}
+															<span className="text-destructive">*</span>
+														</FormLabel>
+														<FormControl>
+															<Input
+																type="email"
+																placeholder="ex: pacient@email.com"
+																className={
+																	formErrors.patientEmail
+																		? "border-destructive"
+																		: ""
+																}
+																{...field}
+															/>
+														</FormControl>
+														<FormDescription>
+															Folosit pentru autentificarea pacientului.
+														</FormDescription>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+											<FormField
+												control={form.control}
+												name="patientPassword"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>
+															Creare parola{" "}
+															<span className="text-destructive">*</span>
+														</FormLabel>
+														<FormControl>
+															<Input
+																type="password"
+																placeholder="Minim 6 caractere"
+																className={
+																	formErrors.patientPassword
+																		? "border-destructive"
+																		: ""
+																}
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
 									</section>
 
 									<Separator />
@@ -327,10 +447,18 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="firstName"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Prenume</FormLabel>
+														<FormLabel>
+															Prenume{" "}
+															<span className="text-destructive">*</span>
+														</FormLabel>
 														<FormControl>
 															<Input
 																placeholder="Prenumele pacientului"
+																className={
+																	formErrors.firstName
+																		? "border-destructive"
+																		: ""
+																}
 																{...field}
 															/>
 														</FormControl>
@@ -343,10 +471,17 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="lastName"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Nume</FormLabel>
+														<FormLabel>
+															Nume <span className="text-destructive">*</span>
+														</FormLabel>
 														<FormControl>
 															<Input
 																placeholder="Numele pacientului"
+																className={
+																	formErrors.lastName
+																		? "border-destructive"
+																		: ""
+																}
 																{...field}
 															/>
 														</FormControl>
@@ -361,10 +496,18 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="patientId"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>ID pacient</FormLabel>
+														<FormLabel>
+															ID pacient{" "}
+															<span className="text-destructive">*</span>
+														</FormLabel>
 														<FormControl>
 															<Input
 																placeholder="Cod intern / initiale"
+																className={
+																	formErrors.patientId
+																		? "border-destructive"
+																		: ""
+																}
 																{...field}
 															/>
 														</FormControl>
@@ -960,11 +1103,17 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 									</section>
 
 									<div className="flex flex-wrap gap-3">
-										<Button type="submit">Salveaza pacient</Button>
+										<Button type="submit" disabled={isPending}>
+											{isPending ? "Se salveaza..." : "Salveaza pacient"}
+										</Button>
 										<Button
 											type="button"
 											variant="outline"
-											onClick={() => form.reset(defaultValues)}
+											onClick={() => {
+												form.reset(defaultValues);
+												setSubmitError(null);
+											}}
+											disabled={isPending}
 										>
 											Reseteaza formularul
 										</Button>
@@ -983,33 +1132,42 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
-								{recentPatients.map((patient) => (
+								{recentPatients.length === 0 && (
+									<p className="text-sm text-muted-foreground">
+										Niciun pacient adaugat inca.
+									</p>
+								)}
+								{recentPatients.map((p) => (
 									<div
-										key={patient.id}
+										key={p.id}
 										className="flex items-center justify-between gap-4"
 									>
 										<div className="flex items-center gap-3">
 											<Avatar className="h-10 w-10">
-												<AvatarImage src={patient.avatar} alt={patient.name} />
 												<AvatarFallback>
-													{patient.name
-														.split(" ")
-														.map((part) => part[0])
-														.join("")}
+													{p.firstName[0]}
+													{p.lastName[0]}
 												</AvatarFallback>
 											</Avatar>
 											<div>
-												<p className="text-sm font-semibold">{patient.name}</p>
+												<p className="text-sm font-semibold">
+													{p.firstName} {p.lastName.charAt(0)}.
+												</p>
 												<p className="text-xs text-muted-foreground">
-													ID {patient.id} · Etiologie {patient.etiology}
+													ID {p.patientCode}
+													{p.etiology ? ` · Etiologie ${p.etiology}` : ""}
 												</p>
 											</div>
 										</div>
 										<div className="text-right">
-											<Badge variant="secondary">{patient.status}</Badge>
-											<p className="text-xs text-muted-foreground">
-												Transplant {patient.date}
-											</p>
+											<Badge variant="secondary">
+												{p.status === "activ" ? "Activ" : "Inactiv"}
+											</Badge>
+											{p.transplantDate && (
+												<p className="text-xs text-muted-foreground">
+													Transplant {p.transplantDate}
+												</p>
+											)}
 										</div>
 									</div>
 								))}

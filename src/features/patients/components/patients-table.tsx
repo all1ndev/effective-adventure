@@ -28,11 +28,19 @@ import { DataTableBulkActions } from "./data-table-bulk-actions";
 import { EditPatientSheet } from "./edit-patient-sheet";
 import { getPatientsColumns } from "./patients-columns";
 
+interface Admin {
+	id: string;
+	name: string;
+	email: string;
+}
+
 type DataTableProps = {
 	data: Patient[];
+	admins: Admin[];
+	onRefresh?: () => void;
 };
 
-export function PatientsTable({ data }: DataTableProps) {
+export function PatientsTable({ data, admins, onRefresh }: DataTableProps) {
 	const [rowSelection, setRowSelection] = useState({});
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
 		status: false,
@@ -194,6 +202,8 @@ export function PatientsTable({ data }: DataTableProps) {
 				patient={editingPatient}
 				open={editSheetOpen}
 				onOpenChange={setEditSheetOpen}
+				admins={admins}
+				onSaved={onRefresh}
 			/>
 		</div>
 	);

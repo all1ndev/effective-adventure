@@ -18,6 +18,11 @@ export {
 	sexEnum,
 	etiologyEnum,
 	patientStatusEnum,
+	donorTypeEnum,
+	donorStatusEnum,
+	rejectionTypeEnum,
+	hbIgRouteEnum,
+	languageEnum,
 	patient,
 	patientRelations,
 } from "./patient-schema";

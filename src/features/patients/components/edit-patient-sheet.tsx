@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { z } from "zod";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { showSubmittedData } from "@/lib/show-submitted-data";
+import { toast } from "sonner";
+import { AlertCircle } from "lucide-react";
+import { updateFullPatient } from "../actions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -64,7 +67,7 @@ const hbIgRouteValues = ["iv", "sc"] as const;
 const patientFormSchema = z.object({
 	firstName: z.string().min(1, "Prenumele este obligatoriu."),
 	lastName: z.string().min(1, "Numele este obligatoriu."),
-	patientId: z.string().min(1, "ID pacient este obligatoriu."),
+	patientCode: z.string().min(1, "ID pacient este obligatoriu."),
 	age: z.number().min(0).max(130).optional(),
 	sex: z.enum(sexValues),
 	weightKg: z.number().min(0).optional(),
@@ -107,51 +110,81 @@ function updateNumberField(
 	onChange(Number.isNaN(parsed) ? undefined : parsed);
 }
 
-function patientToFormValues(patient: Patient): PatientFormValues {
+function safeEnum<T extends string>(
+	value: string | null | undefined,
+	allowed: readonly T[],
+	fallback: T,
+): T {
+	if (!value) return fallback;
+	return (allowed as readonly string[]).includes(value)
+		? (value as T)
+		: fallback;
+}
+
+function patientToFormValues(p: Patient): PatientFormValues {
 	return {
-		firstName: patient.firstName,
-		lastName: patient.lastName,
-		patientId: patient.id,
-		age: patient.age,
-		sex: patient.sex,
-		weightKg: undefined,
-		heightCm: undefined,
-		bmi: undefined,
-		nationality: "",
-		preferredLanguage: "ro",
-		transplantDate: patient.transplantDate ?? "",
-		etiology: (patient.etiology as PatientFormValues["etiology"]) ?? "HBV",
-		etiologyOther: "",
-		donorType: "cadaveric",
-		donorAntiHbc: "necunoscut",
-		donorHbsAg: "necunoscut",
-		rejectionHistory: false,
-		rejectionDate: "",
-		rejectionType: "acut",
-		majorComplications: "",
-		immunosuppressants: [],
-		antiviralProphylaxis: [],
-		hbIg: false,
-		hbIgRoute: "iv",
-		hbIgFrequency: "",
-		otherMeds: "",
-		patientPhone: patient.patientPhone ?? "",
-		doctorAccount: "",
-		status: patient.status,
+		firstName: p.firstName,
+		lastName: p.lastName,
+		patientCode: p.patientCode ?? p.id,
+		age: p.age ?? undefined,
+		sex: p.sex,
+		weightKg: p.weightKg ?? undefined,
+		heightCm: p.heightCm ?? undefined,
+		bmi: p.bmi ?? undefined,
+		nationality: p.nationality ?? "",
+		preferredLanguage: safeEnum(p.preferredLanguage, languageValues, "ro"),
+		transplantDate: p.transplantDate ?? "",
+		etiology: safeEnum(p.etiology, etiologyValues, "HBV"),
+		etiologyOther: p.etiologyOther ?? "",
+		donorType: safeEnum(p.donorType, donorTypeValues, "cadaveric"),
+		donorAntiHbc: safeEnum(p.donorAntiHbc, donorStatusValues, "necunoscut"),
+		donorHbsAg: safeEnum(p.donorHbsAg, donorStatusValues, "necunoscut"),
+		rejectionHistory: p.rejectionHistory ?? false,
+		rejectionDate: p.rejectionDate ?? "",
+		rejectionType: safeEnum(p.rejectionType, rejectionTypeValues, "acut"),
+		majorComplications: p.majorComplications ?? "",
+		immunosuppressants: ((p.immunosuppressants ?? []) as string[]).filter(
+			(v): v is (typeof immunosuppressantValues)[number] =>
+				(immunosuppressantValues as readonly string[]).includes(v),
+		),
+		antiviralProphylaxis: ((p.antiviralProphylaxis ?? []) as string[]).filter(
+			(v): v is (typeof antiviralValues)[number] =>
+				(antiviralValues as readonly string[]).includes(v),
+		),
+		hbIg: p.hbIg ?? false,
+		hbIgRoute: safeEnum(p.hbIgRoute, hbIgRouteValues, "iv"),
+		hbIgFrequency: p.hbIgFrequency ?? "",
+		otherMeds: p.otherMeds ?? "",
+		patientPhone: p.patientPhone ?? "",
+		doctorAccount: p.doctorId ?? "",
+		status: p.status,
 	};
+}
+
+interface Admin {
+	id: string;
+	name: string;
+	email: string;
 }
 
 interface EditPatientSheetProps {
 	patient: Patient | null;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	admins: Admin[];
+	onSaved?: () => void;
 }
 
 export function EditPatientSheet({
 	patient,
 	open,
 	onOpenChange,
+	admins,
+	onSaved,
 }: EditPatientSheetProps) {
+	const [isPending, startTransition] = useTransition();
+	const [submitError, setSubmitError] = useState<string | null>(null);
+
 	const form = useForm<PatientFormValues>({
 		resolver: zodResolver(patientFormSchema),
 		defaultValues: patient ? patientToFormValues(patient) : undefined,
@@ -163,6 +196,11 @@ export function EditPatientSheet({
 		}
 	}, [patient, open, form]);
 
+	function handleOpenChange(nextOpen: boolean) {
+		if (nextOpen) setSubmitError(null);
+		onOpenChange(nextOpen);
+	}
+
 	const weight = useWatch({ control: form.control, name: "weightKg" });
 	const height = useWatch({ control: form.control, name: "heightCm" });
 	const rejectionHistory = useWatch({
@@ -171,6 +209,10 @@ export function EditPatientSheet({
 	});
 	const hbIg = useWatch({ control: form.control, name: "hbIg" });
 	const etiology = useWatch({ control: form.control, name: "etiology" });
+
+	const formErrors = form.formState.errors;
+	const hasValidationErrors =
+		form.formState.isSubmitted && Object.keys(formErrors).length > 0;
 
 	useEffect(() => {
 		if (!weight || !height) {
@@ -190,8 +232,30 @@ export function EditPatientSheet({
 
 	if (!patient) return null;
 
+	function onSubmit(data: PatientFormValues) {
+		if (!patient) return;
+		setSubmitError(null);
+		startTransition(async () => {
+			const result = await updateFullPatient(patient.id, data);
+
+			if (!result.success) {
+				setSubmitError(result.error ?? "Eroare necunoscuta");
+				toast.error(result.error ?? "Eroare la actualizarea pacientului");
+				return;
+			}
+
+			toast.success("Datele pacientului au fost actualizate!");
+			onOpenChange(false);
+			onSaved?.();
+		});
+	}
+
+	function onInvalid() {
+		toast.error("Completati toate campurile obligatorii.");
+	}
+
 	return (
-		<Sheet open={open} onOpenChange={onOpenChange}>
+		<Sheet open={open} onOpenChange={handleOpenChange}>
 			<SheetContent
 				side="right"
 				className="sm:max-w-2xl w-full overflow-y-auto"
@@ -206,12 +270,33 @@ export function EditPatientSheet({
 				</SheetHeader>
 
 				<div className="px-4 pb-6">
+					{hasValidationErrors && (
+						<Alert variant="destructive" className="mb-6">
+							<AlertCircle className="h-4 w-4" />
+							<AlertTitle>Campuri obligatorii necompletate</AlertTitle>
+							<AlertDescription>
+								<ul className="mt-1 list-disc pl-4">
+									{Object.entries(formErrors).map(([key, err]) => (
+										<li key={key} className="font-medium">
+											{err?.message ?? key}
+										</li>
+									))}
+								</ul>
+							</AlertDescription>
+						</Alert>
+					)}
+
+					{submitError && (
+						<Alert variant="destructive" className="mb-6">
+							<AlertCircle className="h-4 w-4" />
+							<AlertTitle>Eroare la salvare</AlertTitle>
+							<AlertDescription>{submitError}</AlertDescription>
+						</Alert>
+					)}
+
 					<Form {...form}>
 						<form
-							onSubmit={form.handleSubmit((data) => {
-								showSubmittedData(data, "Date pacient actualizate");
-								onOpenChange(false);
-							})}
+							onSubmit={form.handleSubmit(onSubmit, onInvalid)}
 							className="space-y-8"
 						>
 							<section className="space-y-4">
@@ -240,12 +325,23 @@ export function EditPatientSheet({
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>Medic responsabil (Admin)</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="nume.medic@spital.ro"
-														{...field}
-													/>
-												</FormControl>
+												<Select
+													onValueChange={field.onChange}
+													value={field.value}
+												>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Selecteaza medicul" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														{admins.map((admin) => (
+															<SelectItem key={admin.id} value={admin.id}>
+																{admin.name} ({admin.email})
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
 												<FormMessage />
 											</FormItem>
 										)}
@@ -263,10 +359,15 @@ export function EditPatientSheet({
 										name="firstName"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Prenume</FormLabel>
+												<FormLabel>
+													Prenume <span className="text-destructive">*</span>
+												</FormLabel>
 												<FormControl>
 													<Input
 														placeholder="Prenumele pacientului"
+														className={
+															formErrors.firstName ? "border-destructive" : ""
+														}
 														{...field}
 													/>
 												</FormControl>
@@ -279,9 +380,17 @@ export function EditPatientSheet({
 										name="lastName"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Nume</FormLabel>
+												<FormLabel>
+													Nume <span className="text-destructive">*</span>
+												</FormLabel>
 												<FormControl>
-													<Input placeholder="Numele pacientului" {...field} />
+													<Input
+														placeholder="Numele pacientului"
+														className={
+															formErrors.lastName ? "border-destructive" : ""
+														}
+														{...field}
+													/>
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -291,16 +400,19 @@ export function EditPatientSheet({
 								<div className="grid gap-4 md:grid-cols-3">
 									<FormField
 										control={form.control}
-										name="patientId"
+										name="patientCode"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>ID pacient</FormLabel>
+												<FormLabel>
+													ID pacient <span className="text-destructive">*</span>
+												</FormLabel>
 												<FormControl>
 													<Input
 														placeholder="Cod intern / initiale"
+														className={
+															formErrors.patientCode ? "border-destructive" : ""
+														}
 														{...field}
-														readOnly
-														disabled
 													/>
 												</FormControl>
 												<FormMessage />
@@ -903,11 +1015,14 @@ export function EditPatientSheet({
 							</section>
 
 							<div className="flex flex-wrap gap-3">
-								<Button type="submit">Salveaza modificarile</Button>
+								<Button type="submit" disabled={isPending}>
+									{isPending ? "Se salveaza..." : "Salveaza modificarile"}
+								</Button>
 								<Button
 									type="button"
 									variant="outline"
 									onClick={() => onOpenChange(false)}
+									disabled={isPending}
 								>
 									Anuleaza
 								</Button>
