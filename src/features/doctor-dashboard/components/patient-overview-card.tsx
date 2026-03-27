@@ -1,28 +1,40 @@
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type PatientSummary } from "../data/summary";
+
+interface PatientSummary {
+	id: string;
+	name: string;
+	age?: number;
+	transplantDate?: string;
+	status: "activ" | "inactiv";
+	activeAlerts: number;
+	complianceRate: number;
+}
 
 interface PatientOverviewCardProps {
 	patient: PatientSummary;
 }
 
-const statusConfig = {
-	bun: {
+function getHealthStatus(patient: PatientSummary) {
+	if (patient.activeAlerts > 0 && patient.complianceRate < 70) {
+		return { icon: XCircle, color: "text-destructive", label: "Critic" };
+	}
+	if (patient.activeAlerts > 0 || patient.complianceRate < 90) {
+		return {
+			icon: AlertTriangle,
+			color: "text-orange-500 dark:text-orange-400",
+			label: "Atentie",
+		};
+	}
+	return {
 		icon: CheckCircle,
 		color: "text-green-600 dark:text-green-400",
 		label: "Bun",
-	},
-	atentie: {
-		icon: AlertTriangle,
-		color: "text-orange-500 dark:text-orange-400",
-		label: "Atentie",
-	},
-	critic: { icon: XCircle, color: "text-destructive", label: "Critic" },
-};
+	};
+}
 
 export function PatientOverviewCard({ patient }: PatientOverviewCardProps) {
-	const health = statusConfig[patient.healthStatus];
+	const health = getHealthStatus(patient);
 	const Icon = health.icon;
 
 	return (
@@ -45,7 +57,7 @@ export function PatientOverviewCard({ patient }: PatientOverviewCardProps) {
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="grid grid-cols-3 gap-3 text-center">
+				<div className="grid grid-cols-2 gap-3 text-center">
 					<div className="rounded-md bg-muted p-2">
 						<p className="text-lg font-bold">{patient.activeAlerts}</p>
 						<p className="text-xs text-muted-foreground">Alerte</p>
@@ -57,10 +69,6 @@ export function PatientOverviewCard({ patient }: PatientOverviewCardProps) {
 							{patient.complianceRate}%
 						</p>
 						<p className="text-xs text-muted-foreground">Conformitate</p>
-					</div>
-					<div className="rounded-md bg-muted p-2">
-						<p className="text-xs font-medium">{patient.lastVisit}</p>
-						<p className="text-xs text-muted-foreground">Ultima vizita</p>
 					</div>
 				</div>
 			</CardContent>

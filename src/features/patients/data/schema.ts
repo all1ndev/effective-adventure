@@ -64,8 +64,8 @@ export type Patient = z.infer<typeof patientSchema>;
 export const patientListSchema = z.array(patientSchema);
 
 export const patientFormSchema = z.object({
-	firstName: z.string().min(1, "Prenumele este obligatoriu"),
-	lastName: z.string().min(1, "Numele este obligatoriu"),
+	firstName: z.string().min(1, "Câmpul este obligatoriu."),
+	lastName: z.string().min(1, "Câmpul este obligatoriu."),
 	patientPhone: z.string().optional(),
 	sex: z.enum(["masculin", "feminin", "nespecificat"]),
 	age: z.number().min(0).max(130).optional(),
@@ -78,9 +78,9 @@ export const patientFormSchema = z.object({
 export type PatientFormValues = z.infer<typeof patientFormSchema>;
 
 export const editPatientFormSchema = z.object({
-	firstName: z.string().min(1, "Prenumele este obligatoriu."),
-	lastName: z.string().min(1, "Numele este obligatoriu."),
-	patientCode: z.string().min(1, "ID pacient este obligatoriu."),
+	firstName: z.string().min(1, "Câmpul este obligatoriu."),
+	lastName: z.string().min(1, "Câmpul este obligatoriu."),
+	patientCode: z.string().min(1, "Câmpul este obligatoriu."),
 	age: z.number().min(0).max(130).optional(),
 	sex: z.enum(["masculin", "feminin", "nespecificat"]),
 	weightKg: z.number().min(0).optional(),
@@ -129,9 +129,9 @@ export const editPatientFormSchema = z.object({
 export type EditPatientFormValues = z.infer<typeof editPatientFormSchema>;
 
 export const addPatientFormSchema = z.object({
-	firstName: z.string().min(1, "Prenumele este obligatoriu."),
-	lastName: z.string().min(1, "Numele este obligatoriu."),
-	patientId: z.string().min(1, "ID pacient este obligatoriu."),
+	firstName: z.string().min(1, "Câmpul este obligatoriu."),
+	lastName: z.string().min(1, "Câmpul este obligatoriu."),
+	patientId: z.string().min(1, "Câmpul este obligatoriu."),
 	age: z.number().min(0).max(130).optional(),
 	sex: z.enum(["masculin", "feminin", "nespecificat"]),
 	weightKg: z.number().min(0).optional(),
@@ -177,10 +177,10 @@ export const addPatientFormSchema = z.object({
 	patientEmail: z
 		.string()
 		.email("Adresa de email invalida.")
-		.min(1, "Email-ul este obligatoriu."),
+		.min(1, "Câmpul este obligatoriu."),
 	patientPassword: z
 		.string()
 		.min(6, "Parola trebuie sa aiba cel putin 6 caractere."),
-	doctorAccount: z.string().min(1, "Medicul responsabil este obligatoriu."),
+	doctorAccount: z.string().min(1, "Câmpul este obligatoriu."),
 });
 export type AddPatientFormValues = z.infer<typeof addPatientFormSchema>;

@@ -75,9 +75,9 @@ const antiviralValues = ["entecavir", "tenofovir"] as const;
 const hbIgRouteValues = ["iv", "sc"] as const;
 
 const patientFormSchema = z.object({
-	firstName: z.string().min(1, "Prenumele este obligatoriu."),
-	lastName: z.string().min(1, "Numele este obligatoriu."),
-	patientId: z.string().min(1, "ID pacient este obligatoriu."),
+	firstName: z.string().min(1, "Câmpul este obligatoriu."),
+	lastName: z.string().min(1, "Câmpul este obligatoriu."),
+	patientId: z.string().min(1, "Câmpul este obligatoriu."),
 	age: z.number().min(0).max(130).optional(),
 	sex: z.enum(sexValues),
 	weightKg: z.number().min(0).optional(),
@@ -105,11 +105,9 @@ const patientFormSchema = z.object({
 	patientEmail: z
 		.string()
 		.email("Adresa de email invalida.")
-		.min(1, "Email-ul este obligatoriu."),
-	patientPassword: z
-		.string()
-		.min(6, "Parola trebuie sa aiba cel putin 6 caractere."),
-	doctorAccount: z.string().min(1, "Medicul responsabil este obligatoriu."),
+		.min(1, "Câmpul este obligatoriu."),
+	patientPassword: z.string().min(6, "Câmpul este obligatoriu."),
+	doctorAccount: z.string().min(1, "Câmpul este obligatoriu."),
 });
 
 type PatientFormValues = z.input<typeof patientFormSchema>;

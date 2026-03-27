@@ -65,9 +65,9 @@ const antiviralValues = ["entecavir", "tenofovir"] as const;
 const hbIgRouteValues = ["iv", "sc"] as const;
 
 const patientFormSchema = z.object({
-	firstName: z.string().min(1, "Prenumele este obligatoriu."),
-	lastName: z.string().min(1, "Numele este obligatoriu."),
-	patientCode: z.string().min(1, "ID pacient este obligatoriu."),
+	firstName: z.string().min(1, "Câmpul este obligatoriu."),
+	lastName: z.string().min(1, "Câmpul este obligatoriu."),
+	patientCode: z.string().min(1, "Câmpul este obligatoriu."),
 	age: z.number().min(0).max(130).optional(),
 	sex: z.enum(sexValues),
 	weightKg: z.number().min(0).optional(),

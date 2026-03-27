@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -7,11 +10,36 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { PatientOverviewCard } from "./components/patient-overview-card";
 import { AlertSummaryWidget } from "./components/alert-summary-widget";
 import { ComplianceChart } from "./components/compliance-chart";
-import { patientSummaries } from "./data/summary";
-import { alerts } from "@/features/alerts/data/alerts";
+import { getDoctorDashboardData } from "./actions";
+
+type DashboardData = Awaited<ReturnType<typeof getDoctorDashboardData>>;
 
 export function DoctorDashboard() {
-	const activePatients = patientSummaries.filter((p) => p.status === "activ");
+	const [data, setData] = useState<DashboardData | null>(null);
+
+	useEffect(() => {
+		getDoctorDashboardData().then(setData);
+	}, []);
+
+	if (!data) {
+		return (
+			<>
+				<Header fixed>
+					<Search />
+					<div className="ms-auto flex items-center space-x-4">
+						<ThemeSwitch />
+						<ConfigDrawer />
+						<ProfileDropdown />
+					</div>
+				</Header>
+				<Main className="flex flex-1 items-center justify-center">
+					<p className="text-muted-foreground">Se incarca...</p>
+				</Main>
+			</>
+		);
+	}
+
+	const activePatients = data.patients.filter((p) => p.status === "activ");
 
 	return (
 		<>
@@ -34,7 +62,7 @@ export function DoctorDashboard() {
 
 				<div className="grid gap-4 md:grid-cols-3">
 					<div className="rounded-lg border p-4 text-center">
-						<p className="text-3xl font-bold">{patientSummaries.length}</p>
+						<p className="text-3xl font-bold">{data.patients.length}</p>
 						<p className="text-sm text-muted-foreground">Total pacienti</p>
 					</div>
 					<div className="rounded-lg border p-4 text-center">
@@ -43,15 +71,15 @@ export function DoctorDashboard() {
 						</p>
 						<p className="text-sm text-muted-foreground">Pacienti activi</p>
 					</div>
-					<AlertSummaryWidget alerts={alerts} />
+					<AlertSummaryWidget alerts={data.alerts} />
 				</div>
 
-				<ComplianceChart patients={patientSummaries} />
+				<ComplianceChart patients={data.patients} />
 
 				<div>
 					<h3 className="mb-3 text-lg font-semibold">Pacienti activi</h3>
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-						{patientSummaries.map((p) => (
+						{activePatients.map((p) => (
 							<PatientOverviewCard key={p.id} patient={p} />
 						))}
 					</div>

@@ -27,10 +27,10 @@ export const medicationListSchema = z.array(medicationSchema);
 export const medicationLogListSchema = z.array(medicationLogSchema);
 
 export const medicationFormSchema = z.object({
-	name: z.string().min(1, "Numele este obligatoriu."),
-	dose: z.string().min(1, "Doza este obligatorie."),
-	frequency: z.string().min(1, "Frecventa este obligatorie."),
-	startDate: z.string().min(1, "Data de inceput este obligatorie."),
+	name: z.string().min(1, "Câmpul este obligatoriu."),
+	dose: z.string().min(1, "Câmpul este obligatoriu."),
+	frequency: z.string().min(1, "Câmpul este obligatoriu."),
+	startDate: z.string().min(1, "Câmpul este obligatoriu."),
 	endDate: z.string().optional(),
 });
 export type MedicationFormValues = z.infer<typeof medicationFormSchema>;
