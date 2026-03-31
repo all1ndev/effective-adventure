@@ -4,6 +4,7 @@ import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { medication, medicationLog } from "@/db/medication-schema";
 import { medicationFormSchema, medicationLogFormSchema } from "./data/schema";
@@ -34,7 +35,7 @@ export async function getMedications() {
 export async function getMedicationsByPatientId(patientId: string) {
 	const session = await getSessionOrThrow();
 
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
@@ -69,7 +70,7 @@ export async function createMedicationForPatient(
 ) {
 	const session = await getSessionOrThrow();
 
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
@@ -160,7 +161,7 @@ export async function getMedicationLogs() {
 export async function getMedicationLogsByPatientId(patientId: string) {
 	const session = await getSessionOrThrow();
 
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 

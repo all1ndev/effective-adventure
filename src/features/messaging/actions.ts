@@ -4,6 +4,7 @@ import { eq, desc, asc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { conversation, message } from "@/db/messaging-schema";
 import { patient } from "@/db/patient-schema";
@@ -31,7 +32,7 @@ export async function getCurrentUser() {
 export async function getConversations() {
 	const session = await getSessionOrThrow();
 
-	if (session.user.role === "admin") {
+	if (isMedicRole(session.user.role)) {
 		// Doctor sees conversations for their patients
 		const doctorPatients = await db
 			.select({ userId: patient.userId })

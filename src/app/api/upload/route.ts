@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { headers } from "next/headers";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
@@ -8,7 +9,7 @@ export async function POST(request: NextRequest) {
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
-	if (!session || session.user.role !== "admin") {
+	if (!session || !isMedicRole(session.user.role)) {
 		return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
 	}
 

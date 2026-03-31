@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { patient } from "@/db/patient-schema";
 import { medication } from "@/db/medication-schema";
@@ -27,15 +28,16 @@ async function getSessionOrThrow() {
 
 export async function getAdmins() {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
 	const { user } = await import("@/db/auth-schema");
+	const { inArray } = await import("drizzle-orm");
 	const admins = await db
 		.select({ id: user.id, name: user.name, email: user.email })
 		.from(user)
-		.where(eq(user.role, "admin"))
+		.where(eq(user.role, "doctor"))
 		.orderBy(asc(user.name));
 
 	return admins;
@@ -43,7 +45,7 @@ export async function getAdmins() {
 
 export async function getPatients() {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
@@ -56,7 +58,7 @@ export async function getPatients() {
 
 export async function getRecentPatients() {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
@@ -78,7 +80,7 @@ export async function getRecentPatients() {
 
 export async function addPatientWithUser(values: unknown) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		return { success: false, error: "Neautorizat" };
 	}
 
@@ -239,7 +241,7 @@ export async function addPatientWithUser(values: unknown) {
 
 export async function updateFullPatient(id: string, values: unknown) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		return { success: false, error: "Neautorizat" };
 	}
 
@@ -305,7 +307,7 @@ export async function updateFullPatient(id: string, values: unknown) {
 
 export async function createPatient(values: unknown) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
@@ -325,7 +327,7 @@ export async function createPatient(values: unknown) {
 
 export async function updatePatient(id: string, values: unknown) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
@@ -347,7 +349,7 @@ export async function updatePatient(id: string, values: unknown) {
 
 export async function deletePatient(id: string) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 

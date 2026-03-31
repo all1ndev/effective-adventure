@@ -4,7 +4,7 @@ import { Patients } from "@/features/patients";
 
 export default function PatientsPage() {
 	return (
-		<RoleGuard allowedRoles={["admin"]}>
+		<RoleGuard allowedRoles={["admin", "doctor"]}>
 			<Patients />
 		</RoleGuard>
 	);

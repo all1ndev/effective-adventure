@@ -1,6 +1,8 @@
 import {
 	Bell,
 	UserCheck,
+	UserPlus,
+	Users,
 	Stethoscope,
 	LayoutDashboard,
 	Activity,
@@ -21,6 +23,58 @@ const sharedUser = {
 	avatar: "/avatars/shadcn.jpg",
 };
 
+export const adminSidebarData: SidebarData = {
+	user: sharedUser,
+	teams: [],
+	navGroups: [
+		{
+			title: "General",
+			items: [
+				{
+					title: "Panou de control",
+					url: "/",
+					icon: LayoutDashboard,
+				},
+				{
+					title: "Lista Pacienți",
+					url: "/patients",
+					icon: Stethoscope,
+				},
+				{
+					title: "Adaugă Pacient",
+					url: "/add-patient",
+					icon: UserCheck,
+				},
+				{
+					title: "Lista Medici",
+					url: "/doctors",
+					icon: Users,
+				},
+				{
+					title: "Adaugă Medic",
+					url: "/add-doctor",
+					icon: UserPlus,
+				},
+				{
+					title: "Trimitere Analize",
+					url: "/send-lab-results",
+					icon: FileUp,
+				},
+				{
+					title: "Alerte",
+					url: "/alerts",
+					icon: Bell,
+				},
+				{
+					title: "Mesagerie",
+					url: "/messaging",
+					icon: MessageSquare,
+				},
+			],
+		},
+	],
+};
+
 export const doctorSidebarData: SidebarData = {
 	user: sharedUser,
 	teams: [],
@@ -34,12 +88,12 @@ export const doctorSidebarData: SidebarData = {
 					icon: LayoutDashboard,
 				},
 				{
-					title: "Lista Pacienti",
+					title: "Lista Pacienți",
 					url: "/patients",
 					icon: Stethoscope,
 				},
 				{
-					title: "Add Patient",
+					title: "Adaugă Pacient",
 					url: "/add-patient",
 					icon: UserCheck,
 				},
@@ -86,7 +140,7 @@ export const patientSidebarData: SidebarData = {
 					icon: Thermometer,
 				},
 				{
-					title: "Medicatie",
+					title: "Medicație",
 					url: "/medication",
 					icon: Pill,
 				},
@@ -101,7 +155,7 @@ export const patientSidebarData: SidebarData = {
 					icon: MessageSquare,
 				},
 				{
-					title: "Educatie",
+					title: "Educație",
 					url: "/education",
 					icon: BookOpen,
 				},
@@ -116,9 +170,10 @@ export const patientSidebarData: SidebarData = {
 };
 
 export function getSidebarData(role: AppRole): SidebarData {
-	if (role === "admin") return doctorSidebarData;
+	if (role === "admin") return adminSidebarData;
+	if (role === "doctor") return doctorSidebarData;
 	return patientSidebarData;
 }
 
 // Fallback export so any existing import of `sidebarData` still compiles
-export const sidebarData = doctorSidebarData;
+export const sidebarData = adminSidebarData;

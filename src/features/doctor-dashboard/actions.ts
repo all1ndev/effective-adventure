@@ -3,6 +3,7 @@
 import { eq, inArray, desc } from "drizzle-orm";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { patient } from "@/db/patient-schema";
 import { alert } from "@/db/alert-schema";
@@ -20,7 +21,7 @@ async function getSessionOrThrow() {
 
 export async function getDoctorDashboardData() {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 

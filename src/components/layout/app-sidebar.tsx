@@ -19,7 +19,7 @@ import { Stethoscope, User } from "lucide-react";
 function SidebarHeaderContent({ role }: { role: string }) {
 	const { state } = useSidebar();
 	const collapsed = state === "collapsed";
-	const isMedic = role === "admin";
+	const isMedic = role === "admin" || role === "doctor";
 
 	if (collapsed) {
 		return (

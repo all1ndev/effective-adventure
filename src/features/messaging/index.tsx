@@ -87,7 +87,7 @@ export function Messaging() {
 					</div>
 				) : (
 					<div className="flex h-full w-full">
-						{currentUserRole === "admin" && (
+						{(currentUserRole === "admin" || currentUserRole === "doctor") && (
 							<aside className="w-72 shrink-0 border-r p-4">
 								<h2 className="mb-3 text-lg font-bold">Mesagerie</h2>
 								<ConversationList
@@ -103,7 +103,8 @@ export function Messaging() {
 									<div className="border-b px-4 py-3">
 										<h3 className="font-semibold">{activeConv.patientName}</h3>
 										<p className="text-xs text-muted-foreground">
-											{currentUserRole === "admin"
+											{currentUserRole === "admin" ||
+											currentUserRole === "doctor"
 												? "Pacient"
 												: "Medic responsabil"}
 										</p>
@@ -118,7 +119,7 @@ export function Messaging() {
 								</>
 							) : (
 								<div className="flex flex-1 items-center justify-center text-muted-foreground">
-									{currentUserRole === "admin"
+									{currentUserRole === "admin" || currentUserRole === "doctor"
 										? "Selectati o conversatie"
 										: "Nu exista o conversatie activa"}
 								</div>
