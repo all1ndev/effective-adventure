@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import {
 	Card,
 	CardContent,
@@ -12,9 +10,6 @@ import { AuthLayout } from "../auth-layout";
 import { UserAuthForm } from "./components/user-auth-form";
 
 export function SignIn() {
-	const searchParams = useSearchParams();
-	const redirect = searchParams.get("redirect") ?? undefined;
-
 	return (
 		<AuthLayout>
 			<Card className="gap-4">
@@ -23,17 +18,11 @@ export function SignIn() {
 					<CardDescription>
 						Introduceți adresa de e-mail și parola <br />
 						pentru a vă conecta la cont. <br />
-						Nu ai un cont?{" "}
-						<Link
-							href="/sign-up"
-							className="underline underline-offset-4 hover:text-primary"
-						>
-							Creează un cont
-						</Link>
+						Nu ai un cont? Contactează administratorul pentru un cont.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<UserAuthForm redirectTo={redirect} />
+					<UserAuthForm />
 				</CardContent>
 				<CardFooter>
 					<p className="px-8 text-center text-sm text-muted-foreground">
