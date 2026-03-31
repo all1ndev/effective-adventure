@@ -31,15 +31,9 @@ const formSchema = z.object({
 		.min(7, "Parola trebuie să aibă cel puțin 7 caractere"),
 });
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
-	redirectTo?: string;
-}
+type UserAuthFormProps = React.HTMLAttributes<HTMLFormElement>;
 
-export function UserAuthForm({
-	className,
-	redirectTo,
-	...props
-}: UserAuthFormProps) {
+export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
@@ -66,7 +60,7 @@ export function UserAuthForm({
 		}
 
 		toast.success(`Bun venit înapoi!`);
-		router.replace(redirectTo || "/");
+		router.replace("/");
 		setIsLoading(false);
 	}
 
