@@ -9,7 +9,7 @@ export default function Page() {
 	const { data: session } = useSession();
 	const role = getUserRole(session?.user?.role);
 
-	if (role === "admin") return <DoctorDashboard />;
+	if (role === "admin" || role === "doctor") return <DoctorDashboard />;
 	if (role === "user") return <PatientDashboard />;
 	return null;
 }

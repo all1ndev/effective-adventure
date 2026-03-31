@@ -4,6 +4,7 @@ import { eq, asc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { patient } from "@/db/patient-schema";
 import { labResult } from "@/db/lab-result-schema";
@@ -20,7 +21,7 @@ async function getSessionOrThrow() {
 
 export async function getDoctorPatients() {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
@@ -43,7 +44,7 @@ export async function createLabResultWithPdf(values: {
 	pdfFileName: string;
 }) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 

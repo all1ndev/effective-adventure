@@ -4,6 +4,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { symptomReport } from "@/db/symptoms-schema";
 import { symptomReportFormSchema } from "./data/schema";
@@ -114,7 +115,7 @@ export async function getSymptomReports() {
 export async function getSymptomReportsByPatientId(patientId: string) {
 	const session = await getSessionOrThrow();
 
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 

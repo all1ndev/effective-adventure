@@ -4,6 +4,7 @@ import { eq, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { alert } from "@/db/alert-schema";
 import { patient } from "@/db/patient-schema";
@@ -20,7 +21,7 @@ async function getSessionOrThrow() {
 
 export async function getAlerts() {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 
@@ -44,7 +45,7 @@ export async function getAlerts() {
 
 export async function dismissAlert(id: string) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 	await db.update(alert).set({ dismissed: true }).where(eq(alert.id, id));

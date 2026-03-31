@@ -52,3 +52,4 @@ export {
 	conversationRelations,
 	messageRelations,
 } from "./messaging-schema";
+export { doctorStatusEnum, doctor, doctorRelations } from "./doctor-schema";

@@ -4,6 +4,7 @@ import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { clinicalNote } from "@/db/clinical-note-schema";
 import { clinicalNoteFormSchema } from "./data/schema";
@@ -20,7 +21,7 @@ async function getSessionOrThrow() {
 
 export async function getClinicalNotesByPatientId(patientId: string) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 	return db
@@ -32,7 +33,7 @@ export async function getClinicalNotesByPatientId(patientId: string) {
 
 export async function createClinicalNote(patientId: string, values: unknown) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 	const parsed = clinicalNoteFormSchema.safeParse(values);
@@ -51,7 +52,7 @@ export async function createClinicalNote(patientId: string, values: unknown) {
 
 export async function deleteClinicalNote(id: string) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 	await db.delete(clinicalNote).where(eq(clinicalNote.id, id));

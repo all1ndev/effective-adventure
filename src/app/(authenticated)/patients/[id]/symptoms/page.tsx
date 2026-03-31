@@ -30,7 +30,7 @@ export default function PatientSymptomsPage({
 	}, [id]);
 
 	return (
-		<RoleGuard allowedRoles={["admin"]}>
+		<RoleGuard allowedRoles={["admin", "doctor"]}>
 			<Header fixed>
 				<Search />
 				<div className="ms-auto flex items-center space-x-4">

@@ -4,6 +4,7 @@ import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { labResult } from "@/db/lab-result-schema";
 import { labResultFormSchema } from "./data/schema";
@@ -30,7 +31,7 @@ export async function getLabResults() {
 
 export async function getLabResultsByPatientId(patientId: string) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 	return db
@@ -64,7 +65,7 @@ export async function createLabResultForPatient(
 	values: unknown,
 ) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 	const parsed = labResultFormSchema.safeParse(values);
@@ -86,7 +87,7 @@ export async function createLabResultForPatient(
 
 export async function deleteLabResult(id: string) {
 	const session = await getSessionOrThrow();
-	if (session.user.role !== "admin") {
+	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
 	await db.delete(labResult).where(eq(labResult.id, id));
