@@ -21,7 +21,7 @@ const patientSchema = z.object({
 	patientCode: z.string(),
 	firstName: z.string(),
 	lastName: z.string(),
-	patientPhone: z.string().optional(),
+	patientPhone: z.string(),
 	sex: z.union([
 		z.literal("masculin"),
 		z.literal("feminin"),
@@ -66,7 +66,7 @@ export const patientListSchema = z.array(patientSchema);
 export const patientFormSchema = z.object({
 	firstName: z.string().min(1, "Câmpul este obligatoriu."),
 	lastName: z.string().min(1, "Câmpul este obligatoriu."),
-	patientPhone: z.string().optional(),
+	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	sex: z.enum(["masculin", "feminin", "nespecificat"]),
 	age: z.number().min(0).max(130).optional(),
 	etiology: z
@@ -122,7 +122,7 @@ export const editPatientFormSchema = z.object({
 	hbIgRoute: z.enum(["iv", "sc"]),
 	hbIgFrequency: z.string().optional(),
 	otherMeds: z.string().optional(),
-	patientPhone: z.string().optional(),
+	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	doctorAccount: z.string().optional(),
 	status: z.enum(["activ", "inactiv"]),
 });
@@ -173,14 +173,11 @@ export const addPatientFormSchema = z.object({
 	hbIgRoute: z.enum(["iv", "sc"]),
 	hbIgFrequency: z.string().optional(),
 	otherMeds: z.string().optional(),
-	patientPhone: z.string().optional(),
+	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	patientEmail: z
 		.string()
 		.email("Adresa de email invalida.")
 		.min(1, "Câmpul este obligatoriu."),
-	patientPassword: z
-		.string()
-		.min(6, "Parola trebuie sa aiba cel putin 6 caractere."),
 	doctorAccount: z.string().min(1, "Câmpul este obligatoriu."),
 });
 export type AddPatientFormValues = z.infer<typeof addPatientFormSchema>;

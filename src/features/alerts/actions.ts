@@ -2,27 +2,20 @@
 
 import { eq, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { alert } from "@/db/alert-schema";
 import { patient } from "@/db/patient-schema";
 
-async function getSessionOrThrow() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-	if (!session) {
-		throw new Error("Neautorizat");
-	}
-	return session;
-}
-
 export async function getAlerts() {
 	const session = await getSessionOrThrow();
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
+	}
+
+	if (session.user.role === "admin") {
+		return db.select().from(alert).orderBy(desc(alert.createdAt));
 	}
 
 	const doctorPatients = await db

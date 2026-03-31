@@ -69,6 +69,7 @@ export function LabResultsForm({ patientId, onSuccess }: LabResultsFormProps) {
 				return;
 			}
 
+			toast.success("Rezultatele au fost salvate cu succes.");
 			setDate("");
 			setRows([
 				{ id: 1, name: "", value: "", unit: "", refMin: "", refMax: "" },

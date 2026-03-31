@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { patient } from "@/db/patient-schema";
@@ -12,19 +13,9 @@ import {
 	editPatientFormSchema,
 } from "./data/schema";
 import { eq, asc, desc } from "drizzle-orm";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { randomUUID } from "crypto";
-
-async function getSessionOrThrow() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-	if (!session) {
-		throw new Error("Neautorizat");
-	}
-	return session;
-}
+import { randomUUID, randomBytes } from "crypto";
+import { sendCredentialsEmail } from "@/lib/email";
 
 export async function getAdmins() {
 	const session = await getSessionOrThrow();
@@ -33,7 +24,6 @@ export async function getAdmins() {
 	}
 
 	const { user } = await import("@/db/auth-schema");
-	const { inArray } = await import("drizzle-orm");
 	const admins = await db
 		.select({ id: user.id, name: user.name, email: user.email })
 		.from(user)
@@ -49,6 +39,10 @@ export async function getPatients() {
 		throw new Error("Neautorizat");
 	}
 
+	if (session.user.role === "admin") {
+		return db.select().from(patient).orderBy(asc(patient.lastName));
+	}
+
 	return db
 		.select()
 		.from(patient)
@@ -62,7 +56,7 @@ export async function getRecentPatients() {
 		throw new Error("Neautorizat");
 	}
 
-	return db
+	const baseQuery = db
 		.select({
 			id: patient.id,
 			firstName: patient.firstName,
@@ -72,7 +66,13 @@ export async function getRecentPatients() {
 			transplantDate: patient.transplantDate,
 			status: patient.status,
 		})
-		.from(patient)
+		.from(patient);
+
+	if (session.user.role === "admin") {
+		return baseQuery.orderBy(desc(patient.createdAt)).limit(5);
+	}
+
+	return baseQuery
 		.where(eq(patient.doctorId, session.user.id))
 		.orderBy(desc(patient.createdAt))
 		.limit(5);
@@ -97,6 +97,7 @@ export async function addPatientWithUser(values: unknown) {
 	}
 
 	const data = parsed.data;
+	const generatedPassword = randomBytes(10).toString("base64url");
 
 	let userId: string | null = null;
 
@@ -105,7 +106,7 @@ export async function addPatientWithUser(values: unknown) {
 			body: {
 				name: `${data.firstName} ${data.lastName}`,
 				email: data.patientEmail,
-				password: data.patientPassword,
+				password: generatedPassword,
 				role: "user",
 			},
 		});
@@ -226,6 +227,15 @@ export async function addPatientWithUser(values: unknown) {
 				unreadCount: 0,
 			});
 		}
+
+		const loginUrl = `${process.env.BETTER_AUTH_URL}/sign-in`;
+		await sendCredentialsEmail({
+			to: data.patientEmail,
+			name: `${data.firstName} ${data.lastName}`,
+			role: "pacient",
+			password: generatedPassword,
+			loginUrl,
+		});
 
 		revalidatePath("/patients");
 		revalidatePath("/add-patient");
@@ -350,10 +360,76 @@ export async function updatePatient(id: string, values: unknown) {
 export async function deletePatient(id: string) {
 	const session = await getSessionOrThrow();
 	if (!isMedicRole(session.user.role)) {
-		throw new Error("Neautorizat");
+		return { success: false, error: "Neautorizat" };
 	}
 
-	await db.delete(patient).where(eq(patient.id, id));
+	try {
+		// Find the patient's userId first
+		const patientRecord = await db
+			.select({ userId: patient.userId })
+			.from(patient)
+			.where(eq(patient.id, id))
+			.limit(1);
 
-	revalidatePath("/patients");
+		if (!patientRecord[0]) {
+			return { success: false, error: "Pacientul nu a fost găsit" };
+		}
+
+		const { userId } = patientRecord[0];
+
+		// Delete the patient profile
+		await db.delete(patient).where(eq(patient.id, id));
+
+		// Delete the user account if it exists (cascades sessions, accounts, etc.)
+		if (userId) {
+			const { user } = await import("@/db/auth-schema");
+			await db.delete(user).where(eq(user.id, userId));
+		}
+
+		revalidatePath("/patients");
+		revalidatePath("/messaging");
+		return { success: true };
+	} catch (err) {
+		const message =
+			err instanceof Error ? err.message : "Eroare la ștergerea pacientului";
+		return { success: false, error: message };
+	}
+}
+
+export async function deletePatients(ids: string[]) {
+	const session = await getSessionOrThrow();
+	if (!isMedicRole(session.user.role)) {
+		return { success: false, error: "Neautorizat" };
+	}
+
+	try {
+		const { user } = await import("@/db/auth-schema");
+		const { inArray } = await import("drizzle-orm");
+
+		// Find all patient userIds
+		const records = await db
+			.select({ userId: patient.userId })
+			.from(patient)
+			.where(inArray(patient.id, ids));
+
+		const userIds = records
+			.map((r) => r.userId)
+			.filter((uid): uid is string => uid !== null);
+
+		// Delete patient profiles
+		await db.delete(patient).where(inArray(patient.id, ids));
+
+		// Delete associated user accounts
+		if (userIds.length > 0) {
+			await db.delete(user).where(inArray(user.id, userIds));
+		}
+
+		revalidatePath("/patients");
+		revalidatePath("/messaging");
+		return { success: true, count: ids.length };
+	} catch (err) {
+		const message =
+			err instanceof Error ? err.message : "Eroare la ștergerea pacienților";
+		return { success: false, error: message };
+	}
 }

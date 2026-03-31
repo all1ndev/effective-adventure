@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -15,23 +16,27 @@ export function Doctors() {
 	const [doctors, setDoctors] = useState<Doctor[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	function fetchData() {
-		getDoctors().then((data) => {
-			const mapped: Doctor[] = data.map((d) => {
-				const result: Record<string, unknown> = {};
-				for (const [key, value] of Object.entries(d)) {
-					result[key] = value === null ? undefined : value;
-				}
-				return result as Doctor;
-			});
-			setDoctors(mapped);
-			setLoading(false);
-		});
-	}
+	const fetchData = useCallback(() => {
+		getDoctors()
+			.then((data) => {
+				const mapped: Doctor[] = data.map((d) => {
+					const result: Record<string, unknown> = {};
+					for (const [key, value] of Object.entries(d)) {
+						result[key] = value === null ? undefined : value;
+					}
+					return result as Doctor;
+				});
+				setDoctors(mapped);
+			})
+			.catch(() => {
+				toast.error("Eroare la încărcarea medicilor.");
+			})
+			.finally(() => setLoading(false));
+	}, []);
 
 	useEffect(() => {
 		fetchData();
-	}, []);
+	}, [fetchData]);
 
 	return (
 		<>

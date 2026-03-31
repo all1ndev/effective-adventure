@@ -1,25 +1,15 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 import { db } from "@/db";
 import { medication } from "@/db/medication-schema";
 import { conversation } from "@/db/messaging-schema";
 import { patient } from "@/db/patient-schema";
+import { doctor } from "@/db/doctor-schema";
 import { user } from "@/db/auth-schema";
 import { vitalSign } from "@/db/vital-signs-schema";
 import { desc } from "drizzle-orm";
-
-async function getSessionOrThrow() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-	if (!session) {
-		throw new Error("Neautorizat");
-	}
-	return session;
-}
 
 export async function getPatientDashboardData() {
 	const session = await getSessionOrThrow();
@@ -57,8 +47,9 @@ export async function getPatientDashboardData() {
 		0,
 	);
 
-	// Doctor name
+	// Doctor name and phone
 	let doctorName = "";
+	let doctorPhone: string | null = null;
 	const patientRecord = await db
 		.select({ doctorId: patient.doctorId })
 		.from(patient)
@@ -66,13 +57,21 @@ export async function getPatientDashboardData() {
 		.limit(1);
 
 	if (patientRecord.length > 0 && patientRecord[0].doctorId) {
-		const doctor = await db
+		const doctorUser = await db
 			.select({ name: user.name })
 			.from(user)
 			.where(eq(user.id, patientRecord[0].doctorId))
 			.limit(1);
-		if (doctor.length > 0) {
-			doctorName = doctor[0].name;
+		if (doctorUser.length > 0) {
+			doctorName = doctorUser[0].name;
+		}
+		const doctorRecord = await db
+			.select({ phone: doctor.phone })
+			.from(doctor)
+			.where(eq(doctor.userId, patientRecord[0].doctorId))
+			.limit(1);
+		if (doctorRecord.length > 0) {
+			doctorPhone = doctorRecord[0].phone;
 		}
 	}
 
@@ -87,5 +86,6 @@ export async function getPatientDashboardData() {
 		activeMedsCount: activeMeds.length,
 		unreadMessages,
 		doctorName,
+		doctorPhone,
 	};
 }

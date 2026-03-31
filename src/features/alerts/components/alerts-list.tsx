@@ -33,6 +33,7 @@ export function AlertsList({ data, onUpdate }: AlertsListProps) {
 				toast.error(String(result.error));
 				return;
 			}
+			toast.success("Alerta a fost respinsă.");
 			onUpdate?.();
 		});
 	}

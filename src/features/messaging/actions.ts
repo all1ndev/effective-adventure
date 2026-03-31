@@ -2,23 +2,12 @@
 
 import { eq, desc, asc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { isMedicRole } from "@/lib/roles";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 import { db } from "@/db";
 import { conversation, message } from "@/db/messaging-schema";
 import { patient } from "@/db/patient-schema";
+import { doctor } from "@/db/doctor-schema";
 import { user } from "@/db/auth-schema";
-
-async function getSessionOrThrow() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-	if (!session) {
-		throw new Error("Neautorizat");
-	}
-	return session;
-}
 
 export async function getCurrentUser() {
 	const session = await getSessionOrThrow();
@@ -32,24 +21,76 @@ export async function getCurrentUser() {
 export async function getConversations() {
 	const session = await getSessionOrThrow();
 
-	if (isMedicRole(session.user.role)) {
-		// Doctor sees conversations for their patients
-		const doctorPatients = await db
-			.select({ userId: patient.userId })
-			.from(patient)
-			.where(eq(patient.doctorId, session.user.id));
+	if (session.user.role === "admin" || session.user.role === "doctor") {
+		// Admin sees ALL conversations, doctor sees only their patients'
+		let convs;
+		if (session.user.role === "admin") {
+			convs = await db
+				.select()
+				.from(conversation)
+				.orderBy(desc(conversation.lastMessageAt));
+		} else {
+			const doctorPatients = await db
+				.select({ userId: patient.userId })
+				.from(patient)
+				.where(eq(patient.doctorId, session.user.id));
 
-		const patientUserIds = doctorPatients
-			.map((p) => p.userId)
-			.filter((id): id is string => id !== null);
+			const patientUserIds = doctorPatients
+				.map((p) => p.userId)
+				.filter((id): id is string => id !== null);
 
-		if (patientUserIds.length === 0) return [];
+			if (patientUserIds.length === 0) return [];
 
-		return db
-			.select()
-			.from(conversation)
-			.where(inArray(conversation.patientId, patientUserIds))
-			.orderBy(desc(conversation.lastMessageAt));
+			convs = await db
+				.select()
+				.from(conversation)
+				.where(inArray(conversation.patientId, patientUserIds))
+				.orderBy(desc(conversation.lastMessageAt));
+		}
+
+		// Enrich with doctor name for each conversation
+		const patientIds = convs.map((c) => c.patientId);
+		const patientRecords =
+			patientIds.length > 0
+				? await db
+						.select({
+							userId: patient.userId,
+							doctorId: patient.doctorId,
+							patientPhone: patient.patientPhone,
+						})
+						.from(patient)
+						.where(inArray(patient.userId, patientIds))
+				: [];
+
+		const doctorIds = [
+			...new Set(
+				patientRecords
+					.map((p) => p.doctorId)
+					.filter((id): id is string => id !== null),
+			),
+		];
+		const doctorUsers =
+			doctorIds.length > 0
+				? await db
+						.select({ id: user.id, name: user.name })
+						.from(user)
+						.where(inArray(user.id, doctorIds))
+				: [];
+
+		const doctorNameMap = new Map(doctorUsers.map((d) => [d.id, d.name]));
+		const patientDoctorMap = new Map(
+			patientRecords.map((p) => [p.userId, p.doctorId]),
+		);
+		const patientPhoneMap = new Map(
+			patientRecords.map((p) => [p.userId, p.patientPhone]),
+		);
+
+		return convs.map((c) => {
+			const doctorId = patientDoctorMap.get(c.patientId);
+			const doctorName = doctorId ? (doctorNameMap.get(doctorId) ?? "—") : "—";
+			const phone = patientPhoneMap.get(c.patientId) ?? null;
+			return { ...c, doctorName, phone };
+		});
 	}
 
 	// Patient sees only their own conversation, but display doctor name
@@ -60,14 +101,23 @@ export async function getConversations() {
 		.limit(1);
 
 	let doctorName = "Medic";
+	let doctorPhone: string | null = null;
 	if (patientRecord.length > 0 && patientRecord[0].doctorId) {
-		const doctor = await db
+		const doctorUser = await db
 			.select({ name: user.name })
 			.from(user)
 			.where(eq(user.id, patientRecord[0].doctorId))
 			.limit(1);
-		if (doctor.length > 0) {
-			doctorName = doctor[0].name;
+		if (doctorUser.length > 0) {
+			doctorName = doctorUser[0].name;
+		}
+		const doctorRecord = await db
+			.select({ phone: doctor.phone })
+			.from(doctor)
+			.where(eq(doctor.userId, patientRecord[0].doctorId))
+			.limit(1);
+		if (doctorRecord.length > 0) {
+			doctorPhone = doctorRecord[0].phone;
 		}
 	}
 
@@ -78,7 +128,12 @@ export async function getConversations() {
 		.orderBy(desc(conversation.lastMessageAt));
 
 	// Replace patientName with doctor name for patient view
-	return convs.map((c) => ({ ...c, patientName: doctorName }));
+	return convs.map((c) => ({
+		...c,
+		patientName: doctorName,
+		doctorName: undefined as string | undefined,
+		phone: doctorPhone,
+	}));
 }
 
 export async function getMessages(conversationId: string) {
@@ -92,11 +147,43 @@ export async function getMessages(conversationId: string) {
 
 export async function sendMessage(conversationId: string, body: string) {
 	const session = await getSessionOrThrow();
+
+	let senderName = session.user.name;
+
+	// Admin sends as the responsible doctor
+	if (session.user.role === "admin") {
+		const conv = await db
+			.select({ patientId: conversation.patientId })
+			.from(conversation)
+			.where(eq(conversation.id, conversationId))
+			.limit(1);
+
+		if (conv.length > 0) {
+			const patientRecord = await db
+				.select({ doctorId: patient.doctorId })
+				.from(patient)
+				.where(eq(patient.userId, conv[0].patientId))
+				.limit(1);
+
+			if (patientRecord.length > 0 && patientRecord[0].doctorId) {
+				const doctor = await db
+					.select({ name: user.name })
+					.from(user)
+					.where(eq(user.id, patientRecord[0].doctorId))
+					.limit(1);
+
+				if (doctor.length > 0) {
+					senderName = doctor[0].name;
+				}
+			}
+		}
+	}
+
 	const newMsg = {
 		id: crypto.randomUUID(),
 		conversationId,
 		senderId: session.user.id,
-		senderName: session.user.name,
+		senderName,
 		body,
 		read: true,
 	};

@@ -65,6 +65,12 @@ export function VitalSignsForm({
 				return;
 			}
 
+			toast.success(
+				editId
+					? "Semnele vitale au fost actualizate cu succes."
+					: "Semnele vitale au fost înregistrate cu succes.",
+			);
+
 			if (result.status === "critical") {
 				toast.warning(
 					"Valorile introduse sunt critice. Medicul dumneavoastră va fi notificat.",

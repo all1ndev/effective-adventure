@@ -28,7 +28,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { PasswordInput } from "@/components/password-input";
+
 import { Separator } from "@/components/ui/separator";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
@@ -40,7 +40,6 @@ const defaultValues: AddDoctorFormValues = {
 	firstName: "",
 	lastName: "",
 	email: "",
-	password: "",
 	specialization: "",
 	phone: "",
 	licenseNumber: "",
@@ -70,6 +69,7 @@ export function AddDoctor() {
 					}
 				}
 				setServerError(result.error ?? "Eroare necunoscută");
+				toast.error(result.error ?? "Eroare la adăugarea medicului");
 				return;
 			}
 
@@ -161,7 +161,7 @@ export function AddDoctor() {
 									name="phone"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Telefon</FormLabel>
+											<FormLabel>Telefon *</FormLabel>
 											<FormControl>
 												<Input placeholder="07xx xxx xxx" {...field} />
 											</FormControl>
@@ -189,10 +189,10 @@ export function AddDoctor() {
 							<CardHeader>
 								<CardTitle>Cont utilizator</CardTitle>
 								<CardDescription>
-									Credențialele cu care medicul se va autentifica.
+									O parolă va fi generată automat și trimisă pe email.
 								</CardDescription>
 							</CardHeader>
-							<CardContent className="grid gap-4 sm:grid-cols-2">
+							<CardContent className="grid gap-4 sm:grid-cols-1">
 								<FormField
 									control={form.control}
 									name="email"
@@ -205,19 +205,6 @@ export function AddDoctor() {
 													placeholder="medic@exemplu.com"
 													{...field}
 												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-								<FormField
-									control={form.control}
-									name="password"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Parolă *</FormLabel>
-											<FormControl>
-												<PasswordInput placeholder="********" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>

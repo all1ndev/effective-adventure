@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -22,26 +23,30 @@ export function Patients() {
 	const [admins, setAdmins] = useState<Admin[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	function fetchData() {
-		getPatients().then((data) => {
-			const mapped: Patient[] = data.map((p) => {
-				const result: Record<string, unknown> = {};
-				for (const [key, value] of Object.entries(p)) {
-					result[key] = value === null ? undefined : value;
-				}
-				return result as Patient;
-			});
-			setPatients(mapped);
-			setLoading(false);
-		});
-	}
+	const fetchData = useCallback(() => {
+		getPatients()
+			.then((data) => {
+				const mapped: Patient[] = data.map((p) => {
+					const result: Record<string, unknown> = {};
+					for (const [key, value] of Object.entries(p)) {
+						result[key] = value === null ? undefined : value;
+					}
+					return result as Patient;
+				});
+				setPatients(mapped);
+			})
+			.catch(() => {
+				toast.error("Eroare la încărcarea pacienților.");
+			})
+			.finally(() => setLoading(false));
+	}, []);
 
 	useEffect(() => {
 		fetchData();
 		getAdmins()
 			.then(setAdmins)
 			.catch(() => {});
-	}, []);
+	}, [fetchData]);
 
 	return (
 		<>

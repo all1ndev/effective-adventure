@@ -1,24 +1,15 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 import { db } from "@/db";
 import { doctor } from "@/db/doctor-schema";
 import { user } from "@/db/auth-schema";
 import { addDoctorFormSchema, editDoctorFormSchema } from "./data/schema";
 import { eq, asc } from "drizzle-orm";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { randomUUID } from "crypto";
-
-async function getSessionOrThrow() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-	if (!session) {
-		throw new Error("Neautorizat");
-	}
-	return session;
-}
+import { randomUUID, randomBytes } from "crypto";
+import { sendCredentialsEmail } from "@/lib/email";
 
 export async function getDoctors() {
 	const session = await getSessionOrThrow();
@@ -64,6 +55,7 @@ export async function addDoctorWithUser(values: unknown) {
 	}
 
 	const data = parsed.data;
+	const generatedPassword = randomBytes(10).toString("base64url");
 
 	let userId: string | null = null;
 
@@ -72,7 +64,7 @@ export async function addDoctorWithUser(values: unknown) {
 			body: {
 				name: `${data.firstName} ${data.lastName}`,
 				email: data.email,
-				password: data.password,
+				password: generatedPassword,
 				role: "user",
 			},
 		});
@@ -101,12 +93,58 @@ export async function addDoctorWithUser(values: unknown) {
 			status: "activ",
 		});
 
+		const loginUrl = `${process.env.BETTER_AUTH_URL}/sign-in`;
+		await sendCredentialsEmail({
+			to: data.email,
+			name: `${data.firstName} ${data.lastName}`,
+			role: "medic",
+			password: generatedPassword,
+			loginUrl,
+		});
+
 		revalidatePath("/doctors");
 		revalidatePath("/add-doctor");
 		return { success: true };
 	} catch (err) {
 		const message =
 			err instanceof Error ? err.message : "Eroare la salvarea medicului";
+		return { success: false, error: message };
+	}
+}
+
+export async function deleteDoctor(id: string) {
+	const session = await getSessionOrThrow();
+	if (session.user.role !== "admin") {
+		return { success: false, error: "Neautorizat" };
+	}
+
+	try {
+		// Find the doctor's userId first
+		const doctorRecord = await db
+			.select({ userId: doctor.userId })
+			.from(doctor)
+			.where(eq(doctor.id, id))
+			.limit(1);
+
+		if (!doctorRecord[0]) {
+			return { success: false, error: "Medicul nu a fost găsit" };
+		}
+
+		const { userId } = doctorRecord[0];
+
+		// Delete the doctor profile
+		await db.delete(doctor).where(eq(doctor.id, id));
+
+		// Delete the user account if it exists (cascades sessions, accounts)
+		if (userId) {
+			await db.delete(user).where(eq(user.id, userId));
+		}
+
+		revalidatePath("/doctors");
+		return { success: true };
+	} catch (err) {
+		const message =
+			err instanceof Error ? err.message : "Eroare la ștergerea medicului";
 		return { success: false, error: message };
 	}
 }

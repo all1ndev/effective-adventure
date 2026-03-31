@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -18,7 +19,11 @@ export function DoctorDashboard() {
 	const [data, setData] = useState<DashboardData | null>(null);
 
 	useEffect(() => {
-		getDoctorDashboardData().then(setData);
+		getDoctorDashboardData()
+			.then(setData)
+			.catch(() => {
+				toast.error("Eroare la încărcarea dashboard-ului.");
+			});
 	}, []);
 
 	if (!data) {

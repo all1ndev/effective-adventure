@@ -5,8 +5,8 @@ import { z } from "zod";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { AlertCircle } from "lucide-react";
-import { updateFullPatient } from "../actions";
+import { AlertCircle, Trash2 } from "lucide-react";
+import { updateFullPatient, deletePatient } from "../actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -38,6 +38,17 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { type Patient } from "../data/schema";
 
 const sexValues = ["masculin", "feminin", "nespecificat"] as const;
@@ -91,7 +102,7 @@ const patientFormSchema = z.object({
 	hbIgRoute: z.enum(hbIgRouteValues),
 	hbIgFrequency: z.string().optional(),
 	otherMeds: z.string().optional(),
-	patientPhone: z.string().optional(),
+	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	doctorAccount: z.string().optional(),
 	status: z.enum(["activ", "inactiv"]),
 });
@@ -183,6 +194,7 @@ export function EditPatientSheet({
 	onSaved,
 }: EditPatientSheetProps) {
 	const [isPending, startTransition] = useTransition();
+	const [isDeleting, startDeleteTransition] = useTransition();
 	const [submitError, setSubmitError] = useState<string | null>(null);
 
 	const form = useForm<PatientFormValues>({
@@ -231,6 +243,21 @@ export function EditPatientSheet({
 	}, [form, height, weight]);
 
 	if (!patient) return null;
+
+	function handleDelete() {
+		if (!patient) return;
+		startDeleteTransition(async () => {
+			const result = await deletePatient(patient.id);
+			if (!result.success) {
+				setSubmitError(result.error ?? "Eroare necunoscută");
+				toast.error(result.error ?? "Eroare la ștergerea pacientului");
+				return;
+			}
+			toast.success("Pacientul a fost șters cu succes!");
+			onOpenChange(false);
+			onSaved?.();
+		});
+	}
 
 	function onSubmit(data: PatientFormValues) {
 		if (!patient) return;
@@ -307,7 +334,7 @@ export function EditPatientSheet({
 										name="patientPhone"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Numar de telefon</FormLabel>
+												<FormLabel>Număr de telefon *</FormLabel>
 												<FormControl>
 													<Input
 														type="tel"
@@ -1014,18 +1041,55 @@ export function EditPatientSheet({
 								/>
 							</section>
 
-							<div className="flex flex-wrap gap-3">
-								<Button type="submit" disabled={isPending}>
-									{isPending ? "Se salveaza..." : "Salveaza modificarile"}
-								</Button>
-								<Button
-									type="button"
-									variant="outline"
-									onClick={() => onOpenChange(false)}
-									disabled={isPending}
-								>
-									Anuleaza
-								</Button>
+							<div className="flex flex-wrap justify-between gap-3">
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
+										<Button
+											type="button"
+											variant="destructive"
+											disabled={isPending || isDeleting}
+										>
+											<Trash2 className="mr-2 h-4 w-4" />
+											{isDeleting ? "Se șterge..." : "Șterge pacientul"}
+										</Button>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle>Confirmați ștergerea</AlertDialogTitle>
+											<AlertDialogDescription>
+												Această acțiune este ireversibilă. Contul pacientului{" "}
+												<strong>
+													{patient.lastName} {patient.firstName}
+												</strong>{" "}
+												va fi șters definitiv, împreună cu toate datele medicale
+												asociate (medicamente, semne vitale, simptome, rezultate
+												laborator, note clinice, jurnal, mesaje).
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogFooter>
+											<AlertDialogCancel>Anulează</AlertDialogCancel>
+											<AlertDialogAction
+												onClick={handleDelete}
+												className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+											>
+												Șterge definitiv
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
+								</AlertDialog>
+								<div className="flex gap-3">
+									<Button
+										type="button"
+										variant="outline"
+										onClick={() => onOpenChange(false)}
+										disabled={isPending || isDeleting}
+									>
+										Anulează
+									</Button>
+									<Button type="submit" disabled={isPending || isDeleting}>
+										{isPending ? "Se salvează..." : "Salvează modificările"}
+									</Button>
+								</div>
 							</div>
 						</form>
 					</Form>

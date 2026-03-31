@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -20,14 +21,18 @@ export function ClinicalNotes({ patientId }: ClinicalNotesProps) {
 	const [notes, setNotes] = useState<ClinicalNote[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	function fetchData() {
-		getClinicalNotesByPatientId(patientId).then((data) => {
-			setNotes(data);
-			setLoading(false);
-		});
-	}
+	const fetchData = useCallback(() => {
+		getClinicalNotesByPatientId(patientId)
+			.then((data) => {
+				setNotes(data);
+			})
+			.catch(() => {
+				toast.error("Eroare la încărcarea notelor clinice.");
+			})
+			.finally(() => setLoading(false));
+	}, [patientId]);
 
-	useEffect(fetchData, [patientId]);
+	useEffect(fetchData, [fetchData]);
 
 	return (
 		<>

@@ -70,6 +70,11 @@ export function SymptomsForm({
 				return;
 			}
 
+			toast.success(
+				editId
+					? "Raportul a fost actualizat cu succes."
+					: "Simptomele au fost raportate cu succes.",
+			);
 			form.reset({
 				symptoms: [],
 				severity: undefined as unknown as SymptomReportFormValues["severity"],

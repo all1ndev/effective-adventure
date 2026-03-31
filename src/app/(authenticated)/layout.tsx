@@ -6,6 +6,7 @@ import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
 import { DirectionProvider } from "@/context/direction-provider";
 import { ThemeProvider } from "@/context/theme-provider";
 import { useSession } from "@/lib/auth-client";
+import { Toaster } from "@/components/ui/sonner";
 
 import { Suspense } from "react";
 
@@ -32,6 +33,7 @@ export default function AuthenticatedRootLayout({
 			<ThemeProvider>
 				<DirectionProvider>
 					<AuthenticatedLayout>{children}</AuthenticatedLayout>
+					<Toaster richColors closeButton />
 				</DirectionProvider>
 			</ThemeProvider>
 		</Suspense>

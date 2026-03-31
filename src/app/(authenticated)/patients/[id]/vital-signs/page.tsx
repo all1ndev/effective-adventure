@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { VitalSignsChart } from "@/features/vital-signs/components/vital-signs-chart";
@@ -23,10 +24,14 @@ export default function PatientVitalSignsPage({
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		getVitalSignsByPatientId(id).then((d) => {
-			setData(d);
-			setLoading(false);
-		});
+		getVitalSignsByPatientId(id)
+			.then((d) => {
+				setData(d);
+			})
+			.catch(() => {
+				toast.error("Eroare la încărcarea semnelor vitale.");
+			})
+			.finally(() => setLoading(false));
 	}, [id]);
 
 	return (

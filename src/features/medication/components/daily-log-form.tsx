@@ -112,6 +112,7 @@ export function DailyLogForm({
 				toast.error(result.error);
 				return;
 			}
+			toast.success("Jurnalul de astăzi a fost salvat cu succes.");
 			setSubmitted(true);
 			setTimeout(() => setSubmitted(false), 3000);
 			onSuccess?.();

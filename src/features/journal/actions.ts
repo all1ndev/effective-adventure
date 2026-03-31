@@ -2,21 +2,10 @@
 
 import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 import { db } from "@/db";
 import { journalEntry } from "@/db/journal-schema";
 import { journalEntryFormSchema } from "./data/schema";
-
-async function getSessionOrThrow() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-	if (!session) {
-		throw new Error("Neautorizat");
-	}
-	return session;
-}
 
 export async function createJournalEntry(values: unknown) {
 	const session = await getSessionOrThrow();
