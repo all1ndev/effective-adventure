@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -17,14 +18,18 @@ export function VitalSigns() {
 	const [vitalSigns, setVitalSigns] = useState<VitalEntry[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	function fetchData() {
-		getVitalSigns().then((data) => {
-			setVitalSigns(data);
-			setLoading(false);
-		});
-	}
+	const fetchData = useCallback(() => {
+		getVitalSigns()
+			.then((data) => {
+				setVitalSigns(data);
+			})
+			.catch(() => {
+				toast.error("Eroare la încărcarea semnelor vitale.");
+			})
+			.finally(() => setLoading(false));
+	}, []);
 
-	useEffect(fetchData, []);
+	useEffect(fetchData, [fetchData]);
 
 	return (
 		<>

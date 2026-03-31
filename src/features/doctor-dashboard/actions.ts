@@ -1,23 +1,12 @@
 "use server";
 
 import { eq, inArray, desc } from "drizzle-orm";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { patient } from "@/db/patient-schema";
 import { alert } from "@/db/alert-schema";
 import { medication, medicationLog } from "@/db/medication-schema";
-
-async function getSessionOrThrow() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-	if (!session) {
-		throw new Error("Neautorizat");
-	}
-	return session;
-}
 
 export async function getDoctorDashboardData() {
 	const session = await getSessionOrThrow();
@@ -25,13 +14,14 @@ export async function getDoctorDashboardData() {
 		throw new Error("Neautorizat");
 	}
 
-	const doctorId = session.user.id;
-
-	// Fetch doctor's patients
-	const patients = await db
-		.select()
-		.from(patient)
-		.where(eq(patient.doctorId, doctorId));
+	// Fetch patients (admin sees all, doctor sees own)
+	const patients =
+		session.user.role === "admin"
+			? await db.select().from(patient)
+			: await db
+					.select()
+					.from(patient)
+					.where(eq(patient.doctorId, session.user.id));
 
 	const patientUserIds = patients
 		.map((p) => p.userId)

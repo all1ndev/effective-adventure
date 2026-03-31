@@ -7,6 +7,9 @@ import { Main } from "@/components/layout/main";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Spinner } from "@/components/ui/spinner";
+import { Phone } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { ConversationList } from "./components/conversation-list";
 import { MessageThread } from "./components/message-thread";
 import { MessageInput } from "./components/message-input";
@@ -38,7 +41,11 @@ export function Messaging() {
 				setConversations(data);
 				if (data.length > 0) setActiveId(data[0].id);
 			}),
-		]).then(() => setLoading(false));
+		])
+			.catch(() => {
+				toast.error("Eroare la încărcarea mesageriei.");
+			})
+			.finally(() => setLoading(false));
 	}, []);
 
 	useEffect(() => {
@@ -52,7 +59,11 @@ export function Messaging() {
 	async function handleSend(body: string) {
 		if (!activeId) return;
 		const result = await sendMessage(activeId, body);
-		if (result.success && result.message) {
+		if (!result.success) {
+			toast.error("Eroare la trimiterea mesajului.");
+			return;
+		}
+		if (result.message) {
 			setThreadMessages((prev) => [
 				...prev,
 				{
@@ -100,14 +111,31 @@ export function Messaging() {
 						<div className="flex flex-1 flex-col overflow-hidden">
 							{activeConv ? (
 								<>
-									<div className="border-b px-4 py-3">
-										<h3 className="font-semibold">{activeConv.patientName}</h3>
-										<p className="text-xs text-muted-foreground">
-											{currentUserRole === "admin" ||
-											currentUserRole === "doctor"
-												? "Pacient"
-												: "Medic responsabil"}
-										</p>
+									<div className="flex items-center justify-between border-b px-4 py-3">
+										<div>
+											<h3 className="font-semibold">
+												{activeConv.patientName}
+											</h3>
+											<p className="text-xs text-muted-foreground">
+												{currentUserRole === "admin" ||
+												currentUserRole === "doctor"
+													? `Pacient${activeConv.doctorName ? ` · Dr. ${activeConv.doctorName}` : ""}`
+													: "Medic responsabil"}
+											</p>
+										</div>
+										{activeConv.phone && (
+											<Button
+												variant="outline"
+												size="icon"
+												asChild
+												className="shrink-0"
+											>
+												<a href={`tel:${activeConv.phone}`}>
+													<Phone className="h-4 w-4" />
+													<span className="sr-only">Sună</span>
+												</a>
+											</Button>
+										)}
 									</div>
 									<div className="flex-1 overflow-y-auto">
 										<MessageThread

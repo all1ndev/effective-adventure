@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
-import { Activity, Pill, MessageSquare, ArrowRight } from "lucide-react";
+import { Activity, Pill, MessageSquare, ArrowRight, Phone } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -18,10 +19,14 @@ export function PatientDashboard() {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		getPatientDashboardData().then((d) => {
-			setData(d);
-			setLoading(false);
-		});
+		getPatientDashboardData()
+			.then((d) => {
+				setData(d);
+			})
+			.catch(() => {
+				toast.error("Eroare la încărcarea dashboard-ului.");
+			})
+			.finally(() => setLoading(false));
 	}, []);
 
 	return (
@@ -130,6 +135,18 @@ export function PatientDashboard() {
 									<ArrowRight className="h-4 w-4" />
 								</Link>
 							</Button>
+							{data?.doctorPhone && (
+								<Button
+									variant="outline"
+									className="justify-between h-auto py-3"
+									asChild
+								>
+									<a href={`tel:${data.doctorPhone}`}>
+										<span>Sună medicul</span>
+										<Phone className="h-4 w-4" />
+									</a>
+								</Button>
+							)}
 						</div>
 					</div>
 				</Main>

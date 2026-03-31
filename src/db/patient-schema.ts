@@ -51,7 +51,9 @@ export const patient = pgTable(
 	{
 		id: text("id").primaryKey(),
 		userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
-		doctorId: text("doctor_id").references(() => user.id),
+		doctorId: text("doctor_id").references(() => user.id, {
+			onDelete: "set null",
+		}),
 		patientCode: text("patient_code").notNull(),
 		firstName: text("first_name").notNull(),
 		lastName: text("last_name").notNull(),

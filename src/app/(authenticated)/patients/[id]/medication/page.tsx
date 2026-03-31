@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { MedicationForm } from "@/features/medication/components/medication-form";
@@ -30,7 +31,7 @@ export default function PatientMedicationPage({
 	const [logs, setLogs] = useState<MedicationLog[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	function fetchData() {
+	const fetchData = useCallback(() => {
 		Promise.all([
 			getMedicationsByPatientId(id).then((data) =>
 				setMeds(data.map((m) => ({ ...m, endDate: m.endDate ?? undefined }))),
@@ -47,12 +48,12 @@ export default function PatientMedicationPage({
 			),
 		])
 			.catch(() => {
-				// Allow the page to render even if fetch fails
+				toast.error("Eroare la încărcarea medicației.");
 			})
 			.finally(() => setLoading(false));
-	}
+	}, [id]);
 
-	useEffect(fetchData, [id]);
+	useEffect(fetchData, [fetchData]);
 
 	return (
 		<RoleGuard allowedRoles={["admin", "doctor"]}>

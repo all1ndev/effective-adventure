@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -22,7 +23,7 @@ export function Medication() {
 	const [logs, setLogs] = useState<MedicationLog[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	function fetchData() {
+	const fetchData = useCallback(() => {
 		Promise.all([
 			getMedications().then((data) =>
 				setMeds(data.map((m) => ({ ...m, endDate: m.endDate ?? undefined }))),
@@ -39,12 +40,12 @@ export function Medication() {
 			),
 		])
 			.catch(() => {
-				// Allow the page to render even if fetch fails
+				toast.error("Eroare la încărcarea medicației.");
 			})
 			.finally(() => setLoading(false));
-	}
+	}, []);
 
-	useEffect(fetchData, []);
+	useEffect(fetchData, [fetchData]);
 
 	return (
 		<>

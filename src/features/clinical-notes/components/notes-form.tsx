@@ -39,6 +39,7 @@ export function NotesForm({ patientId, onSuccess }: NotesFormProps) {
 				toast.error(result.error);
 				return;
 			}
+			toast.success("Nota a fost salvată cu succes.");
 			setContent("");
 			setSubmitted(true);
 			setTimeout(() => setSubmitted(false), 4000);

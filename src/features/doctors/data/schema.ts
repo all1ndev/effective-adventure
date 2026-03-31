@@ -10,7 +10,7 @@ export const doctorSchema = z.object({
 	lastName: z.string(),
 	email: z.string().optional(),
 	specialization: z.string().nullable().optional(),
-	phone: z.string().nullable().optional(),
+	phone: z.string(),
 	licenseNumber: z.string().nullable().optional(),
 	status: doctorStatusSchema,
 });
@@ -23,9 +23,8 @@ export const addDoctorFormSchema = z.object({
 		.string()
 		.email("Adresa de email invalidă.")
 		.min(1, "Câmpul este obligatoriu."),
-	password: z.string().min(7, "Parola trebuie să aibă cel puțin 7 caractere."),
 	specialization: z.string().optional(),
-	phone: z.string().optional(),
+	phone: z.string().min(1, "Câmpul este obligatoriu."),
 	licenseNumber: z.string().optional(),
 });
 export type AddDoctorFormValues = z.infer<typeof addDoctorFormSchema>;
@@ -34,7 +33,7 @@ export const editDoctorFormSchema = z.object({
 	firstName: z.string().min(1, "Câmpul este obligatoriu."),
 	lastName: z.string().min(1, "Câmpul este obligatoriu."),
 	specialization: z.string().optional(),
-	phone: z.string().optional(),
+	phone: z.string().min(1, "Câmpul este obligatoriu."),
 	licenseNumber: z.string().optional(),
 	status: z.enum(["activ", "inactiv"]),
 });

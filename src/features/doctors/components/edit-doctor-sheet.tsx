@@ -4,8 +4,8 @@ import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { AlertCircle } from "lucide-react";
-import { updateDoctor } from "../actions";
+import { AlertCircle, Trash2 } from "lucide-react";
+import { updateDoctor, deleteDoctor } from "../actions";
 import {
 	editDoctorFormSchema,
 	type EditDoctorFormValues,
@@ -36,6 +36,17 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface EditDoctorSheetProps {
 	doctor: Doctor | null;
@@ -63,6 +74,7 @@ export function EditDoctorSheet({
 }: EditDoctorSheetProps) {
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [isPending, startTransition] = useTransition();
+	const [isDeleting, startDeleteTransition] = useTransition();
 
 	const form = useForm<EditDoctorFormValues>({
 		resolver: zodResolver(editDoctorFormSchema),
@@ -81,6 +93,21 @@ export function EditDoctorSheet({
 			form.reset(doctorToFormValues(doctor));
 		}
 	}, [doctor, form]);
+
+	function handleDelete() {
+		if (!doctor) return;
+		startDeleteTransition(async () => {
+			const result = await deleteDoctor(doctor.id);
+			if (!result.success) {
+				setServerError(result.error ?? "Eroare necunoscută");
+				toast.error(result.error ?? "Eroare la ștergerea medicului");
+				return;
+			}
+			toast.success("Medicul a fost șters cu succes!");
+			onOpenChange(false);
+			onSaved?.();
+		});
+	}
 
 	function onSubmit(values: EditDoctorFormValues) {
 		if (!doctor) return;
@@ -176,7 +203,7 @@ export function EditDoctorSheet({
 							name="phone"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Telefon</FormLabel>
+									<FormLabel>Telefon *</FormLabel>
 									<FormControl>
 										<Input placeholder="07xx xxx xxx" {...field} />
 									</FormControl>
@@ -221,17 +248,52 @@ export function EditDoctorSheet({
 							)}
 						/>
 
-						<div className="flex justify-end gap-2 pt-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => onOpenChange(false)}
-							>
-								Anulează
-							</Button>
-							<Button type="submit" disabled={isPending}>
-								{isPending ? "Se salvează..." : "Salvează"}
-							</Button>
+						<div className="flex justify-between gap-2 pt-4">
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button
+										type="button"
+										variant="destructive"
+										disabled={isPending || isDeleting}
+									>
+										<Trash2 className="mr-2 h-4 w-4" />
+										{isDeleting ? "Se șterge..." : "Șterge medicul"}
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle>Confirmați ștergerea</AlertDialogTitle>
+										<AlertDialogDescription>
+											Această acțiune este ireversibilă. Contul medicului{" "}
+											<strong>
+												{doctor?.lastName} {doctor?.firstName}
+											</strong>{" "}
+											va fi șters definitiv, împreună cu toate datele asociate.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>Anulează</AlertDialogCancel>
+										<AlertDialogAction
+											onClick={handleDelete}
+											className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+										>
+											Șterge definitiv
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
+							<div className="flex gap-2">
+								<Button
+									type="button"
+									variant="outline"
+									onClick={() => onOpenChange(false)}
+								>
+									Anulează
+								</Button>
+								<Button type="submit" disabled={isPending || isDeleting}>
+									{isPending ? "Se salvează..." : "Salvează"}
+								</Button>
+							</div>
 						</div>
 					</form>
 				</Form>

@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, KeyRound, LogOut } from "lucide-react";
 import useDialogState from "@/hooks/use-dialog-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,6 +16,7 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { SignOutDialog } from "@/components/sign-out-dialog";
+import { ChangePasswordDialog } from "@/components/change-password-dialog";
 
 type NavUserProps = {
 	user: {
@@ -36,6 +37,7 @@ function getInitials(name: string): string {
 export function NavUser({ user }: NavUserProps) {
 	const { isMobile } = useSidebar();
 	const [open, setOpen] = useDialogState();
+	const [passwordOpen, setPasswordOpen] = useDialogState();
 	const initials = getInitials(user.name);
 
 	return (
@@ -82,6 +84,10 @@ export function NavUser({ user }: NavUserProps) {
 								</div>
 							</DropdownMenuLabel>
 							<DropdownMenuSeparator />
+							<DropdownMenuItem onClick={() => setPasswordOpen(true)}>
+								<KeyRound />
+								Schimbă parola
+							</DropdownMenuItem>
 							<DropdownMenuItem
 								variant="destructive"
 								onClick={() => setOpen(true)}
@@ -95,6 +101,10 @@ export function NavUser({ user }: NavUserProps) {
 			</SidebarMenu>
 
 			<SignOutDialog open={!!open} onOpenChange={setOpen} />
+			<ChangePasswordDialog
+				open={!!passwordOpen}
+				onOpenChange={setPasswordOpen}
+			/>
 		</>
 	);
 }

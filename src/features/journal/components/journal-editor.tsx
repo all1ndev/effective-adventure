@@ -43,6 +43,7 @@ export function JournalEditor({ onSuccess }: JournalEditorProps) {
 				toast.error(result.error);
 				return;
 			}
+			toast.success("Intrarea a fost salvată cu succes.");
 			setSelectedMood(null);
 			setContent("");
 			setSubmitted(true);

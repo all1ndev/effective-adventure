@@ -43,6 +43,13 @@
 			"when": 1774817251919,
 			"tag": "0005_loud_loners",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1774983464193,
+			"tag": "0006_dry_harry_osborn",
+			"breakpoints": true
 		}
 	]
 }

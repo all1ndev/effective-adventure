@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { LabResultsTable } from "@/features/lab-results/components/lab-results-table";
@@ -23,14 +24,18 @@ export default function PatientLabResultsPage({
 	const [results, setResults] = useState<LabResult[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	function fetchData() {
-		getLabResultsByPatientId(id).then((data) => {
-			setResults(data);
-			setLoading(false);
-		});
-	}
+	const fetchData = useCallback(() => {
+		getLabResultsByPatientId(id)
+			.then((data) => {
+				setResults(data);
+			})
+			.catch(() => {
+				toast.error("Eroare la încărcarea rezultatelor de laborator.");
+			})
+			.finally(() => setLoading(false));
+	}, [id]);
 
-	useEffect(fetchData, [id]);
+	useEffect(fetchData, [fetchData]);
 
 	const latest = results[0];
 

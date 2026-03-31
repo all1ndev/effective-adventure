@@ -2,23 +2,12 @@
 
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { labResult } from "@/db/lab-result-schema";
 import { labResultFormSchema } from "./data/schema";
 import { generateLabResultAlerts } from "@/features/alerts/generate-alerts";
-
-async function getSessionOrThrow() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-	if (!session) {
-		throw new Error("Neautorizat");
-	}
-	return session;
-}
 
 export async function getLabResults() {
 	const session = await getSessionOrThrow();

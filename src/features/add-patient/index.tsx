@@ -100,12 +100,11 @@ const patientFormSchema = z.object({
 	hbIgRoute: z.enum(hbIgRouteValues),
 	hbIgFrequency: z.string().optional(),
 	otherMeds: z.string().optional(),
-	patientPhone: z.string().optional(),
+	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	patientEmail: z
 		.string()
 		.email("Adresa de email invalida.")
 		.min(1, "Câmpul este obligatoriu."),
-	patientPassword: z.string().min(6, "Câmpul este obligatoriu."),
 	doctorAccount: z.string().min(1, "Câmpul este obligatoriu."),
 });
 
@@ -140,7 +139,6 @@ const defaultValues: PatientFormValues = {
 	otherMeds: "",
 	patientPhone: "",
 	patientEmail: "",
-	patientPassword: "",
 	doctorAccount: undefined as unknown as string,
 };
 
@@ -149,7 +147,6 @@ const REQUIRED_FIELD_LABELS: Record<string, string> = {
 	lastName: "Nume",
 	patientId: "ID pacient",
 	patientEmail: "Email pacient",
-	patientPassword: "Parola pacient",
 	doctorAccount: "Medic responsabil",
 	sex: "Sex",
 	preferredLanguage: "Limba preferata",
@@ -333,7 +330,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="patientPhone"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Numar de telefon</FormLabel>
+														<FormLabel>Număr de telefon *</FormLabel>
 														<FormControl>
 															<Input
 																type="tel"
@@ -405,31 +402,9 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 													</FormItem>
 												)}
 											/>
-											<FormField
-												control={form.control}
-												name="patientPassword"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>
-															Creare parola{" "}
-															<span className="text-destructive">*</span>
-														</FormLabel>
-														<FormControl>
-															<Input
-																type="password"
-																placeholder="Minim 6 caractere"
-																className={
-																	formErrors.patientPassword
-																		? "border-destructive"
-																		: ""
-																}
-																{...field}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
+											<p className="text-sm text-muted-foreground pt-2">
+												O parolă va fi generată automat și trimisă pe email.
+											</p>
 										</div>
 									</section>
 

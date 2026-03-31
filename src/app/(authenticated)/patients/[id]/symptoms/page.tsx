@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { SymptomsList } from "@/features/symptoms/components/symptoms-list";
@@ -23,10 +24,14 @@ export default function PatientSymptomsPage({
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		getSymptomReportsByPatientId(id).then((d) => {
-			setData(d);
-			setLoading(false);
-		});
+		getSymptomReportsByPatientId(id)
+			.then((d) => {
+				setData(d);
+			})
+			.catch(() => {
+				toast.error("Eroare la încărcarea simptomelor.");
+			})
+			.finally(() => setLoading(false));
 	}, [id]);
 
 	return (

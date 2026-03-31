@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface ConversationItem {
 	id: string;
 	patientName: string;
+	doctorName?: string;
 	lastMessage: string;
 	lastMessageAt: Date | string;
 	unreadCount: number;
@@ -46,6 +47,11 @@ export function ConversationList({
 								</Badge>
 							)}
 						</div>
+						{conv.doctorName && (
+							<p className="truncate text-xs text-muted-foreground">
+								Dr. {conv.doctorName}
+							</p>
+						)}
 						<p className="truncate text-xs text-muted-foreground">
 							{conv.lastMessage}
 						</p>
