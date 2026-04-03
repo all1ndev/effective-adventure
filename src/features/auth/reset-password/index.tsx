@@ -1,0 +1,43 @@
+import Link from "next/link";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { AuthLayout } from "../auth-layout";
+import { ResetPasswordForm } from "./components/reset-password-form";
+
+export function ResetPassword({ token }: { token: string }) {
+	return (
+		<AuthLayout>
+			<Card className="gap-4">
+				<CardHeader>
+					<CardTitle className="text-lg tracking-tight">
+						Resetare parolă
+					</CardTitle>
+					<CardDescription>
+						Introduceți noua parolă pentru contul dumneavoastră.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<ResetPasswordForm token={token} />
+				</CardContent>
+				<CardFooter>
+					<p className="mx-auto px-8 text-center text-sm text-balance text-muted-foreground">
+						Îți amintești parola?{" "}
+						<Link
+							href="/sign-in"
+							className="underline underline-offset-4 hover:text-primary"
+						>
+							Autentifică-te
+						</Link>
+						.
+					</p>
+				</CardFooter>
+			</Card>
+		</AuthLayout>
+	);
+}
