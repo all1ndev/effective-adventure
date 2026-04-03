@@ -351,7 +351,7 @@ export function EditPatientSheet({
 										name="doctorAccount"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Medic responsabil (Admin)</FormLabel>
+												<FormLabel>Medic responsabil</FormLabel>
 												<Select
 													onValueChange={field.onChange}
 													value={field.value}

@@ -348,7 +348,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>
-															Medic responsabil (Admin){" "}
+															Medic responsabil{" "}
 															<span className="text-destructive">*</span>
 														</FormLabel>
 														<Select
