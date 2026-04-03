@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { sleep, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -16,6 +16,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { requestPasswordReset } from "../actions";
 
 const formSchema = z.object({
 	email: z.email({
@@ -36,21 +37,21 @@ export function ForgotPasswordForm({
 		defaultValues: { email: "" },
 	});
 
-	function onSubmit(data: z.infer<typeof formSchema>) {
+	async function onSubmit(data: z.infer<typeof formSchema>) {
 		setIsLoading(true);
 
-		console.log(data);
+		const result = await requestPasswordReset(data.email);
 
-		toast.promise(sleep(2000), {
-			loading: "Se trimite e-mailul...",
-			success: () => {
-				setIsLoading(false);
-				form.reset();
-				router.push("/otp");
-				return `E-mail trimis la ${data.email}`;
-			},
-			error: "Eroare",
-		});
+		setIsLoading(false);
+
+		if (!result.success) {
+			toast.error(result.error);
+			return;
+		}
+
+		form.reset();
+		toast.success(`E-mail trimis la ${data.email}`);
+		router.push("/sign-in");
 	}
 
 	return (
@@ -74,7 +75,7 @@ export function ForgotPasswordForm({
 					)}
 				/>
 				<Button className="mt-2" disabled={isLoading}>
-					Continue
+					Continuă
 					{isLoading ? <Loader2 className="animate-spin" /> : <ArrowRight />}
 				</Button>
 			</form>
