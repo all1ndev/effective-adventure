@@ -26,7 +26,21 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { getDoctorPatients, createLabResultWithPdf } from "./actions";
+import {
+	getDoctorPatients,
+	createLabResultWithPdf,
+	getSentLabResults,
+	deleteSentLabResult,
+} from "./actions";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { Trash2, FileText } from "lucide-react";
 
 interface PatientOption {
 	id: string;
@@ -36,8 +50,18 @@ interface PatientOption {
 	patientCode: string;
 }
 
+interface SentResult {
+	id: string;
+	date: string;
+	pdfFileName: string | null;
+	createdAt: Date;
+	patientName: string;
+	patientEmail: string;
+}
+
 export function SendLabResults() {
 	const [patients, setPatients] = useState<PatientOption[]>([]);
+	const [sentResults, setSentResults] = useState<SentResult[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [isPending, startTransition] = useTransition();
 
@@ -47,11 +71,18 @@ export function SendLabResults() {
 	const [dragActive, setDragActive] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
-	useEffect(() => {
-		getDoctorPatients()
-			.then(setPatients)
+	const loadData = useCallback(() => {
+		Promise.all([getDoctorPatients(), getSentLabResults()])
+			.then(([p, r]) => {
+				setPatients(p);
+				setSentResults(r);
+			})
 			.finally(() => setLoading(false));
 	}, []);
+
+	useEffect(() => {
+		loadData();
+	}, [loadData]);
 
 	const handleDrag = useCallback((e: React.DragEvent) => {
 		e.preventDefault();
@@ -145,6 +176,7 @@ export function SendLabResults() {
 			setDate("");
 			setFile(null);
 			if (fileInputRef.current) fileInputRef.current.value = "";
+			loadData();
 		});
 	}
 
@@ -173,118 +205,188 @@ export function SendLabResults() {
 						<Spinner className="size-6" />
 					</div>
 				) : (
-					<Card className="max-w-2xl">
-						<CardHeader>
-							<CardTitle>Încărcare PDF analize</CardTitle>
-							<CardDescription>
-								Selectați pacientul, data recoltării și fișierul PDF cu
-								rezultatele.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<form onSubmit={handleSubmit} className="space-y-6">
-								<div className="space-y-1.5">
-									<Label htmlFor="patient">Pacient</Label>
-									<Select
-										value={selectedPatientId}
-										onValueChange={setSelectedPatientId}
-									>
-										<SelectTrigger id="patient" className="w-full">
-											<SelectValue placeholder="Selectați pacientul" />
-										</SelectTrigger>
-										<SelectContent>
-											{patients.map((p) => (
-												<SelectItem key={p.id} value={p.id}>
-													{p.lastName} {p.firstName} — {p.patientCode}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</div>
+					<>
+						<Card className="max-w-2xl">
+							<CardHeader>
+								<CardTitle>Încărcare PDF analize</CardTitle>
+								<CardDescription>
+									Selectați pacientul, data recoltării și fișierul PDF cu
+									rezultatele.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<form onSubmit={handleSubmit} className="space-y-6">
+									<div className="space-y-1.5">
+										<Label htmlFor="patient">Pacient</Label>
+										<Select
+											value={selectedPatientId}
+											onValueChange={setSelectedPatientId}
+										>
+											<SelectTrigger id="patient" className="w-full">
+												<SelectValue placeholder="Selectați pacientul" />
+											</SelectTrigger>
+											<SelectContent>
+												{patients.map((p) => (
+													<SelectItem key={p.id} value={p.id}>
+														{p.lastName} {p.firstName} — {p.patientCode}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
 
-								<div className="space-y-1.5">
-									<Label htmlFor="date">Data recoltării</Label>
-									<Input
-										id="date"
-										type="date"
-										value={date}
-										onChange={(e) => setDate(e.target.value)}
-									/>
-								</div>
-
-								<div className="space-y-1.5">
-									<Label>Fișier PDF</Label>
-									<div
-										className={`relative rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
-											dragActive
-												? "border-primary bg-primary/5"
-												: file
-													? "border-green-500 bg-green-50 dark:bg-green-950/20"
-													: "border-muted-foreground/25 hover:border-muted-foreground/50"
-										}`}
-										onDragEnter={handleDrag}
-										onDragLeave={handleDrag}
-										onDragOver={handleDrag}
-										onDrop={handleDrop}
-									>
-										{file ? (
-											<div className="flex flex-col items-center gap-2">
-												<CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
-												<p className="text-sm font-medium">{file.name}</p>
-												<p className="text-muted-foreground text-xs">
-													{(file.size / 1024 / 1024).toFixed(2)} MB
-												</p>
-												<Button
-													type="button"
-													variant="ghost"
-													size="sm"
-													onClick={() => {
-														setFile(null);
-														if (fileInputRef.current)
-															fileInputRef.current.value = "";
-													}}
-												>
-													<X className="mr-1 h-4 w-4" />
-													Șterge fișierul
-												</Button>
-											</div>
-										) : (
-											<div className="flex flex-col items-center gap-2">
-												<FileUp className="text-muted-foreground h-10 w-10" />
-												<p className="text-sm font-medium">
-													Trageți fișierul PDF aici
-												</p>
-												<p className="text-muted-foreground text-xs">
-													sau apăsați pentru a selecta (max 10 MB)
-												</p>
-												<Button
-													type="button"
-													variant="outline"
-													size="sm"
-													className="mt-2"
-													onClick={() => fileInputRef.current?.click()}
-												>
-													<Upload className="mr-1 h-4 w-4" />
-													Selectați fișierul
-												</Button>
-											</div>
-										)}
-										<input
-											ref={fileInputRef}
-											type="file"
-											accept="application/pdf"
-											className="hidden"
-											onChange={handleFileChange}
+									<div className="space-y-1.5">
+										<Label htmlFor="date">Data recoltării</Label>
+										<Input
+											id="date"
+											type="date"
+											value={date}
+											onChange={(e) => setDate(e.target.value)}
 										/>
 									</div>
-								</div>
 
-								<Button type="submit" className="w-full" disabled={isPending}>
-									{isPending ? "Se trimite..." : "Trimite rezultatele"}
-								</Button>
-							</form>
-						</CardContent>
-					</Card>
+									<div className="space-y-1.5">
+										<Label>Fișier PDF</Label>
+										<div
+											className={`relative rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
+												dragActive
+													? "border-primary bg-primary/5"
+													: file
+														? "border-green-500 bg-green-50 dark:bg-green-950/20"
+														: "border-muted-foreground/25 hover:border-muted-foreground/50"
+											}`}
+											onDragEnter={handleDrag}
+											onDragLeave={handleDrag}
+											onDragOver={handleDrag}
+											onDrop={handleDrop}
+										>
+											{file ? (
+												<div className="flex flex-col items-center gap-2">
+													<CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+													<p className="text-sm font-medium">{file.name}</p>
+													<p className="text-muted-foreground text-xs">
+														{(file.size / 1024 / 1024).toFixed(2)} MB
+													</p>
+													<Button
+														type="button"
+														variant="ghost"
+														size="sm"
+														onClick={() => {
+															setFile(null);
+															if (fileInputRef.current)
+																fileInputRef.current.value = "";
+														}}
+													>
+														<X className="mr-1 h-4 w-4" />
+														Șterge fișierul
+													</Button>
+												</div>
+											) : (
+												<div className="flex flex-col items-center gap-2">
+													<FileUp className="text-muted-foreground h-10 w-10" />
+													<p className="text-sm font-medium">
+														Trageți fișierul PDF aici
+													</p>
+													<p className="text-muted-foreground text-xs">
+														sau apăsați pentru a selecta (max 10 MB)
+													</p>
+													<Button
+														type="button"
+														variant="outline"
+														size="sm"
+														className="mt-2"
+														onClick={() => fileInputRef.current?.click()}
+													>
+														<Upload className="mr-1 h-4 w-4" />
+														Selectați fișierul
+													</Button>
+												</div>
+											)}
+											<input
+												ref={fileInputRef}
+												type="file"
+												accept="application/pdf"
+												className="hidden"
+												onChange={handleFileChange}
+											/>
+										</div>
+									</div>
+
+									<Button type="submit" className="w-full" disabled={isPending}>
+										{isPending ? "Se trimite..." : "Trimite rezultatele"}
+									</Button>
+								</form>
+							</CardContent>
+						</Card>
+
+						{sentResults.length > 0 && (
+							<Card>
+								<CardHeader>
+									<CardTitle>Istoric rezultate trimise</CardTitle>
+									<CardDescription>
+										Toate rezultatele de laborator trimise ca PDF.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<Table>
+										<TableHeader>
+											<TableRow>
+												<TableHead>Pacient</TableHead>
+												<TableHead>Data recoltării</TableHead>
+												<TableHead>Trimis la</TableHead>
+												<TableHead>Fișier</TableHead>
+												<TableHead className="w-[50px]" />
+											</TableRow>
+										</TableHeader>
+										<TableBody>
+											{sentResults.map((r) => (
+												<TableRow key={r.id}>
+													<TableCell className="font-medium">
+														{r.patientName}
+													</TableCell>
+													<TableCell>{r.date}</TableCell>
+													<TableCell>
+														{new Date(r.createdAt).toLocaleDateString("ro-RO")}
+													</TableCell>
+													<TableCell>
+														{r.pdfFileName && (
+															<a
+																href={`/api/files/lab-results/${r.pdfFileName}`}
+																target="_blank"
+																rel="noopener noreferrer"
+																className="text-primary inline-flex items-center gap-1 hover:underline"
+															>
+																<FileText className="h-4 w-4" />
+																PDF
+															</a>
+														)}
+													</TableCell>
+													<TableCell>
+														<Button
+															variant="ghost"
+															size="icon"
+															className="text-destructive h-8 w-8"
+															onClick={() => {
+																startTransition(async () => {
+																	const res = await deleteSentLabResult(r.id);
+																	if (res.success) {
+																		toast.success("Rezultatul a fost șters.");
+																		loadData();
+																	}
+																});
+															}}
+														>
+															<Trash2 className="h-4 w-4" />
+														</Button>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</CardContent>
+							</Card>
+						)}
+					</>
 				)}
 			</Main>
 		</>
