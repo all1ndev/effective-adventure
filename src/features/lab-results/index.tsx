@@ -57,14 +57,24 @@ export function LabResults() {
 					</div>
 				) : (
 					<>
-						{latest && <LabResultsTable result={latest} />}
-						<div className="grid gap-4 lg:grid-cols-2">
-							<LabResultsChart results={results} testName="ALT (SGPT)" />
-							<LabResultsChart results={results} testName="Tacrolimus" />
-						</div>
-						{results.slice(1).map((r) => (
-							<LabResultsTable key={r.id} result={r} />
-						))}
+						{results.length === 0 ? (
+							<div className="flex flex-1 items-center justify-center">
+								<p className="text-muted-foreground">
+									Încă nu aveți rezultate de laborator.
+								</p>
+							</div>
+						) : (
+							<>
+								{latest && <LabResultsTable result={latest} />}
+								<div className="grid gap-4 lg:grid-cols-2">
+									<LabResultsChart results={results} testName="ALT (SGPT)" />
+									<LabResultsChart results={results} testName="Tacrolimus" />
+								</div>
+								{results.slice(1).map((r) => (
+									<LabResultsTable key={r.id} result={r} />
+								))}
+							</>
+						)}
 					</>
 				)}
 			</Main>
