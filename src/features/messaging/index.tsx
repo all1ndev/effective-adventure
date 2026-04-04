@@ -32,6 +32,7 @@ export function Messaging() {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		let firstActiveId = "";
 		Promise.all([
 			getCurrentUser().then((u) => {
 				setCurrentUserId(u.id);
@@ -39,20 +40,25 @@ export function Messaging() {
 			}),
 			getConversations().then((data) => {
 				setConversations(data);
-				if (data.length > 0) setActiveId(data[0].id);
+				if (data.length > 0) firstActiveId = data[0].id;
 			}),
 		])
+			.then(() => {
+				if (firstActiveId) {
+					setActiveId(firstActiveId);
+					return getMessages(firstActiveId).then(setThreadMessages);
+				}
+			})
 			.catch(() => {
 				toast.error("Eroare la încărcarea mesageriei.");
 			})
 			.finally(() => setLoading(false));
 	}, []);
 
-	useEffect(() => {
-		if (activeId) {
-			getMessages(activeId).then(setThreadMessages);
-		}
-	}, [activeId]);
+	function handleSelectConversation(id: string) {
+		setActiveId(id);
+		getMessages(id).then(setThreadMessages);
+	}
 
 	const activeConv = conversations.find((c) => c.id === activeId);
 
@@ -104,7 +110,7 @@ export function Messaging() {
 								<ConversationList
 									conversations={conversations}
 									activeId={activeId}
-									onSelect={setActiveId}
+									onSelect={handleSelectConversation}
 								/>
 							</aside>
 						)}
@@ -148,8 +154,8 @@ export function Messaging() {
 							) : (
 								<div className="flex flex-1 items-center justify-center text-muted-foreground">
 									{currentUserRole === "admin" || currentUserRole === "doctor"
-										? "Selectati o conversatie"
-										: "Nu exista o conversatie activa"}
+										? "Selectați o conversație"
+										: "Nu există o conversație activă"}
 								</div>
 							)}
 						</div>
