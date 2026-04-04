@@ -48,6 +48,7 @@ import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { Spinner } from "@/components/ui/spinner";
 
 const sexValues = ["masculin", "feminin", "nespecificat"] as const;
 const languageValues = ["ro", "en", "it", "fr", "de"] as const;
@@ -186,6 +187,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 	const [isPending, startTransition] = useTransition();
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [recentPatients, setRecentPatients] = useState<RecentPatient[]>([]);
+	const [loadingRecent, setLoadingRecent] = useState(true);
 
 	const form = useForm<PatientFormValues>({
 		resolver: zodResolver(patientFormSchema),
@@ -230,7 +232,8 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 	useEffect(() => {
 		getRecentPatients()
 			.then(setRecentPatients)
-			.catch(() => {});
+			.catch(() => {})
+			.finally(() => setLoadingRecent(false));
 	}, []);
 
 	function onSubmit(data: PatientFormValues) {
@@ -246,7 +249,6 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 
 			toast.success("Pacientul a fost adaugat cu succes!");
 			form.reset(defaultValues);
-
 			getRecentPatients()
 				.then(setRecentPatients)
 				.catch(() => {});
@@ -1103,45 +1105,50 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
-								{recentPatients.length === 0 && (
+								{loadingRecent ? (
+									<div className="flex items-center justify-center py-4">
+										<Spinner className="size-5" />
+									</div>
+								) : recentPatients.length === 0 ? (
 									<p className="text-sm text-muted-foreground">
-										Niciun pacient adaugat inca.
+										Niciun pacient adăugat încă.
 									</p>
-								)}
-								{recentPatients.map((p) => (
-									<div
-										key={p.id}
-										className="flex items-center justify-between gap-4"
-									>
-										<div className="flex items-center gap-3">
-											<Avatar className="h-10 w-10">
-												<AvatarFallback>
-													{p.firstName[0]}
-													{p.lastName[0]}
-												</AvatarFallback>
-											</Avatar>
-											<div>
-												<p className="text-sm font-semibold">
-													{p.firstName} {p.lastName.charAt(0)}.
-												</p>
-												<p className="text-xs text-muted-foreground">
-													ID {p.patientCode}
-													{p.etiology ? ` · Etiologie ${p.etiology}` : ""}
-												</p>
+								) : null}
+								{!loadingRecent &&
+									recentPatients.map((p) => (
+										<div
+											key={p.id}
+											className="flex items-center justify-between gap-4"
+										>
+											<div className="flex items-center gap-3">
+												<Avatar className="h-10 w-10">
+													<AvatarFallback>
+														{p.firstName[0]}
+														{p.lastName[0]}
+													</AvatarFallback>
+												</Avatar>
+												<div>
+													<p className="text-sm font-semibold">
+														{p.firstName} {p.lastName.charAt(0)}.
+													</p>
+													<p className="text-xs text-muted-foreground">
+														ID {p.patientCode}
+														{p.etiology ? ` · Etiologie ${p.etiology}` : ""}
+													</p>
+												</div>
+											</div>
+											<div className="text-right">
+												<Badge variant="secondary">
+													{p.status === "activ" ? "Activ" : "Inactiv"}
+												</Badge>
+												{p.transplantDate && (
+													<p className="text-xs text-muted-foreground">
+														Transplant {p.transplantDate}
+													</p>
+												)}
 											</div>
 										</div>
-										<div className="text-right">
-											<Badge variant="secondary">
-												{p.status === "activ" ? "Activ" : "Inactiv"}
-											</Badge>
-											{p.transplantDate && (
-												<p className="text-xs text-muted-foreground">
-													Transplant {p.transplantDate}
-												</p>
-											)}
-										</div>
-									</div>
-								))}
+									))}
 							</CardContent>
 						</Card>
 
