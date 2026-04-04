@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { isMedicRole } from "@/lib/roles";
 import { headers } from "next/headers";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(request: NextRequest) {
 	const session = await auth.api.getSession({
@@ -35,11 +34,21 @@ export async function POST(request: NextRequest) {
 	}
 
 	const fileName = `${crypto.randomUUID()}.pdf`;
-	const uploadDir = path.join(process.cwd(), "uploads", "lab-results");
-	await mkdir(uploadDir, { recursive: true });
-
 	const buffer = Buffer.from(await file.arrayBuffer());
-	await writeFile(path.join(uploadDir, fileName), buffer);
+
+	const { error } = await supabaseAdmin.storage
+		.from("lab-results")
+		.upload(fileName, buffer, {
+			contentType: "application/pdf",
+			upsert: false,
+		});
+
+	if (error) {
+		return NextResponse.json(
+			{ error: "Eroare la încărcarea fișierului." },
+			{ status: 500 },
+		);
+	}
 
 	return NextResponse.json({ fileName });
 }

@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { patient } from "@/db/patient-schema";
 import { labResult } from "@/db/lab-result-schema";
 import { user } from "@/db/auth-schema";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function getDoctorPatients() {
 	const session = await getSessionOrThrow();
@@ -91,7 +92,19 @@ export async function deleteSentLabResult(id: string) {
 		throw new Error("Neautorizat");
 	}
 
+	const [record] = await db
+		.select({ pdfFileName: labResult.pdfFileName })
+		.from(labResult)
+		.where(eq(labResult.id, id));
+
 	await db.delete(labResult).where(eq(labResult.id, id));
+
+	if (record?.pdfFileName) {
+		await supabaseAdmin.storage
+			.from("lab-results")
+			.remove([record.pdfFileName]);
+	}
+
 	revalidatePath("/send-lab-results");
 	revalidatePath("/lab-results");
 	return { success: true };
