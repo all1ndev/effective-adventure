@@ -6,6 +6,7 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { vitalSign } from "@/db/vital-signs-schema";
+import { resolvePatientUserId } from "@/lib/patient-utils";
 import { vitalEntryFormSchema } from "./data/schema";
 import {
 	computeVitalStatus,
@@ -110,9 +111,11 @@ export async function getVitalSignsByPatientId(patientId: string) {
 		throw new Error("Neautorizat");
 	}
 
+	const userId = await resolvePatientUserId(patientId);
+
 	return db
 		.select()
 		.from(vitalSign)
-		.where(eq(vitalSign.patientId, patientId))
+		.where(eq(vitalSign.patientId, userId))
 		.orderBy(desc(vitalSign.date));
 }

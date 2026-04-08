@@ -6,6 +6,7 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { symptomReport } from "@/db/symptoms-schema";
+import { resolvePatientUserId } from "@/lib/patient-utils";
 import { symptomReportFormSchema } from "./data/schema";
 import { generateSymptomAlerts } from "@/features/alerts/generate-alerts";
 
@@ -106,9 +107,11 @@ export async function getSymptomReportsByPatientId(patientId: string) {
 		throw new Error("Neautorizat");
 	}
 
+	const userId = await resolvePatientUserId(patientId);
+
 	return db
 		.select()
 		.from(symptomReport)
-		.where(eq(symptomReport.patientId, patientId))
+		.where(eq(symptomReport.patientId, userId))
 		.orderBy(desc(symptomReport.date));
 }

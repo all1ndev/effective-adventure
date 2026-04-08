@@ -26,6 +26,7 @@ import {
 import {
 	medicationFormSchema,
 	frequencyOptions,
+	categoryOptions,
 	type MedicationFormValues,
 	type Medication,
 } from "../data/schema";
@@ -65,6 +66,7 @@ export function EditMedicationDialog({
 	});
 
 	const frequencyValue = watch("frequency");
+	const categoryValue = watch("category");
 
 	useEffect(() => {
 		if (med && open) {
@@ -75,6 +77,7 @@ export function EditMedicationDialog({
 				notes: med.notes ?? "",
 				startDate: med.startDate,
 				endDate: med.endDate ?? "",
+				category: med.category ?? "altele",
 			});
 		}
 	}, [med, open, reset]);
@@ -130,6 +133,24 @@ export function EditMedicationDialog({
 					onSubmit={handleSubmit(onSubmit)}
 					className="grid gap-4 sm:grid-cols-2"
 				>
+					<div className="space-y-1.5 sm:col-span-2">
+						<Label>Categorie</Label>
+						<Select
+							value={categoryValue}
+							onValueChange={(v) => setValue("category", v)}
+						>
+							<SelectTrigger>
+								<SelectValue placeholder="Selectați categoria" />
+							</SelectTrigger>
+							<SelectContent>
+								{categoryOptions.map((opt) => (
+									<SelectItem key={opt.value} value={opt.value}>
+										{opt.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
 					<div className="space-y-1.5 sm:col-span-2">
 						<Label htmlFor="edit-name">Nume medicament</Label>
 						<Input id="edit-name" {...register("name")} />

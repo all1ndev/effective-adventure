@@ -64,6 +64,13 @@
 			"when": 1775663037454,
 			"tag": "0008_living_grey_gargoyle",
 			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "7",
+			"when": 1775681163360,
+			"tag": "0009_steep_starhawk",
+			"breakpoints": true
 		}
 	]
 }

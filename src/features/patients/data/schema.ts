@@ -124,40 +124,6 @@ export const editPatientFormSchema = z.object({
 	rejectionDate: z.string().optional(),
 	rejectionType: z.enum(["acut", "cronic"]),
 	majorComplications: z.string().optional(),
-	immunosuppressants: z
-		.array(
-			z.enum([
-				"tacrolimus",
-				"ciclosporina",
-				"micofenolat",
-				"azatioprina",
-				"corticosteroizi",
-			]),
-		)
-		.default([]),
-	immunosuppressantDetails: z
-		.record(
-			z.string(),
-			z.object({
-				frequency: z.string().optional(),
-				notes: z.string().optional(),
-			}),
-		)
-		.default({}),
-	antiviralProphylaxis: z.array(z.enum(["entecavir", "tenofovir"])).default([]),
-	antiviralDetails: z
-		.record(
-			z.string(),
-			z.object({
-				frequency: z.string().optional(),
-				notes: z.string().optional(),
-			}),
-		)
-		.default({}),
-	hbIg: z.boolean(),
-	hbIgRoute: z.enum(["iv", "sc"]),
-	hbIgFrequency: z.string().optional(),
-	otherMeds: z.string().optional(),
 	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	doctorAccount: z.string().optional(),
 	status: z.enum(["activ", "inactiv"]),
@@ -193,22 +159,19 @@ export const addPatientFormSchema = z.object({
 	rejectionDate: z.string().optional(),
 	rejectionType: z.enum(["acut", "cronic"]),
 	majorComplications: z.string().optional(),
-	immunosuppressants: z
+	medications: z
 		.array(
-			z.enum([
-				"tacrolimus",
-				"ciclosporina",
-				"micofenolat",
-				"azatioprina",
-				"corticosteroizi",
-			]),
+			z.object({
+				name: z.string().min(1, "Câmpul este obligatoriu."),
+				dose: z.string().min(1, "Câmpul este obligatoriu."),
+				frequency: z.string().min(1, "Câmpul este obligatoriu."),
+				notes: z.string().optional(),
+				startDate: z.string().min(1, "Câmpul este obligatoriu."),
+				endDate: z.string().optional(),
+				category: z.string().optional(),
+			}),
 		)
 		.default([]),
-	antiviralProphylaxis: z.array(z.enum(["entecavir", "tenofovir"])).default([]),
-	hbIg: z.boolean(),
-	hbIgRoute: z.enum(["iv", "sc"]),
-	hbIgFrequency: z.string().optional(),
-	otherMeds: z.string().optional(),
 	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	patientEmail: z
 		.string()

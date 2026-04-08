@@ -3,6 +3,7 @@
 import { use, useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RoleGuard } from "@/components/role-guard";
 import { MedicationForm } from "@/features/medication/components/medication-form";
 import { ComplianceTable } from "@/features/medication/components/compliance-table";
@@ -34,7 +35,13 @@ export default function PatientMedicationPage({
 	const fetchData = useCallback(() => {
 		Promise.all([
 			getMedicationsByPatientId(id).then((data) =>
-				setMeds(data.map((m) => ({ ...m, endDate: m.endDate ?? undefined }))),
+				setMeds(
+					data.map((m) => ({
+						...m,
+						endDate: m.endDate ?? undefined,
+						category: m.category ?? "altele",
+					})),
+				),
 			),
 			getMedicationLogsByPatientId(id).then((logsData) =>
 				setLogs(
@@ -81,12 +88,59 @@ export default function PatientMedicationPage({
 					<>
 						<RenewalAlert medications={meds} />
 						<MedicationForm patientId={id} onSuccess={fetchData} />
-						<ComplianceTable
-							medications={meds}
-							logs={logs}
-							patientId={id}
-							onUpdate={fetchData}
-						/>
+						<Tabs defaultValue="toate" className="w-full">
+							<TabsList>
+								<TabsTrigger value="toate">Toate</TabsTrigger>
+								<TabsTrigger value="imunosupresor">Imunosupresoare</TabsTrigger>
+								<TabsTrigger value="antiviral">Antivirale</TabsTrigger>
+								<TabsTrigger value="hbig">HB-Ig</TabsTrigger>
+								<TabsTrigger value="altele">Altele</TabsTrigger>
+							</TabsList>
+							<TabsContent value="toate">
+								<ComplianceTable
+									medications={meds}
+									logs={logs}
+									patientId={id}
+									onUpdate={fetchData}
+								/>
+							</TabsContent>
+							<TabsContent value="imunosupresor">
+								<ComplianceTable
+									medications={meds}
+									logs={logs}
+									patientId={id}
+									onUpdate={fetchData}
+									category="imunosupresor"
+								/>
+							</TabsContent>
+							<TabsContent value="antiviral">
+								<ComplianceTable
+									medications={meds}
+									logs={logs}
+									patientId={id}
+									onUpdate={fetchData}
+									category="antiviral"
+								/>
+							</TabsContent>
+							<TabsContent value="hbig">
+								<ComplianceTable
+									medications={meds}
+									logs={logs}
+									patientId={id}
+									onUpdate={fetchData}
+									category="hbig"
+								/>
+							</TabsContent>
+							<TabsContent value="altele">
+								<ComplianceTable
+									medications={meds}
+									logs={logs}
+									patientId={id}
+									onUpdate={fetchData}
+									category="altele"
+								/>
+							</TabsContent>
+						</Tabs>
 					</>
 				)}
 			</Main>

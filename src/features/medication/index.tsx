@@ -26,7 +26,13 @@ export function Medication() {
 	const fetchData = useCallback(() => {
 		Promise.all([
 			getMedications().then((data) =>
-				setMeds(data.map((m) => ({ ...m, endDate: m.endDate ?? undefined }))),
+				setMeds(
+					data.map((m) => ({
+						...m,
+						endDate: m.endDate ?? undefined,
+						category: m.category ?? "altele",
+					})),
+				),
 			),
 			getMedicationLogs().then((logsData) =>
 				setLogs(
@@ -77,11 +83,7 @@ export function Medication() {
 							onSuccess={fetchData}
 						/>
 						<MedicationCalendar medications={meds} logs={logs} />
-						<ComplianceTable
-							medications={meds}
-							logs={logs}
-							onUpdate={fetchData}
-						/>
+						<ComplianceTable medications={meds} logs={logs} />
 					</>
 				)}
 			</Main>

@@ -6,6 +6,7 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { labResult } from "@/db/lab-result-schema";
+import { resolvePatientUserId } from "@/lib/patient-utils";
 import { labResultFormSchema } from "./data/schema";
 import { generateLabResultAlerts } from "@/features/alerts/generate-alerts";
 
@@ -23,10 +24,11 @@ export async function getLabResultsByPatientId(patientId: string) {
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
+	const userId = await resolvePatientUserId(patientId);
 	return db
 		.select()
 		.from(labResult)
-		.where(eq(labResult.patientId, patientId))
+		.where(eq(labResult.patientId, userId))
 		.orderBy(desc(labResult.date));
 }
 
@@ -61,13 +63,14 @@ export async function createLabResultForPatient(
 	if (!parsed.success) {
 		return { error: "Date invalide." };
 	}
+	const userId = await resolvePatientUserId(patientId);
 	await db.insert(labResult).values({
 		id: crypto.randomUUID(),
-		patientId,
+		patientId: userId,
 		...parsed.data,
 	});
 
-	await generateLabResultAlerts(patientId, parsed.data.tests);
+	await generateLabResultAlerts(userId, parsed.data.tests);
 
 	revalidatePath(`/patients/${patientId}/lab-results`);
 	revalidatePath("/alerts");

@@ -6,8 +6,22 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { medication, medicationLog } from "@/db/medication-schema";
-import { medicationFormSchema, medicationLogFormSchema } from "./data/schema";
+import { resolvePatientUserId } from "@/lib/patient-utils";
+import {
+	medicationFormSchema,
+	medicationLogFormSchema,
+	type MedicationFormValues,
+} from "./data/schema";
 import { generateMedicationAlerts } from "@/features/alerts/generate-alerts";
+
+function sanitizeMedicationData(data: MedicationFormValues) {
+	return {
+		...data,
+		endDate: data.endDate || null,
+		notes: data.notes || null,
+		category: data.category || "altele",
+	};
+}
 
 export async function getMedications() {
 	const session = await getSessionOrThrow();
@@ -26,10 +40,12 @@ export async function getMedicationsByPatientId(patientId: string) {
 		throw new Error("Neautorizat");
 	}
 
+	const userId = await resolvePatientUserId(patientId);
+
 	return db
 		.select()
 		.from(medication)
-		.where(eq(medication.patientId, patientId))
+		.where(eq(medication.patientId, userId))
 		.orderBy(desc(medication.startDate));
 }
 
@@ -44,7 +60,7 @@ export async function createMedication(values: unknown) {
 	await db.insert(medication).values({
 		id: crypto.randomUUID(),
 		patientId: session.user.id,
-		...parsed.data,
+		...sanitizeMedicationData(parsed.data),
 	});
 
 	revalidatePath("/medication");
@@ -67,13 +83,17 @@ export async function createMedicationForPatient(
 		return { error: "Date invalide." };
 	}
 
+	const userId = await resolvePatientUserId(patientId);
+	const sanitized = sanitizeMedicationData(parsed.data);
+
 	await db.insert(medication).values({
 		id: crypto.randomUUID(),
-		patientId,
-		...parsed.data,
+		patientId: userId,
+		...sanitized,
 	});
 
 	revalidatePath(`/patients/${patientId}/medication`);
+	revalidatePath("/medication");
 	return { success: true };
 }
 
@@ -97,7 +117,10 @@ export async function updateMedication(id: string, values: unknown) {
 		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
-	await db.update(medication).set(parsed.data).where(eq(medication.id, id));
+	await db
+		.update(medication)
+		.set(sanitizeMedicationData(parsed.data))
+		.where(eq(medication.id, id));
 
 	revalidatePath("/medication");
 	return { success: true };
@@ -120,19 +143,25 @@ export async function updateMedicationForPatient(
 		return { error: "Date invalide." };
 	}
 
+	const userId = await resolvePatientUserId(patientId);
+
 	const existing = await db
 		.select()
 		.from(medication)
-		.where(and(eq(medication.id, id), eq(medication.patientId, patientId)))
+		.where(and(eq(medication.id, id), eq(medication.patientId, userId)))
 		.limit(1);
 
 	if (existing.length === 0) {
 		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
-	await db.update(medication).set(parsed.data).where(eq(medication.id, id));
+	await db
+		.update(medication)
+		.set(sanitizeMedicationData(parsed.data))
+		.where(eq(medication.id, id));
 
 	revalidatePath(`/patients/${patientId}/medication`);
+	revalidatePath("/medication");
 	return { success: true };
 }
 
@@ -146,10 +175,12 @@ export async function deleteMedicationForPatient(
 		throw new Error("Neautorizat");
 	}
 
+	const userId = await resolvePatientUserId(patientId);
+
 	const existing = await db
 		.select()
 		.from(medication)
-		.where(and(eq(medication.id, id), eq(medication.patientId, patientId)))
+		.where(and(eq(medication.id, id), eq(medication.patientId, userId)))
 		.limit(1);
 
 	if (existing.length === 0) {
@@ -159,6 +190,7 @@ export async function deleteMedicationForPatient(
 	await db.delete(medication).where(eq(medication.id, id));
 
 	revalidatePath(`/patients/${patientId}/medication`);
+	revalidatePath("/medication");
 	return { success: true };
 }
 
@@ -211,10 +243,12 @@ export async function getMedicationLogsByPatientId(patientId: string) {
 		throw new Error("Neautorizat");
 	}
 
+	const userId = await resolvePatientUserId(patientId);
+
 	const patientMeds = await db
 		.select({ id: medication.id })
 		.from(medication)
-		.where(eq(medication.patientId, patientId));
+		.where(eq(medication.patientId, userId));
 
 	const medIds = patientMeds.map((m) => m.id);
 

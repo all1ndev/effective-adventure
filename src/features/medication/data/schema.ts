@@ -9,6 +9,7 @@ export const medicationSchema = z.object({
 	notes: z.string().nullable().optional(),
 	startDate: z.string(),
 	endDate: z.string().optional(),
+	category: z.string().optional(),
 });
 
 export const medicationLogSchema = z.object({
@@ -37,6 +38,26 @@ export const frequencyOptions = [
 	{ value: "Lunar", label: "Lunar" },
 ] as const;
 
+export const categoryOptions = [
+	{ value: "imunosupresor", label: "Imunosupresor" },
+	{ value: "antiviral", label: "Antiviral" },
+	{ value: "hbig", label: "HB-Ig" },
+	{ value: "altele", label: "Altele" },
+] as const;
+
+export const suggestedDrugs: Record<string, string[]> = {
+	imunosupresor: [
+		"Tacrolimus",
+		"Ciclosporina",
+		"Micofenolat mofetil",
+		"Azatioprina",
+		"Corticosteroizi",
+	],
+	antiviral: ["Entecavir", "Tenofovir"],
+	hbig: ["HB-Ig"],
+	altele: [],
+};
+
 export const medicationFormSchema = z.object({
 	name: z.string().min(1, "Câmpul este obligatoriu."),
 	dose: z.string().min(1, "Câmpul este obligatoriu."),
@@ -44,6 +65,7 @@ export const medicationFormSchema = z.object({
 	notes: z.string().optional(),
 	startDate: z.string().min(1, "Câmpul este obligatoriu."),
 	endDate: z.string().optional(),
+	category: z.string().optional(),
 });
 export type MedicationFormValues = z.infer<typeof medicationFormSchema>;
 

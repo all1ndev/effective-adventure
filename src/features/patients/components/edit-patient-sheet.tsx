@@ -9,7 +9,6 @@ import { AlertCircle, Trash2 } from "lucide-react";
 import { updateFullPatient, deletePatient } from "../actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Form,
 	FormControl,
@@ -50,7 +49,6 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { type Patient } from "../data/schema";
-import { frequencyOptions } from "@/features/medication/data/schema";
 
 const sexValues = ["masculin", "feminin", "nespecificat"] as const;
 const languageValues = ["ro", "en", "it", "fr", "de"] as const;
@@ -66,15 +64,6 @@ const etiologyValues = [
 const donorTypeValues = ["cadaveric", "viu"] as const;
 const donorStatusValues = ["pozitiv", "negativ", "necunoscut"] as const;
 const rejectionTypeValues = ["acut", "cronic"] as const;
-const immunosuppressantValues = [
-	"tacrolimus",
-	"ciclosporina",
-	"micofenolat",
-	"azatioprina",
-	"corticosteroizi",
-] as const;
-const antiviralValues = ["entecavir", "tenofovir"] as const;
-const hbIgRouteValues = ["iv", "sc"] as const;
 
 const patientFormSchema = z.object({
 	firstName: z.string().min(1, "Câmpul este obligatoriu."),
@@ -97,30 +86,6 @@ const patientFormSchema = z.object({
 	rejectionDate: z.string().optional(),
 	rejectionType: z.enum(rejectionTypeValues),
 	majorComplications: z.string().optional(),
-	immunosuppressants: z.array(z.enum(immunosuppressantValues)).default([]),
-	immunosuppressantDetails: z
-		.record(
-			z.string(),
-			z.object({
-				frequency: z.string().optional(),
-				notes: z.string().optional(),
-			}),
-		)
-		.default({}),
-	antiviralProphylaxis: z.array(z.enum(antiviralValues)).default([]),
-	antiviralDetails: z
-		.record(
-			z.string(),
-			z.object({
-				frequency: z.string().optional(),
-				notes: z.string().optional(),
-			}),
-		)
-		.default({}),
-	hbIg: z.boolean(),
-	hbIgRoute: z.enum(hbIgRouteValues),
-	hbIgFrequency: z.string().optional(),
-	otherMeds: z.string().optional(),
 	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	doctorAccount: z.string().optional(),
 	status: z.enum(["activ", "inactiv"]),
@@ -173,28 +138,6 @@ function patientToFormValues(p: Patient): PatientFormValues {
 		rejectionDate: p.rejectionDate ?? "",
 		rejectionType: safeEnum(p.rejectionType, rejectionTypeValues, "acut"),
 		majorComplications: p.majorComplications ?? "",
-		immunosuppressants: ((p.immunosuppressants ?? []) as string[]).filter(
-			(v): v is (typeof immunosuppressantValues)[number] =>
-				(immunosuppressantValues as readonly string[]).includes(v),
-		),
-		immunosuppressantDetails:
-			(p.immunosuppressantDetails as Record<
-				string,
-				{ frequency?: string; notes?: string }
-			>) ?? {},
-		antiviralProphylaxis: ((p.antiviralProphylaxis ?? []) as string[]).filter(
-			(v): v is (typeof antiviralValues)[number] =>
-				(antiviralValues as readonly string[]).includes(v),
-		),
-		antiviralDetails:
-			(p.antiviralDetails as Record<
-				string,
-				{ frequency?: string; notes?: string }
-			>) ?? {},
-		hbIg: p.hbIg ?? false,
-		hbIgRoute: safeEnum(p.hbIgRoute, hbIgRouteValues, "iv"),
-		hbIgFrequency: p.hbIgFrequency ?? "",
-		otherMeds: p.otherMeds ?? "",
 		patientPhone: p.patientPhone ?? "",
 		doctorAccount: p.doctorId ?? "",
 		status: p.status,
@@ -248,24 +191,7 @@ export function EditPatientSheet({
 		control: form.control,
 		name: "rejectionHistory",
 	});
-	const hbIg = useWatch({ control: form.control, name: "hbIg" });
 	const etiology = useWatch({ control: form.control, name: "etiology" });
-	const selectedImmunosuppressants = useWatch({
-		control: form.control,
-		name: "immunosuppressants",
-	});
-	const selectedAntivirals = useWatch({
-		control: form.control,
-		name: "antiviralProphylaxis",
-	});
-	const immuDetails = useWatch({
-		control: form.control,
-		name: "immunosuppressantDetails",
-	});
-	const avDetails = useWatch({
-		control: form.control,
-		name: "antiviralDetails",
-	});
 
 	const formErrors = form.formState.errors;
 	const hasValidationErrors =
@@ -918,284 +844,15 @@ export function EditPatientSheet({
 							<Separator />
 
 							<section className="space-y-4">
-								<h2 className="text-lg font-semibold">Schema terapeutica</h2>
-								<div className="grid gap-4 md:grid-cols-2">
-									<FormField
-										control={form.control}
-										name="immunosuppressants"
-										render={() => (
-											<FormItem>
-												<FormLabel>Imunosupresoare</FormLabel>
-												<div className="grid gap-3">
-													{immunosuppressantValues.map((item) => (
-														<FormField
-															key={item}
-															control={form.control}
-															name="immunosuppressants"
-															render={({ field }) => (
-																<FormItem className="flex items-center gap-2">
-																	<FormControl>
-																		<Checkbox
-																			checked={field.value?.includes(item)}
-																			onCheckedChange={(checked) => {
-																				const current = field.value ?? [];
-																				return checked === true
-																					? field.onChange([...current, item])
-																					: field.onChange(
-																							current.filter(
-																								(value) => value !== item,
-																							),
-																						);
-																			}}
-																		/>
-																	</FormControl>
-																	<FormLabel className="font-normal">
-																		{item.charAt(0).toUpperCase() +
-																			item.slice(1)}
-																	</FormLabel>
-																</FormItem>
-															)}
-														/>
-													))}
-												</div>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="antiviralProphylaxis"
-										render={() => (
-											<FormItem>
-												<FormLabel>Profilaxie antivirala</FormLabel>
-												<div className="grid gap-3">
-													{antiviralValues.map((item) => (
-														<FormField
-															key={item}
-															control={form.control}
-															name="antiviralProphylaxis"
-															render={({ field }) => (
-																<FormItem className="flex items-center gap-2">
-																	<FormControl>
-																		<Checkbox
-																			checked={field.value?.includes(item)}
-																			onCheckedChange={(checked) => {
-																				const current = field.value ?? [];
-																				return checked === true
-																					? field.onChange([...current, item])
-																					: field.onChange(
-																							current.filter(
-																								(value) => value !== item,
-																							),
-																						);
-																			}}
-																		/>
-																	</FormControl>
-																	<FormLabel className="font-normal">
-																		{item.charAt(0).toUpperCase() +
-																			item.slice(1)}
-																	</FormLabel>
-																</FormItem>
-															)}
-														/>
-													))}
-													<FormField
-														control={form.control}
-														name="hbIg"
-														render={({ field }) => (
-															<FormItem className="mt-2 flex items-center justify-between rounded-lg border p-3">
-																<div>
-																	<FormLabel>HBIg</FormLabel>
-																	<FormDescription>
-																		Activati daca exista profilaxie cu HBIg.
-																	</FormDescription>
-																</div>
-																<FormControl>
-																	<Switch
-																		checked={field.value}
-																		onCheckedChange={field.onChange}
-																	/>
-																</FormControl>
-															</FormItem>
-														)}
-													/>
-												</div>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-								{(selectedImmunosuppressants ?? []).length > 0 && (
-									<div className="space-y-3">
-										<p className="text-sm font-medium text-muted-foreground">
-											Detalii imunosupresoare selectate
-										</p>
-										{(selectedImmunosuppressants ?? []).map((item) => (
-											<div
-												key={item}
-												className="rounded-lg border p-3 space-y-2"
-											>
-												<p className="text-sm font-medium">
-													{item.charAt(0).toUpperCase() + item.slice(1)}
-												</p>
-												<div className="grid gap-3 sm:grid-cols-2">
-													<div className="space-y-1">
-														<FormLabel className="text-xs">Frecvență</FormLabel>
-														<Select
-															value={immuDetails?.[item]?.frequency ?? ""}
-															onValueChange={(v) =>
-																form.setValue(
-																	`immunosuppressantDetails.${item}.frequency`,
-																	v,
-																)
-															}
-														>
-															<SelectTrigger>
-																<SelectValue placeholder="Selectați" />
-															</SelectTrigger>
-															<SelectContent>
-																{frequencyOptions.map((opt) => (
-																	<SelectItem key={opt.value} value={opt.value}>
-																		{opt.label}
-																	</SelectItem>
-																))}
-															</SelectContent>
-														</Select>
-													</div>
-													<div className="space-y-1">
-														<FormLabel className="text-xs">Notițe</FormLabel>
-														<Input
-															placeholder="ex: dimineața, pe stomacul gol"
-															value={immuDetails?.[item]?.notes ?? ""}
-															onChange={(e) =>
-																form.setValue(
-																	`immunosuppressantDetails.${item}.notes`,
-																	e.target.value,
-																)
-															}
-														/>
-													</div>
-												</div>
-											</div>
-										))}
-									</div>
-								)}
-								{(selectedAntivirals ?? []).length > 0 && (
-									<div className="space-y-3">
-										<p className="text-sm font-medium text-muted-foreground">
-											Detalii antivirale selectate
-										</p>
-										{(selectedAntivirals ?? []).map((item) => (
-											<div
-												key={item}
-												className="rounded-lg border p-3 space-y-2"
-											>
-												<p className="text-sm font-medium">
-													{item.charAt(0).toUpperCase() + item.slice(1)}
-												</p>
-												<div className="grid gap-3 sm:grid-cols-2">
-													<div className="space-y-1">
-														<FormLabel className="text-xs">Frecvență</FormLabel>
-														<Select
-															value={avDetails?.[item]?.frequency ?? ""}
-															onValueChange={(v) =>
-																form.setValue(
-																	`antiviralDetails.${item}.frequency`,
-																	v,
-																)
-															}
-														>
-															<SelectTrigger>
-																<SelectValue placeholder="Selectați" />
-															</SelectTrigger>
-															<SelectContent>
-																{frequencyOptions.map((opt) => (
-																	<SelectItem key={opt.value} value={opt.value}>
-																		{opt.label}
-																	</SelectItem>
-																))}
-															</SelectContent>
-														</Select>
-													</div>
-													<div className="space-y-1">
-														<FormLabel className="text-xs">Notițe</FormLabel>
-														<Input
-															placeholder="ex: dimineața, pe stomacul gol"
-															value={avDetails?.[item]?.notes ?? ""}
-															onChange={(e) =>
-																form.setValue(
-																	`antiviralDetails.${item}.notes`,
-																	e.target.value,
-																)
-															}
-														/>
-													</div>
-												</div>
-											</div>
-										))}
-									</div>
-								)}
-								{hbIg && (
-									<div className="grid gap-4 md:grid-cols-2">
-										<FormField
-											control={form.control}
-											name="hbIgRoute"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Cale administrare HBIg</FormLabel>
-													<Select
-														onValueChange={field.onChange}
-														value={field.value}
-													>
-														<FormControl>
-															<SelectTrigger>
-																<SelectValue placeholder="Selecteaza" />
-															</SelectTrigger>
-														</FormControl>
-														<SelectContent>
-															<SelectItem value="iv">IV</SelectItem>
-															<SelectItem value="sc">SC</SelectItem>
-														</SelectContent>
-													</Select>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-										<FormField
-											control={form.control}
-											name="hbIgFrequency"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Frecventa HBIg</FormLabel>
-													<FormControl>
-														<Input
-															placeholder="Ex: lunar, la 8 saptamani"
-															{...field}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
-								)}
-								<FormField
-									control={form.control}
-									name="otherMeds"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Alte medicamente importante</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Profilaxie infectioasa (CMV, PCP), antidiabetice, antihipertensive, statine"
-													className="min-h-[100px]"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								<h2 className="text-lg font-semibold">Schema terapeutică</h2>
+								<p className="text-sm text-muted-foreground">
+									Medicația pacientului se gestionează pe pagina dedicată.
+								</p>
+								<Button variant="outline" type="button" asChild>
+									<a href={`/patients/${patient.id}/medication`}>
+										Mergi la medicație →
+									</a>
+								</Button>
 							</section>
 
 							<div className="flex flex-wrap justify-between gap-3">

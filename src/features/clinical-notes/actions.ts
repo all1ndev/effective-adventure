@@ -6,6 +6,7 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { clinicalNote } from "@/db/clinical-note-schema";
+import { resolvePatientUserId } from "@/lib/patient-utils";
 import { clinicalNoteFormSchema } from "./data/schema";
 
 export async function getClinicalNotesByPatientId(patientId: string) {
@@ -13,10 +14,11 @@ export async function getClinicalNotesByPatientId(patientId: string) {
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
+	const userId = await resolvePatientUserId(patientId);
 	return db
 		.select()
 		.from(clinicalNote)
-		.where(eq(clinicalNote.patientId, patientId))
+		.where(eq(clinicalNote.patientId, userId))
 		.orderBy(desc(clinicalNote.visitDate));
 }
 
@@ -29,9 +31,10 @@ export async function createClinicalNote(patientId: string, values: unknown) {
 	if (!parsed.success) {
 		return { error: "Date invalide." };
 	}
+	const userId = await resolvePatientUserId(patientId);
 	await db.insert(clinicalNote).values({
 		id: crypto.randomUUID(),
-		patientId,
+		patientId: userId,
 		author: session.user.name,
 		...parsed.data,
 	});

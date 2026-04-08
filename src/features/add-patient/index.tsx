@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { z } from "zod";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import {
 	addPatientWithUser,
 	getRecentPatients,
@@ -21,7 +21,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Form,
 	FormControl,
@@ -49,7 +48,11 @@ import { Main } from "@/components/layout/main";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Spinner } from "@/components/ui/spinner";
-import { frequencyOptions } from "@/features/medication/data/schema";
+import {
+	frequencyOptions,
+	categoryOptions,
+	suggestedDrugs,
+} from "@/features/medication/data/schema";
 
 const sexValues = ["masculin", "feminin", "nespecificat"] as const;
 const languageValues = ["ro", "en", "it", "fr", "de"] as const;
@@ -65,15 +68,15 @@ const etiologyValues = [
 const donorTypeValues = ["cadaveric", "viu"] as const;
 const donorStatusValues = ["pozitiv", "negativ", "necunoscut"] as const;
 const rejectionTypeValues = ["acut", "cronic"] as const;
-const immunosuppressantValues = [
-	"tacrolimus",
-	"ciclosporina",
-	"micofenolat",
-	"azatioprina",
-	"corticosteroizi",
-] as const;
-const antiviralValues = ["entecavir", "tenofovir"] as const;
-const hbIgRouteValues = ["iv", "sc"] as const;
+const medicationEntrySchema = z.object({
+	name: z.string().min(1, "Câmpul este obligatoriu."),
+	dose: z.string().min(1, "Câmpul este obligatoriu."),
+	frequency: z.string().min(1, "Câmpul este obligatoriu."),
+	notes: z.string().optional(),
+	startDate: z.string().min(1, "Câmpul este obligatoriu."),
+	endDate: z.string().optional(),
+	category: z.string().optional(),
+});
 
 const patientFormSchema = z.object({
 	firstName: z.string().min(1, "Câmpul este obligatoriu."),
@@ -96,30 +99,7 @@ const patientFormSchema = z.object({
 	rejectionDate: z.string().optional(),
 	rejectionType: z.enum(rejectionTypeValues),
 	majorComplications: z.string().optional(),
-	immunosuppressants: z.array(z.enum(immunosuppressantValues)).default([]),
-	immunosuppressantDetails: z
-		.record(
-			z.string(),
-			z.object({
-				frequency: z.string().optional(),
-				notes: z.string().optional(),
-			}),
-		)
-		.default({}),
-	antiviralProphylaxis: z.array(z.enum(antiviralValues)).default([]),
-	antiviralDetails: z
-		.record(
-			z.string(),
-			z.object({
-				frequency: z.string().optional(),
-				notes: z.string().optional(),
-			}),
-		)
-		.default({}),
-	hbIg: z.boolean(),
-	hbIgRoute: z.enum(hbIgRouteValues),
-	hbIgFrequency: z.string().optional(),
-	otherMeds: z.string().optional(),
+	medications: z.array(medicationEntrySchema).default([]),
 	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	patientEmail: z
 		.string()
@@ -151,14 +131,7 @@ const defaultValues: PatientFormValues = {
 	rejectionDate: "",
 	rejectionType: "acut",
 	majorComplications: "",
-	immunosuppressants: [],
-	immunosuppressantDetails: {},
-	antiviralProphylaxis: [],
-	antiviralDetails: {},
-	hbIg: false,
-	hbIgRoute: "iv",
-	hbIgFrequency: "",
-	otherMeds: "",
+	medications: [],
 	patientPhone: "",
 	patientEmail: "",
 	doctorAccount: undefined as unknown as string,
@@ -221,23 +194,10 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 		control: form.control,
 		name: "rejectionHistory",
 	});
-	const hbIg = useWatch({ control: form.control, name: "hbIg" });
 	const etiology = useWatch({ control: form.control, name: "etiology" });
-	const selectedImmunosuppressants = useWatch({
+	const { fields, append, remove } = useFieldArray({
 		control: form.control,
-		name: "immunosuppressants",
-	});
-	const selectedAntivirals = useWatch({
-		control: form.control,
-		name: "antiviralProphylaxis",
-	});
-	const watchedImmuDetails = useWatch({
-		control: form.control,
-		name: "immunosuppressantDetails",
-	});
-	const watchedAvDetails = useWatch({
-		control: form.control,
-		name: "antiviralDetails",
+		name: "medications",
 	});
 
 	const formErrors = form.formState.errors;
@@ -938,312 +898,199 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 									<Separator />
 
 									<section className="space-y-4">
-										<h2 className="text-lg font-semibold">
-											Schema terapeutică
-										</h2>
-										<div className="grid gap-4 md:grid-cols-2">
-											<FormField
-												control={form.control}
-												name="immunosuppressants"
-												render={() => (
-													<FormItem>
-														<FormLabel>Imunosupresoare</FormLabel>
-														<div className="grid gap-3">
-															{immunosuppressantValues.map((item) => (
-																<FormField
-																	key={item}
-																	control={form.control}
-																	name="immunosuppressants"
-																	render={({ field }) => (
-																		<FormItem className="flex items-center gap-2">
-																			<FormControl>
-																				<Checkbox
-																					checked={field.value?.includes(item)}
-																					onCheckedChange={(checked) => {
-																						const current = field.value ?? [];
-																						return checked === true
-																							? field.onChange([
-																									...current,
-																									item,
-																								])
-																							: field.onChange(
-																									current.filter(
-																										(value) => value !== item,
-																									),
-																								);
-																					}}
-																				/>
-																			</FormControl>
-																			<FormLabel className="font-normal">
-																				{item.charAt(0).toUpperCase() +
-																					item.slice(1)}
-																			</FormLabel>
-																		</FormItem>
-																	)}
-																/>
-															))}
+										<div className="flex items-center justify-between">
+											<h2 className="text-lg font-semibold">
+												Schema terapeutică
+											</h2>
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												onClick={() =>
+													append({
+														name: "",
+														dose: "",
+														frequency: "",
+														notes: "",
+														startDate: new Date().toISOString().split("T")[0],
+														endDate: "",
+														category: "altele",
+													})
+												}
+											>
+												<Plus className="mr-1 h-4 w-4" />
+												Adaugă medicament
+											</Button>
+										</div>
+
+										{fields.length === 0 && (
+											<p className="text-sm text-muted-foreground">
+												Niciun medicament adăugat încă. Apăsați butonul de mai
+												sus pentru a adăuga.
+											</p>
+										)}
+
+										{fields.map((field, index) => {
+											const cat = form.watch(`medications.${index}.category`);
+											const suggestions = suggestedDrugs[cat ?? "altele"] ?? [];
+
+											return (
+												<div
+													key={field.id}
+													className="rounded-lg border p-4 space-y-3"
+												>
+													<div className="flex items-center justify-between">
+														<p className="text-sm font-medium">
+															Medicament #{index + 1}
+														</p>
+														<Button
+															type="button"
+															variant="ghost"
+															size="icon"
+															className="h-8 w-8 text-destructive"
+															onClick={() => remove(index)}
+														>
+															<Trash2 className="h-4 w-4" />
+														</Button>
+													</div>
+
+													<div className="grid gap-3 sm:grid-cols-2">
+														<div className="space-y-1.5">
+															<FormLabel className="text-xs">
+																Categorie
+															</FormLabel>
+															<Select
+																value={cat ?? "altele"}
+																onValueChange={(v) => {
+																	form.setValue(
+																		`medications.${index}.category`,
+																		v,
+																	);
+																	if (v === "hbig") {
+																		form.setValue(
+																			`medications.${index}.name`,
+																			"HB-Ig",
+																		);
+																	}
+																}}
+															>
+																<SelectTrigger>
+																	<SelectValue />
+																</SelectTrigger>
+																<SelectContent>
+																	{categoryOptions.map((opt) => (
+																		<SelectItem
+																			key={opt.value}
+																			value={opt.value}
+																		>
+																			{opt.label}
+																		</SelectItem>
+																	))}
+																</SelectContent>
+															</Select>
 														</div>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-											<FormField
-												control={form.control}
-												name="antiviralProphylaxis"
-												render={() => (
-													<FormItem>
-														<FormLabel>Profilaxie antivirală</FormLabel>
-														<div className="grid gap-3">
-															{antiviralValues.map((item) => (
-																<FormField
-																	key={item}
-																	control={form.control}
-																	name="antiviralProphylaxis"
-																	render={({ field }) => (
-																		<FormItem className="flex items-center gap-2">
-																			<FormControl>
-																				<Checkbox
-																					checked={field.value?.includes(item)}
-																					onCheckedChange={(checked) => {
-																						const current = field.value ?? [];
-																						return checked === true
-																							? field.onChange([
-																									...current,
-																									item,
-																								])
-																							: field.onChange(
-																									current.filter(
-																										(value) => value !== item,
-																									),
-																								);
-																					}}
-																				/>
-																			</FormControl>
-																			<FormLabel className="font-normal">
-																				{item.charAt(0).toUpperCase() +
-																					item.slice(1)}
-																			</FormLabel>
-																		</FormItem>
-																	)}
-																/>
-															))}
-															<FormField
-																control={form.control}
-																name="hbIg"
-																render={({ field }) => (
-																	<FormItem className="mt-2 flex items-center justify-between rounded-lg border p-3">
-																		<div>
-																			<FormLabel>HBIg</FormLabel>
-																			<FormDescription>
-																				Activați dacă există profilaxie cu HBIg.
-																			</FormDescription>
-																		</div>
-																		<FormControl>
-																			<Switch
-																				checked={field.value}
-																				onCheckedChange={field.onChange}
-																			/>
-																		</FormControl>
-																	</FormItem>
+														<div className="space-y-1.5">
+															<FormLabel className="text-xs">
+																Nume medicament
+															</FormLabel>
+															<Input
+																placeholder="ex: Tacrolimus"
+																{...form.register(`medications.${index}.name`)}
+															/>
+															{suggestions.length > 0 && (
+																<div className="flex flex-wrap gap-1">
+																	{suggestions.map((drug: string) => (
+																		<Badge
+																			key={drug}
+																			variant="outline"
+																			className="cursor-pointer text-[10px] hover:bg-accent"
+																			onClick={() =>
+																				form.setValue(
+																					`medications.${index}.name`,
+																					drug,
+																				)
+																			}
+																		>
+																			{drug}
+																		</Badge>
+																	))}
+																</div>
+															)}
+														</div>
+														<div className="space-y-1.5">
+															<FormLabel className="text-xs">Doză</FormLabel>
+															<Input
+																placeholder="ex: 2 mg"
+																{...form.register(`medications.${index}.dose`)}
+															/>
+														</div>
+														<div className="space-y-1.5">
+															<FormLabel className="text-xs">
+																Frecvență
+															</FormLabel>
+															<Select
+																value={
+																	form.watch(
+																		`medications.${index}.frequency`,
+																	) ?? ""
+																}
+																onValueChange={(v) =>
+																	form.setValue(
+																		`medications.${index}.frequency`,
+																		v,
+																	)
+																}
+															>
+																<SelectTrigger>
+																	<SelectValue placeholder="Selectați" />
+																</SelectTrigger>
+																<SelectContent>
+																	{frequencyOptions.map((opt) => (
+																		<SelectItem
+																			key={opt.value}
+																			value={opt.value}
+																		>
+																			{opt.label}
+																		</SelectItem>
+																	))}
+																</SelectContent>
+															</Select>
+														</div>
+														<div className="space-y-1.5">
+															<FormLabel className="text-xs">
+																Data începere
+															</FormLabel>
+															<Input
+																type="date"
+																{...form.register(
+																	`medications.${index}.startDate`,
 																)}
 															/>
 														</div>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-										</div>
-										{(selectedImmunosuppressants ?? []).length > 0 && (
-											<div className="space-y-3">
-												<p className="text-sm font-medium text-muted-foreground">
-													Detalii imunosupresoare selectate
-												</p>
-												{(selectedImmunosuppressants ?? []).map((item) => (
-													<div
-														key={item}
-														className="rounded-lg border p-3 space-y-2"
-													>
-														<p className="text-sm font-medium">
-															{item.charAt(0).toUpperCase() + item.slice(1)}
-														</p>
-														<div className="grid gap-3 sm:grid-cols-2">
-															<div className="space-y-1">
-																<FormLabel className="text-xs">
-																	Frecvență
-																</FormLabel>
-																<Select
-																	value={
-																		watchedImmuDetails?.[item]?.frequency ?? ""
-																	}
-																	onValueChange={(v) =>
-																		form.setValue(
-																			`immunosuppressantDetails.${item}.frequency`,
-																			v,
-																		)
-																	}
-																>
-																	<SelectTrigger>
-																		<SelectValue placeholder="Selectați" />
-																	</SelectTrigger>
-																	<SelectContent>
-																		{frequencyOptions.map((opt) => (
-																			<SelectItem
-																				key={opt.value}
-																				value={opt.value}
-																			>
-																				{opt.label}
-																			</SelectItem>
-																		))}
-																	</SelectContent>
-																</Select>
-															</div>
-															<div className="space-y-1">
-																<FormLabel className="text-xs">
-																	Notițe
-																</FormLabel>
-																<Input
-																	placeholder="ex: dimineața, pe stomacul gol"
-																	value={
-																		watchedImmuDetails?.[item]?.notes ?? ""
-																	}
-																	onChange={(e) =>
-																		form.setValue(
-																			`immunosuppressantDetails.${item}.notes`,
-																			e.target.value,
-																		)
-																	}
-																/>
-															</div>
+														<div className="space-y-1.5">
+															<FormLabel className="text-xs">
+																Data expirare (opțional)
+															</FormLabel>
+															<Input
+																type="date"
+																{...form.register(
+																	`medications.${index}.endDate`,
+																)}
+															/>
+														</div>
+														<div className="space-y-1.5 sm:col-span-2">
+															<FormLabel className="text-xs">
+																Notițe (opțional)
+															</FormLabel>
+															<Input
+																placeholder="ex: pe stomacul gol, dimineața"
+																{...form.register(`medications.${index}.notes`)}
+															/>
 														</div>
 													</div>
-												))}
-											</div>
-										)}
-										{(selectedAntivirals ?? []).length > 0 && (
-											<div className="space-y-3">
-												<p className="text-sm font-medium text-muted-foreground">
-													Detalii antivirale selectate
-												</p>
-												{(selectedAntivirals ?? []).map((item) => (
-													<div
-														key={item}
-														className="rounded-lg border p-3 space-y-2"
-													>
-														<p className="text-sm font-medium">
-															{item.charAt(0).toUpperCase() + item.slice(1)}
-														</p>
-														<div className="grid gap-3 sm:grid-cols-2">
-															<div className="space-y-1">
-																<FormLabel className="text-xs">
-																	Frecvență
-																</FormLabel>
-																<Select
-																	value={
-																		watchedAvDetails?.[item]?.frequency ?? ""
-																	}
-																	onValueChange={(v) =>
-																		form.setValue(
-																			`antiviralDetails.${item}.frequency`,
-																			v,
-																		)
-																	}
-																>
-																	<SelectTrigger>
-																		<SelectValue placeholder="Selectați" />
-																	</SelectTrigger>
-																	<SelectContent>
-																		{frequencyOptions.map((opt) => (
-																			<SelectItem
-																				key={opt.value}
-																				value={opt.value}
-																			>
-																				{opt.label}
-																			</SelectItem>
-																		))}
-																	</SelectContent>
-																</Select>
-															</div>
-															<div className="space-y-1">
-																<FormLabel className="text-xs">
-																	Notițe
-																</FormLabel>
-																<Input
-																	placeholder="ex: dimineața, pe stomacul gol"
-																	value={watchedAvDetails?.[item]?.notes ?? ""}
-																	onChange={(e) =>
-																		form.setValue(
-																			`antiviralDetails.${item}.notes`,
-																			e.target.value,
-																		)
-																	}
-																/>
-															</div>
-														</div>
-													</div>
-												))}
-											</div>
-										)}
-										{hbIg && (
-											<div className="grid gap-4 md:grid-cols-2">
-												<FormField
-													control={form.control}
-													name="hbIgRoute"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>Cale administrare HBIg</FormLabel>
-															<Select
-																onValueChange={field.onChange}
-																value={field.value}
-															>
-																<FormControl>
-																	<SelectTrigger>
-																		<SelectValue placeholder="Selecteaza" />
-																	</SelectTrigger>
-																</FormControl>
-																<SelectContent>
-																	<SelectItem value="iv">IV</SelectItem>
-																	<SelectItem value="sc">SC</SelectItem>
-																</SelectContent>
-															</Select>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name="hbIgFrequency"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>Frecventa HBIg</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Ex: lunar, la 8 saptamani"
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-											</div>
-										)}
-										<FormField
-											control={form.control}
-											name="otherMeds"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Alte medicamente importante</FormLabel>
-													<FormControl>
-														<Textarea
-															placeholder="Profilaxie infectioasa (CMV, PCP), antidiabetice, antihipertensive, statine"
-															className="min-h-[100px]"
-															{...field}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
+												</div>
+											);
+										})}
 									</section>
 
 									<div className="flex flex-wrap gap-3">
@@ -1340,16 +1187,8 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 									<Badge variant="outline">Critic</Badge>
 								</div>
 								<div className="flex items-center justify-between">
-									<span>Schema terapeutica</span>
+									<span>Schema terapeutică (medicație)</span>
 									<Badge variant="outline">Recomandat</Badge>
-								</div>
-								<div className="flex items-center justify-between">
-									<span>Profilaxie antivirala + HBIg</span>
-									<Badge variant="outline">Recomandat</Badge>
-								</div>
-								<div className="flex items-center justify-between">
-									<span>Alte medicamente importante</span>
-									<Badge variant="outline">Optional</Badge>
 								</div>
 							</CardContent>
 						</Card>

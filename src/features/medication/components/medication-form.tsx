@@ -21,10 +21,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
 	medicationFormSchema,
 	frequencyOptions,
+	categoryOptions,
+	suggestedDrugs,
 	type MedicationFormValues,
 } from "../data/schema";
 import { createMedication, createMedicationForPatient } from "../actions";
@@ -53,10 +56,13 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 			notes: "",
 			startDate: "",
 			endDate: "",
+			category: "altele",
 		},
 	});
 
 	const frequencyValue = watch("frequency");
+	const categoryValue = watch("category");
+	const suggestions = suggestedDrugs[categoryValue ?? "altele"] ?? [];
 
 	function onSubmit(values: MedicationFormValues) {
 		startTransition(async () => {
@@ -89,12 +95,49 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 					className="grid gap-4 sm:grid-cols-2"
 				>
 					<div className="space-y-1.5 sm:col-span-2">
+						<Label>Categorie</Label>
+						<Select
+							value={categoryValue}
+							onValueChange={(v) => {
+								setValue("category", v);
+								if (v === "hbig") {
+									setValue("name", "HB-Ig");
+								}
+							}}
+						>
+							<SelectTrigger>
+								<SelectValue placeholder="Selectați categoria" />
+							</SelectTrigger>
+							<SelectContent>
+								{categoryOptions.map((opt) => (
+									<SelectItem key={opt.value} value={opt.value}>
+										{opt.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+					<div className="space-y-1.5 sm:col-span-2">
 						<Label htmlFor="name">Nume medicament</Label>
 						<Input
 							id="name"
 							placeholder="ex: Tacrolimus"
 							{...register("name")}
 						/>
+						{suggestions.length > 0 && (
+							<div className="flex flex-wrap gap-1.5 pt-1">
+								{suggestions.map((drug: string) => (
+									<Badge
+										key={drug}
+										variant="outline"
+										className="cursor-pointer hover:bg-accent"
+										onClick={() => setValue("name", drug)}
+									>
+										{drug}
+									</Badge>
+								))}
+							</div>
+						)}
 						{errors.name && (
 							<p className="text-sm text-destructive">{errors.name.message}</p>
 						)}
@@ -142,7 +185,27 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 						<Label htmlFor="endDate">Data expirare (opțional)</Label>
 						<Input id="endDate" type="date" {...register("endDate")} />
 					</div>
-					<div className="space-y-1.5 sm:col-span-2">
+					{categoryValue === "hbig" && (
+						<div className="space-y-1.5">
+							<Label>Cale administrare</Label>
+							<Select
+								onValueChange={(v) =>
+									setValue("notes", `Cale: ${v.toUpperCase()}`)
+								}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Selectați calea" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="iv">IV</SelectItem>
+									<SelectItem value="sc">SC</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+					)}
+					<div
+						className={`space-y-1.5 ${categoryValue === "hbig" ? "" : "sm:col-span-2"}`}
+					>
 						<Label htmlFor="notes">Notițe (opțional)</Label>
 						<Textarea
 							id="notes"

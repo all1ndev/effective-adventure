@@ -146,112 +146,35 @@ export async function addPatientWithUser(values: unknown) {
 			rejectionDate: data.rejectionDate || null,
 			rejectionType: data.rejectionHistory ? data.rejectionType : null,
 			majorComplications: data.majorComplications || null,
-			immunosuppressants: data.immunosuppressants,
-			immunosuppressantDetails:
-				((data as Record<string, unknown>).immunosuppressantDetails as Record<
-					string,
-					{ frequency?: string; notes?: string }
-				>) ?? {},
-			antiviralProphylaxis: data.antiviralProphylaxis,
-			antiviralDetails:
-				((data as Record<string, unknown>).antiviralDetails as Record<
-					string,
-					{ frequency?: string; notes?: string }
-				>) ?? {},
-			hbIg: data.hbIg,
-			hbIgRoute: data.hbIg ? data.hbIgRoute : null,
-			hbIgFrequency: data.hbIg ? data.hbIgFrequency || null : null,
-			otherMeds: data.otherMeds || null,
 			status: "activ",
 		});
 
-		// Create medication records from selected medications
-		if (userId) {
-			const today = new Date().toISOString().split("T")[0];
-			const medicationRecords: {
-				id: string;
-				patientId: string;
-				name: string;
-				dose: string;
-				frequency: string;
-				notes: string | null;
-				startDate: string;
-			}[] = [];
-
-			const immuDetails = (data as Record<string, unknown>)
-				.immunosuppressantDetails as
-				| Record<string, { frequency?: string; notes?: string }>
-				| undefined;
-			const avDetails = (data as Record<string, unknown>).antiviralDetails as
-				| Record<string, { frequency?: string; notes?: string }>
-				| undefined;
-
-			for (const med of data.immunosuppressants ?? []) {
-				const details = immuDetails?.[med];
-				medicationRecords.push({
-					id: randomUUID(),
-					patientId: userId,
-					name: med,
-					dose: "-",
-					frequency: details?.frequency || "-",
-					notes: details?.notes || null,
-					startDate: today,
-				});
-			}
-			for (const med of data.antiviralProphylaxis ?? []) {
-				const details = avDetails?.[med];
-				medicationRecords.push({
-					id: randomUUID(),
-					patientId: userId,
-					name: med,
-					dose: "-",
-					frequency: details?.frequency || "-",
-					notes: details?.notes || null,
-					startDate: today,
-				});
-			}
-			if (data.hbIg) {
-				medicationRecords.push({
-					id: randomUUID(),
-					patientId: userId,
-					name: "HB-Ig",
-					dose: "-",
-					frequency: data.hbIgFrequency || "-",
-					notes: null,
-					startDate: today,
-				});
-			}
-			if (data.otherMeds) {
-				for (const med of data.otherMeds
-					.split(",")
-					.map((m) => m.trim())
-					.filter(Boolean)) {
-					medicationRecords.push({
-						id: randomUUID(),
-						patientId: userId,
-						name: med,
-						dose: "-",
-						frequency: "-",
-						notes: null,
-						startDate: today,
-					});
-				}
-			}
-
-			if (medicationRecords.length > 0) {
-				await db.insert(medication).values(medicationRecords);
-			}
-
-			// Create conversation between patient and responsible medic
-			const patientName = `${data.firstName} ${data.lastName}`;
-			await db.insert(conversation).values({
+		// Create medication records from form
+		if (userId && data.medications && data.medications.length > 0) {
+			const medicationRecords = data.medications.map((med) => ({
 				id: randomUUID(),
 				patientId: userId,
-				patientName,
-				lastMessage: "",
-				unreadCount: 0,
-			});
+				name: med.name,
+				dose: med.dose,
+				frequency: med.frequency,
+				notes: med.notes || null,
+				startDate: med.startDate,
+				endDate: med.endDate || null,
+				category: med.category || "altele",
+			}));
+
+			await db.insert(medication).values(medicationRecords);
 		}
+
+		// Create conversation between patient and responsible medic
+		const patientName = `${data.firstName} ${data.lastName}`;
+		await db.insert(conversation).values({
+			id: randomUUID(),
+			patientId: userId,
+			patientName,
+			lastMessage: "",
+			unreadCount: 0,
+		});
 
 		const loginUrl = `${process.env.BETTER_AUTH_URL}/sign-in`;
 		await sendCredentialsEmail({
@@ -320,14 +243,6 @@ export async function updateFullPatient(id: string, values: unknown) {
 				rejectionDate: data.rejectionDate || null,
 				rejectionType: data.rejectionHistory ? data.rejectionType : null,
 				majorComplications: data.majorComplications || null,
-				immunosuppressants: data.immunosuppressants,
-				immunosuppressantDetails: data.immunosuppressantDetails,
-				antiviralProphylaxis: data.antiviralProphylaxis,
-				antiviralDetails: data.antiviralDetails,
-				hbIg: data.hbIg,
-				hbIgRoute: data.hbIg ? data.hbIgRoute : null,
-				hbIgFrequency: data.hbIg ? data.hbIgFrequency || null : null,
-				otherMeds: data.otherMeds || null,
 				status: data.status,
 				updatedAt: new Date(),
 			})
