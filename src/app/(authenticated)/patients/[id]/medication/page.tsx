@@ -81,7 +81,12 @@ export default function PatientMedicationPage({
 					<>
 						<RenewalAlert medications={meds} />
 						<MedicationForm patientId={id} onSuccess={fetchData} />
-						<ComplianceTable medications={meds} logs={logs} />
+						<ComplianceTable
+							medications={meds}
+							logs={logs}
+							patientId={id}
+							onUpdate={fetchData}
+						/>
 					</>
 				)}
 			</Main>

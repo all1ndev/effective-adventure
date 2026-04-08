@@ -103,6 +103,65 @@ export async function updateMedication(id: string, values: unknown) {
 	return { success: true };
 }
 
+export async function updateMedicationForPatient(
+	patientId: string,
+	id: string,
+	values: unknown,
+) {
+	const session = await getSessionOrThrow();
+
+	if (!isMedicRole(session.user.role)) {
+		throw new Error("Neautorizat");
+	}
+
+	const parsed = medicationFormSchema.safeParse(values);
+
+	if (!parsed.success) {
+		return { error: "Date invalide." };
+	}
+
+	const existing = await db
+		.select()
+		.from(medication)
+		.where(and(eq(medication.id, id), eq(medication.patientId, patientId)))
+		.limit(1);
+
+	if (existing.length === 0) {
+		return { error: "Înregistrarea nu a fost găsită." };
+	}
+
+	await db.update(medication).set(parsed.data).where(eq(medication.id, id));
+
+	revalidatePath(`/patients/${patientId}/medication`);
+	return { success: true };
+}
+
+export async function deleteMedicationForPatient(
+	patientId: string,
+	id: string,
+) {
+	const session = await getSessionOrThrow();
+
+	if (!isMedicRole(session.user.role)) {
+		throw new Error("Neautorizat");
+	}
+
+	const existing = await db
+		.select()
+		.from(medication)
+		.where(and(eq(medication.id, id), eq(medication.patientId, patientId)))
+		.limit(1);
+
+	if (existing.length === 0) {
+		return { error: "Înregistrarea nu a fost găsită." };
+	}
+
+	await db.delete(medication).where(eq(medication.id, id));
+
+	revalidatePath(`/patients/${patientId}/medication`);
+	return { success: true };
+}
+
 export async function deleteMedication(id: string) {
 	const session = await getSessionOrThrow();
 

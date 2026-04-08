@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { Pencil } from "lucide-react";
 import {
 	Table,
 	TableBody,
@@ -7,14 +11,25 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { type Medication, type MedicationLog } from "../data/schema";
+import { EditMedicationDialog } from "./edit-medication-dialog";
 
 interface ComplianceTableProps {
 	medications: Medication[];
 	logs: MedicationLog[];
+	patientId?: string;
+	onUpdate?: () => void;
 }
 
-export function ComplianceTable({ medications, logs }: ComplianceTableProps) {
+export function ComplianceTable({
+	medications,
+	logs,
+	patientId,
+	onUpdate,
+}: ComplianceTableProps) {
+	const [editingMed, setEditingMed] = useState<Medication | null>(null);
+
 	const stats = medications.map((med) => {
 		const medLogs = logs.filter((l) => l.medicationId === med.id);
 		const taken = medLogs.filter((l) => l.status === "luat").length;
@@ -24,44 +39,71 @@ export function ComplianceTable({ medications, logs }: ComplianceTableProps) {
 	});
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Conformitate medicație</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Medicament</TableHead>
-							<TableHead>Doză</TableHead>
-							<TableHead>Frecvență</TableHead>
-							<TableHead className="text-right">Conformitate</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{stats.map(({ med, taken, total, rate }) => (
-							<TableRow key={med.id}>
-								<TableCell className="font-medium">{med.name}</TableCell>
-								<TableCell>{med.dose}</TableCell>
-								<TableCell>{med.frequency}</TableCell>
-								<TableCell className="text-right">
-									<span
-										className={
-											rate >= 90
-												? "text-green-600 dark:text-green-400"
-												: rate >= 70
-													? "text-orange-600 dark:text-orange-400"
-													: "font-semibold text-destructive"
-										}
-									>
-										{total > 0 ? `${rate}% (${taken}/${total})` : "—"}
-									</span>
-								</TableCell>
+		<>
+			<Card>
+				<CardHeader>
+					<CardTitle>Conformitate medicație</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Medicament</TableHead>
+								<TableHead>Doză</TableHead>
+								<TableHead>Frecvență</TableHead>
+								<TableHead>Notițe</TableHead>
+								<TableHead className="text-right">Conformitate</TableHead>
+								<TableHead className="w-10" />
 							</TableRow>
-						))}
-					</TableBody>
-				</Table>
-			</CardContent>
-		</Card>
+						</TableHeader>
+						<TableBody>
+							{stats.map(({ med, taken, total, rate }) => (
+								<TableRow key={med.id}>
+									<TableCell className="font-medium">{med.name}</TableCell>
+									<TableCell>{med.dose}</TableCell>
+									<TableCell>{med.frequency}</TableCell>
+									<TableCell className="max-w-[200px] truncate text-muted-foreground text-sm">
+										{med.notes || "—"}
+									</TableCell>
+									<TableCell className="text-right">
+										<span
+											className={
+												rate >= 90
+													? "text-green-600 dark:text-green-400"
+													: rate >= 70
+														? "text-orange-600 dark:text-orange-400"
+														: "font-semibold text-destructive"
+											}
+										>
+											{total > 0 ? `${rate}% (${taken}/${total})` : "—"}
+										</span>
+									</TableCell>
+									<TableCell>
+										<Button
+											variant="ghost"
+											size="icon"
+											className="h-8 w-8"
+											onClick={() => setEditingMed(med)}
+										>
+											<Pencil className="h-4 w-4" />
+											<span className="sr-only">Editează</span>
+										</Button>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</CardContent>
+			</Card>
+			<EditMedicationDialog
+				medication={editingMed}
+				open={editingMed !== null}
+				onOpenChange={(open) => {
+					if (!open) setEditingMed(null);
+				}}
+				patientId={patientId}
+				onSuccess={onUpdate}
+			/>
+		</>
 	);
 }

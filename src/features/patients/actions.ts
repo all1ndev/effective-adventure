@@ -164,26 +164,39 @@ export async function addPatientWithUser(values: unknown) {
 				name: string;
 				dose: string;
 				frequency: string;
+				notes: string | null;
 				startDate: string;
 			}[] = [];
 
+			const immuDetails = (data as Record<string, unknown>)
+				.immunosuppressantDetails as
+				| Record<string, { frequency?: string; notes?: string }>
+				| undefined;
+			const avDetails = (data as Record<string, unknown>).antiviralDetails as
+				| Record<string, { frequency?: string; notes?: string }>
+				| undefined;
+
 			for (const med of data.immunosuppressants ?? []) {
+				const details = immuDetails?.[med];
 				medicationRecords.push({
 					id: randomUUID(),
 					patientId: userId,
 					name: med,
 					dose: "-",
-					frequency: "-",
+					frequency: details?.frequency || "-",
+					notes: details?.notes || null,
 					startDate: today,
 				});
 			}
 			for (const med of data.antiviralProphylaxis ?? []) {
+				const details = avDetails?.[med];
 				medicationRecords.push({
 					id: randomUUID(),
 					patientId: userId,
 					name: med,
 					dose: "-",
-					frequency: "-",
+					frequency: details?.frequency || "-",
+					notes: details?.notes || null,
 					startDate: today,
 				});
 			}
@@ -194,6 +207,7 @@ export async function addPatientWithUser(values: unknown) {
 					name: "HB-Ig",
 					dose: "-",
 					frequency: data.hbIgFrequency || "-",
+					notes: null,
 					startDate: today,
 				});
 			}
@@ -208,6 +222,7 @@ export async function addPatientWithUser(values: unknown) {
 						name: med,
 						dose: "-",
 						frequency: "-",
+						notes: null,
 						startDate: today,
 					});
 				}

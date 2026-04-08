@@ -77,7 +77,11 @@ export function Medication() {
 							onSuccess={fetchData}
 						/>
 						<MedicationCalendar medications={meds} logs={logs} />
-						<ComplianceTable medications={meds} logs={logs} />
+						<ComplianceTable
+							medications={meds}
+							logs={logs}
+							onUpdate={fetchData}
+						/>
 					</>
 				)}
 			</Main>

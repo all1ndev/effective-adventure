@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
 	Card,
 	CardContent,
@@ -13,9 +14,17 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
 	medicationFormSchema,
+	frequencyOptions,
 	type MedicationFormValues,
 } from "../data/schema";
 import { createMedication, createMedicationForPatient } from "../actions";
@@ -32,6 +41,8 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 		register,
 		handleSubmit,
 		reset,
+		setValue,
+		watch,
 		formState: { errors },
 	} = useForm<MedicationFormValues>({
 		resolver: zodResolver(medicationFormSchema),
@@ -39,10 +50,13 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 			name: "",
 			dose: "",
 			frequency: "",
+			notes: "",
 			startDate: "",
 			endDate: "",
 		},
 	});
+
+	const frequencyValue = watch("frequency");
 
 	function onSubmit(values: MedicationFormValues) {
 		startTransition(async () => {
@@ -93,12 +107,22 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 						)}
 					</div>
 					<div className="space-y-1.5">
-						<Label htmlFor="frequency">Frecvență</Label>
-						<Input
-							id="frequency"
-							placeholder="ex: De 2 ori pe zi"
-							{...register("frequency")}
-						/>
+						<Label>Frecvență</Label>
+						<Select
+							value={frequencyValue}
+							onValueChange={(v) => setValue("frequency", v)}
+						>
+							<SelectTrigger>
+								<SelectValue placeholder="Selectați frecvența" />
+							</SelectTrigger>
+							<SelectContent>
+								{frequencyOptions.map((opt) => (
+									<SelectItem key={opt.value} value={opt.value}>
+										{opt.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 						{errors.frequency && (
 							<p className="text-sm text-destructive">
 								{errors.frequency.message}
@@ -117,6 +141,15 @@ export function MedicationForm({ patientId, onSuccess }: MedicationFormProps) {
 					<div className="space-y-1.5">
 						<Label htmlFor="endDate">Data expirare (opțional)</Label>
 						<Input id="endDate" type="date" {...register("endDate")} />
+					</div>
+					<div className="space-y-1.5 sm:col-span-2">
+						<Label htmlFor="notes">Notițe (opțional)</Label>
+						<Textarea
+							id="notes"
+							placeholder="ex: A se lua pe stomacul gol, înainte de masă"
+							className="min-h-[60px]"
+							{...register("notes")}
+						/>
 					</div>
 					<div className="sm:col-span-2">
 						<Button type="submit" disabled={isPending}>

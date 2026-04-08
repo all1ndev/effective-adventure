@@ -12,6 +12,7 @@ export const medication = pgTable(
 		name: text("name").notNull(),
 		dose: text("dose").notNull(),
 		frequency: text("frequency").notNull(),
+		notes: text("notes"),
 		startDate: text("start_date").notNull(),
 		endDate: text("end_date"),
 		createdAt: timestamp("created_at").defaultNow().notNull(),

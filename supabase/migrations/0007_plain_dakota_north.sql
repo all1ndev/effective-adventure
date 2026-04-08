@@ -1,0 +1,1 @@
+ALTER TABLE "medication" ADD COLUMN "notes" text;
