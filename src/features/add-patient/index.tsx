@@ -231,6 +231,14 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 		control: form.control,
 		name: "antiviralProphylaxis",
 	});
+	const watchedImmuDetails = useWatch({
+		control: form.control,
+		name: "immunosuppressantDetails",
+	});
+	const watchedAvDetails = useWatch({
+		control: form.control,
+		name: "antiviralDetails",
+	});
 
 	const formErrors = form.formState.errors;
 	const hasValidationErrors =
@@ -1065,9 +1073,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 																</FormLabel>
 																<Select
 																	value={
-																		form.getValues(
-																			`immunosuppressantDetails.${item}.frequency`,
-																		) ?? ""
+																		watchedImmuDetails?.[item]?.frequency ?? ""
 																	}
 																	onValueChange={(v) =>
 																		form.setValue(
@@ -1098,9 +1104,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 																<Input
 																	placeholder="ex: dimineața, pe stomacul gol"
 																	value={
-																		form.getValues(
-																			`immunosuppressantDetails.${item}.notes`,
-																		) ?? ""
+																		watchedImmuDetails?.[item]?.notes ?? ""
 																	}
 																	onChange={(e) =>
 																		form.setValue(
@@ -1135,9 +1139,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 																</FormLabel>
 																<Select
 																	value={
-																		form.getValues(
-																			`antiviralDetails.${item}.frequency`,
-																		) ?? ""
+																		watchedAvDetails?.[item]?.frequency ?? ""
 																	}
 																	onValueChange={(v) =>
 																		form.setValue(
@@ -1167,11 +1169,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 																</FormLabel>
 																<Input
 																	placeholder="ex: dimineața, pe stomacul gol"
-																	value={
-																		form.getValues(
-																			`antiviralDetails.${item}.notes`,
-																		) ?? ""
-																	}
+																	value={watchedAvDetails?.[item]?.notes ?? ""}
 																	onChange={(e) =>
 																		form.setValue(
 																			`antiviralDetails.${item}.notes`,

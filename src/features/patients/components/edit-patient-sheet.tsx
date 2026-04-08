@@ -258,6 +258,14 @@ export function EditPatientSheet({
 		control: form.control,
 		name: "antiviralProphylaxis",
 	});
+	const immuDetails = useWatch({
+		control: form.control,
+		name: "immunosuppressantDetails",
+	});
+	const avDetails = useWatch({
+		control: form.control,
+		name: "antiviralDetails",
+	});
 
 	const formErrors = form.formState.errors;
 	const hasValidationErrors =
@@ -1034,11 +1042,7 @@ export function EditPatientSheet({
 													<div className="space-y-1">
 														<FormLabel className="text-xs">Frecvență</FormLabel>
 														<Select
-															value={
-																form.getValues(
-																	`immunosuppressantDetails.${item}.frequency`,
-																) ?? ""
-															}
+															value={immuDetails?.[item]?.frequency ?? ""}
 															onValueChange={(v) =>
 																form.setValue(
 																	`immunosuppressantDetails.${item}.frequency`,
@@ -1062,11 +1066,7 @@ export function EditPatientSheet({
 														<FormLabel className="text-xs">Notițe</FormLabel>
 														<Input
 															placeholder="ex: dimineața, pe stomacul gol"
-															value={
-																form.getValues(
-																	`immunosuppressantDetails.${item}.notes`,
-																) ?? ""
-															}
+															value={immuDetails?.[item]?.notes ?? ""}
 															onChange={(e) =>
 																form.setValue(
 																	`immunosuppressantDetails.${item}.notes`,
@@ -1097,11 +1097,7 @@ export function EditPatientSheet({
 													<div className="space-y-1">
 														<FormLabel className="text-xs">Frecvență</FormLabel>
 														<Select
-															value={
-																form.getValues(
-																	`antiviralDetails.${item}.frequency`,
-																) ?? ""
-															}
+															value={avDetails?.[item]?.frequency ?? ""}
 															onValueChange={(v) =>
 																form.setValue(
 																	`antiviralDetails.${item}.frequency`,
@@ -1125,11 +1121,7 @@ export function EditPatientSheet({
 														<FormLabel className="text-xs">Notițe</FormLabel>
 														<Input
 															placeholder="ex: dimineața, pe stomacul gol"
-															value={
-																form.getValues(
-																	`antiviralDetails.${item}.notes`,
-																) ?? ""
-															}
+															value={avDetails?.[item]?.notes ?? ""}
 															onChange={(e) =>
 																form.setValue(
 																	`antiviralDetails.${item}.notes`,
