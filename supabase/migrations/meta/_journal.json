@@ -71,6 +71,13 @@
 			"when": 1775681163360,
 			"tag": "0009_steep_starhawk",
 			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "7",
+			"when": 1775686231988,
+			"tag": "0010_young_william_stryker",
+			"breakpoints": true
 		}
 	]
 }

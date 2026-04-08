@@ -53,3 +53,11 @@ export {
 	messageRelations,
 } from "./messaging-schema";
 export { doctorStatusEnum, doctor, doctorRelations } from "./doctor-schema";
+export {
+	notificationTargetEnum,
+	notificationSeverityEnum,
+	notification,
+	notificationRead,
+	notificationRelations,
+	notificationReadRelations,
+} from "./notification-schema";

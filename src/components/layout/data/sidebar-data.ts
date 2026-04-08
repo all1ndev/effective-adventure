@@ -1,5 +1,6 @@
 import {
 	Bell,
+	BellRing,
 	UserCheck,
 	UserPlus,
 	Users,
@@ -66,6 +67,11 @@ export const adminSidebarData: SidebarData = {
 					icon: Bell,
 				},
 				{
+					title: "Notificări",
+					url: "/notifications",
+					icon: BellRing,
+				},
+				{
 					title: "Mesagerie",
 					url: "/messaging",
 					icon: MessageSquare,
@@ -108,6 +114,11 @@ export const doctorSidebarData: SidebarData = {
 					icon: Bell,
 				},
 				{
+					title: "Notificări",
+					url: "/notifications",
+					icon: BellRing,
+				},
+				{
 					title: "Mesagerie",
 					url: "/messaging",
 					icon: MessageSquare,
@@ -148,6 +159,11 @@ export const patientSidebarData: SidebarData = {
 					title: "Rezultate Laborator",
 					url: "/lab-results",
 					icon: FlaskConical,
+				},
+				{
+					title: "Notificări",
+					url: "/notifications",
+					icon: BellRing,
 				},
 				{
 					title: "Mesagerie",
