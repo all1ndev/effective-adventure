@@ -78,9 +78,15 @@ export const patient = pgTable(
 		immunosuppressants: json("immunosuppressants")
 			.$type<string[]>()
 			.default([]),
+		immunosuppressantDetails: json("immunosuppressant_details")
+			.$type<Record<string, { frequency?: string; notes?: string }>>()
+			.default({}),
 		antiviralProphylaxis: json("antiviral_prophylaxis")
 			.$type<string[]>()
 			.default([]),
+		antiviralDetails: json("antiviral_details")
+			.$type<Record<string, { frequency?: string; notes?: string }>>()
+			.default({}),
 		hbIg: boolean("hb_ig").default(false),
 		hbIgRoute: hbIgRouteEnum("hb_ig_route"),
 		hbIgFrequency: text("hb_ig_frequency"),

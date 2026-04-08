@@ -147,7 +147,17 @@ export async function addPatientWithUser(values: unknown) {
 			rejectionType: data.rejectionHistory ? data.rejectionType : null,
 			majorComplications: data.majorComplications || null,
 			immunosuppressants: data.immunosuppressants,
+			immunosuppressantDetails:
+				((data as Record<string, unknown>).immunosuppressantDetails as Record<
+					string,
+					{ frequency?: string; notes?: string }
+				>) ?? {},
 			antiviralProphylaxis: data.antiviralProphylaxis,
+			antiviralDetails:
+				((data as Record<string, unknown>).antiviralDetails as Record<
+					string,
+					{ frequency?: string; notes?: string }
+				>) ?? {},
 			hbIg: data.hbIg,
 			hbIgRoute: data.hbIg ? data.hbIgRoute : null,
 			hbIgFrequency: data.hbIg ? data.hbIgFrequency || null : null,
@@ -311,7 +321,9 @@ export async function updateFullPatient(id: string, values: unknown) {
 				rejectionType: data.rejectionHistory ? data.rejectionType : null,
 				majorComplications: data.majorComplications || null,
 				immunosuppressants: data.immunosuppressants,
+				immunosuppressantDetails: data.immunosuppressantDetails,
 				antiviralProphylaxis: data.antiviralProphylaxis,
+				antiviralDetails: data.antiviralDetails,
 				hbIg: data.hbIg,
 				hbIgRoute: data.hbIg ? data.hbIgRoute : null,
 				hbIgFrequency: data.hbIg ? data.hbIgFrequency || null : null,

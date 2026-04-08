@@ -50,6 +50,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { type Patient } from "../data/schema";
+import { frequencyOptions } from "@/features/medication/data/schema";
 
 const sexValues = ["masculin", "feminin", "nespecificat"] as const;
 const languageValues = ["ro", "en", "it", "fr", "de"] as const;
@@ -97,7 +98,25 @@ const patientFormSchema = z.object({
 	rejectionType: z.enum(rejectionTypeValues),
 	majorComplications: z.string().optional(),
 	immunosuppressants: z.array(z.enum(immunosuppressantValues)).default([]),
+	immunosuppressantDetails: z
+		.record(
+			z.string(),
+			z.object({
+				frequency: z.string().optional(),
+				notes: z.string().optional(),
+			}),
+		)
+		.default({}),
 	antiviralProphylaxis: z.array(z.enum(antiviralValues)).default([]),
+	antiviralDetails: z
+		.record(
+			z.string(),
+			z.object({
+				frequency: z.string().optional(),
+				notes: z.string().optional(),
+			}),
+		)
+		.default({}),
 	hbIg: z.boolean(),
 	hbIgRoute: z.enum(hbIgRouteValues),
 	hbIgFrequency: z.string().optional(),
@@ -158,10 +177,20 @@ function patientToFormValues(p: Patient): PatientFormValues {
 			(v): v is (typeof immunosuppressantValues)[number] =>
 				(immunosuppressantValues as readonly string[]).includes(v),
 		),
+		immunosuppressantDetails:
+			(p.immunosuppressantDetails as Record<
+				string,
+				{ frequency?: string; notes?: string }
+			>) ?? {},
 		antiviralProphylaxis: ((p.antiviralProphylaxis ?? []) as string[]).filter(
 			(v): v is (typeof antiviralValues)[number] =>
 				(antiviralValues as readonly string[]).includes(v),
 		),
+		antiviralDetails:
+			(p.antiviralDetails as Record<
+				string,
+				{ frequency?: string; notes?: string }
+			>) ?? {},
 		hbIg: p.hbIg ?? false,
 		hbIgRoute: safeEnum(p.hbIgRoute, hbIgRouteValues, "iv"),
 		hbIgFrequency: p.hbIgFrequency ?? "",
@@ -221,6 +250,14 @@ export function EditPatientSheet({
 	});
 	const hbIg = useWatch({ control: form.control, name: "hbIg" });
 	const etiology = useWatch({ control: form.control, name: "etiology" });
+	const selectedImmunosuppressants = useWatch({
+		control: form.control,
+		name: "immunosuppressants",
+	});
+	const selectedAntivirals = useWatch({
+		control: form.control,
+		name: "antiviralProphylaxis",
+	});
 
 	const formErrors = form.formState.errors;
 	const hasValidationErrors =
@@ -303,11 +340,13 @@ export function EditPatientSheet({
 							<AlertTitle>Campuri obligatorii necompletate</AlertTitle>
 							<AlertDescription>
 								<ul className="mt-1 list-disc pl-4">
-									{Object.entries(formErrors).map(([key, err]) => (
-										<li key={key} className="font-medium">
-											{err?.message ?? key}
-										</li>
-									))}
+									{Object.entries(formErrors)
+										.filter(([, err]) => typeof err?.message === "string")
+										.map(([key, err]) => (
+											<li key={key} className="font-medium">
+												{(err?.message as string) ?? key}
+											</li>
+										))}
 								</ul>
 							</AlertDescription>
 						</Alert>
@@ -978,6 +1017,132 @@ export function EditPatientSheet({
 										)}
 									/>
 								</div>
+								{(selectedImmunosuppressants ?? []).length > 0 && (
+									<div className="space-y-3">
+										<p className="text-sm font-medium text-muted-foreground">
+											Detalii imunosupresoare selectate
+										</p>
+										{(selectedImmunosuppressants ?? []).map((item) => (
+											<div
+												key={item}
+												className="rounded-lg border p-3 space-y-2"
+											>
+												<p className="text-sm font-medium">
+													{item.charAt(0).toUpperCase() + item.slice(1)}
+												</p>
+												<div className="grid gap-3 sm:grid-cols-2">
+													<div className="space-y-1">
+														<FormLabel className="text-xs">Frecvență</FormLabel>
+														<Select
+															value={
+																form.getValues(
+																	`immunosuppressantDetails.${item}.frequency`,
+																) ?? ""
+															}
+															onValueChange={(v) =>
+																form.setValue(
+																	`immunosuppressantDetails.${item}.frequency`,
+																	v,
+																)
+															}
+														>
+															<SelectTrigger>
+																<SelectValue placeholder="Selectați" />
+															</SelectTrigger>
+															<SelectContent>
+																{frequencyOptions.map((opt) => (
+																	<SelectItem key={opt.value} value={opt.value}>
+																		{opt.label}
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+													</div>
+													<div className="space-y-1">
+														<FormLabel className="text-xs">Notițe</FormLabel>
+														<Input
+															placeholder="ex: dimineața, pe stomacul gol"
+															value={
+																form.getValues(
+																	`immunosuppressantDetails.${item}.notes`,
+																) ?? ""
+															}
+															onChange={(e) =>
+																form.setValue(
+																	`immunosuppressantDetails.${item}.notes`,
+																	e.target.value,
+																)
+															}
+														/>
+													</div>
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+								{(selectedAntivirals ?? []).length > 0 && (
+									<div className="space-y-3">
+										<p className="text-sm font-medium text-muted-foreground">
+											Detalii antivirale selectate
+										</p>
+										{(selectedAntivirals ?? []).map((item) => (
+											<div
+												key={item}
+												className="rounded-lg border p-3 space-y-2"
+											>
+												<p className="text-sm font-medium">
+													{item.charAt(0).toUpperCase() + item.slice(1)}
+												</p>
+												<div className="grid gap-3 sm:grid-cols-2">
+													<div className="space-y-1">
+														<FormLabel className="text-xs">Frecvență</FormLabel>
+														<Select
+															value={
+																form.getValues(
+																	`antiviralDetails.${item}.frequency`,
+																) ?? ""
+															}
+															onValueChange={(v) =>
+																form.setValue(
+																	`antiviralDetails.${item}.frequency`,
+																	v,
+																)
+															}
+														>
+															<SelectTrigger>
+																<SelectValue placeholder="Selectați" />
+															</SelectTrigger>
+															<SelectContent>
+																{frequencyOptions.map((opt) => (
+																	<SelectItem key={opt.value} value={opt.value}>
+																		{opt.label}
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+													</div>
+													<div className="space-y-1">
+														<FormLabel className="text-xs">Notițe</FormLabel>
+														<Input
+															placeholder="ex: dimineața, pe stomacul gol"
+															value={
+																form.getValues(
+																	`antiviralDetails.${item}.notes`,
+																) ?? ""
+															}
+															onChange={(e) =>
+																form.setValue(
+																	`antiviralDetails.${item}.notes`,
+																	e.target.value,
+																)
+															}
+														/>
+													</div>
+												</div>
+											</div>
+										))}
+									</div>
+								)}
 								{hbIg && (
 									<div className="grid gap-4 md:grid-cols-2">
 										<FormField

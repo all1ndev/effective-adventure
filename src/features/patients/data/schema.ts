@@ -53,7 +53,25 @@ const patientSchema = z.object({
 	rejectionType: z.enum(["acut", "cronic"]).nullable().optional(),
 	majorComplications: z.string().optional(),
 	immunosuppressants: z.array(z.string()).optional(),
+	immunosuppressantDetails: z
+		.record(
+			z.string(),
+			z.object({
+				frequency: z.string().optional(),
+				notes: z.string().optional(),
+			}),
+		)
+		.optional(),
 	antiviralProphylaxis: z.array(z.string()).optional(),
+	antiviralDetails: z
+		.record(
+			z.string(),
+			z.object({
+				frequency: z.string().optional(),
+				notes: z.string().optional(),
+			}),
+		)
+		.optional(),
 	hbIg: z.boolean().optional(),
 	hbIgRoute: z.enum(["iv", "sc"]).nullable().optional(),
 	hbIgFrequency: z.string().optional(),
@@ -117,7 +135,25 @@ export const editPatientFormSchema = z.object({
 			]),
 		)
 		.default([]),
+	immunosuppressantDetails: z
+		.record(
+			z.string(),
+			z.object({
+				frequency: z.string().optional(),
+				notes: z.string().optional(),
+			}),
+		)
+		.default({}),
 	antiviralProphylaxis: z.array(z.enum(["entecavir", "tenofovir"])).default([]),
+	antiviralDetails: z
+		.record(
+			z.string(),
+			z.object({
+				frequency: z.string().optional(),
+				notes: z.string().optional(),
+			}),
+		)
+		.default({}),
 	hbIg: z.boolean(),
 	hbIgRoute: z.enum(["iv", "sc"]),
 	hbIgFrequency: z.string().optional(),
