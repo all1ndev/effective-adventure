@@ -26,6 +26,7 @@ interface CreateNotificationInput {
 	severity: "critical" | "warning" | "info";
 	targetType: TargetType;
 	targetValue?: string;
+	scheduledAt?: string;
 }
 
 async function resolveTargetUserIds(
@@ -176,12 +177,46 @@ export async function createNotification(input: CreateNotificationInput) {
 		severity: input.severity,
 		targetType: input.targetType,
 		targetValue: input.targetValue ?? null,
+		scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : null,
 		createdBy: session.user.id,
 		createdByName: session.user.name ?? "Medic",
 	});
 
 	revalidatePath("/notifications");
 	return { success: true, recipientCount: targetUserIds.length };
+}
+
+export async function deleteNotification(notificationId: string) {
+	const session = await getSessionOrThrow();
+
+	if (!isMedicRole(session.user.role)) {
+		throw new Error("Neautorizat");
+	}
+
+	const [target] = await db
+		.select()
+		.from(notification)
+		.where(eq(notification.id, notificationId))
+		.limit(1);
+
+	if (!target) {
+		return { error: "Notificarea nu a fost găsită." };
+	}
+
+	const elapsed = Date.now() - new Date(target.createdAt).getTime();
+	const fiveMinutes = 5 * 60 * 1000;
+
+	if (elapsed > fiveMinutes) {
+		return { error: "Notificarea poate fi ștearsă doar în primele 5 minute." };
+	}
+
+	await db
+		.delete(notificationRead)
+		.where(eq(notificationRead.notificationId, notificationId));
+	await db.delete(notification).where(eq(notification.id, notificationId));
+
+	revalidatePath("/notifications");
+	return { success: true };
 }
 
 export async function getNotificationsForPatient() {
@@ -200,9 +235,11 @@ export async function getNotificationsForPatient() {
 
 	const readSet = new Set(reads.map((r) => r.notificationId));
 
+	const now = new Date();
 	const myNotifications: typeof allNotifications = [];
 
 	for (const n of allNotifications) {
+		if (n.scheduledAt && new Date(n.scheduledAt) > now) continue;
 		const targets = await resolveTargetUserIds(
 			n.targetType as TargetType,
 			n.targetValue ?? undefined,

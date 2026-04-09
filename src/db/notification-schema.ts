@@ -32,6 +32,7 @@ export const notification = pgTable(
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
 		createdByName: text("created_by_name").notNull(),
+		scheduledAt: timestamp("scheduled_at"),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
 	(table) => [index("notification_createdAt_idx").on(table.createdAt)],

@@ -161,6 +161,21 @@ export function PatientNotifications() {
 														minute: "2-digit",
 													})}
 												</p>
+												{n.scheduledAt && (
+													<p className="text-xs text-muted-foreground">
+														Programată pentru:{" "}
+														{new Date(n.scheduledAt).toLocaleDateString(
+															"ro-RO",
+															{
+																day: "numeric",
+																month: "long",
+																year: "numeric",
+																hour: "2-digit",
+																minute: "2-digit",
+															},
+														)}
+													</p>
+												)}
 											</div>
 											{!n.read ? (
 												<Button

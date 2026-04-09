@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useTransition } from "react";
-import { Send } from "lucide-react";
+import { Send, CalendarClock, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import {
 	createNotification,
+	deleteNotification,
 	getSentNotifications,
 	getTargetPreview,
 	getDoctorsList,
@@ -96,6 +97,7 @@ export function SendNotifications() {
 	const [loading, setLoading] = useState(true);
 	const [doctors, setDoctors] = useState<Doctor[]>([]);
 	const [patients, setPatients] = useState<Patient[]>([]);
+	const [now, setNow] = useState(() => Date.now());
 
 	const [title, setTitle] = useState("");
 	const [message, setMessage] = useState("");
@@ -105,6 +107,8 @@ export function SendNotifications() {
 	const [targetType, setTargetType] = useState<string>("");
 	const [targetValue, setTargetValue] = useState("");
 	const [selectedPatients, setSelectedPatients] = useState<string[]>([]);
+	const [scheduledDate, setScheduledDate] = useState("");
+	const [scheduledTime, setScheduledTime] = useState("");
 	const [preview, setPreview] = useState<{
 		count: number;
 		patients: string[];
@@ -121,6 +125,11 @@ export function SendNotifications() {
 	}, []);
 
 	useEffect(fetchData, [fetchData]);
+
+	useEffect(() => {
+		const interval = setInterval(() => setNow(Date.now()), 30_000);
+		return () => clearInterval(interval);
+	}, []);
 
 	function handleTargetValueChange(v: string) {
 		setTargetValue(v);
@@ -158,6 +167,18 @@ export function SendNotifications() {
 			.catch(() => setPreview(null));
 	}
 
+	function handleDelete(id: string) {
+		startTransition(async () => {
+			const result = await deleteNotification(id);
+			if ("error" in result) {
+				toast.error(result.error);
+				return;
+			}
+			toast.success("Notificarea a fost ștearsă.");
+			fetchData();
+		});
+	}
+
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 
@@ -173,6 +194,13 @@ export function SendNotifications() {
 					? undefined
 					: targetValue || undefined;
 
+		const scheduledAt =
+			scheduledDate && scheduledTime
+				? new Date(`${scheduledDate}T${scheduledTime}`).toISOString()
+				: scheduledDate
+					? new Date(`${scheduledDate}T00:00`).toISOString()
+					: undefined;
+
 		startTransition(async () => {
 			const result = await createNotification({
 				title: title.trim(),
@@ -182,6 +210,7 @@ export function SendNotifications() {
 					typeof createNotification
 				>[0]["targetType"],
 				targetValue: value,
+				scheduledAt,
 			});
 
 			if ("error" in result) {
@@ -190,7 +219,9 @@ export function SendNotifications() {
 			}
 
 			toast.success(
-				`Notificare trimisă către ${result.recipientCount} pacient${result.recipientCount === 1 ? "" : "i"}.`,
+				scheduledAt
+					? `Notificare programată pentru ${new Date(scheduledAt).toLocaleString("ro-RO")} către ${result.recipientCount} pacient${result.recipientCount === 1 ? "" : "i"}.`
+					: `Notificare trimisă către ${result.recipientCount} pacient${result.recipientCount === 1 ? "" : "i"}.`,
 			);
 			setTitle("");
 			setMessage("");
@@ -198,6 +229,8 @@ export function SendNotifications() {
 			setTargetType("");
 			setTargetValue("");
 			setSelectedPatients([]);
+			setScheduledDate("");
+			setScheduledTime("");
 			setPreview(null);
 			fetchData();
 		});
@@ -460,9 +493,39 @@ export function SendNotifications() {
 										/>
 									</div>
 
+									<div className="space-y-1.5">
+										<Label className="flex items-center gap-1.5">
+											<CalendarClock className="h-4 w-4" />
+											Programare (opțional)
+										</Label>
+										<div className="flex gap-2">
+											<Input
+												type="date"
+												value={scheduledDate}
+												onChange={(e) => setScheduledDate(e.target.value)}
+												min={new Date().toISOString().split("T")[0]}
+												className="flex-1"
+											/>
+											<Input
+												type="time"
+												value={scheduledTime}
+												onChange={(e) => setScheduledTime(e.target.value)}
+												className="flex-1"
+												disabled={!scheduledDate}
+											/>
+										</div>
+										<p className="text-xs text-muted-foreground">
+											Lăsați gol pentru trimitere imediată.
+										</p>
+									</div>
+
 									<Button type="submit" disabled={isPending}>
 										<Send className="mr-2 h-4 w-4" />
-										{isPending ? "Se trimite..." : "Trimite notificarea"}
+										{isPending
+											? "Se trimite..."
+											: scheduledDate
+												? "Programează notificarea"
+												: "Trimite notificarea"}
 									</Button>
 								</form>
 							</CardContent>
@@ -485,18 +548,67 @@ export function SendNotifications() {
 										{sent.map((n) => {
 											const sev =
 												severityConfig[n.severity] ?? severityConfig.info;
+											const isScheduled =
+												n.scheduledAt && new Date(n.scheduledAt) > new Date();
+											const canDelete =
+												now - new Date(n.createdAt).getTime() < 5 * 60 * 1000;
 											return (
 												<div
 													key={n.id}
-													className="rounded-lg border p-3 space-y-1"
+													className={`rounded-lg border p-3 space-y-1 ${isScheduled ? "border-dashed opacity-75" : ""}`}
 												>
 													<div className="flex items-center justify-between">
-														<p className="font-medium text-sm">{n.title}</p>
-														<Badge className={sev.className}>{sev.label}</Badge>
+														<div className="flex items-center gap-2">
+															<p className="font-medium text-sm">{n.title}</p>
+															{isScheduled && (
+																<Badge
+																	variant="outline"
+																	className="text-xs gap-1"
+																>
+																	<CalendarClock className="h-3 w-3" />
+																	Programată
+																</Badge>
+															)}
+														</div>
+														<div className="flex items-center gap-1.5">
+															<Badge className={sev.className}>
+																{sev.label}
+															</Badge>
+															{canDelete && (
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	className="h-7 w-7 text-muted-foreground hover:text-red-600"
+																	disabled={isPending}
+																	onClick={() => handleDelete(n.id)}
+																>
+																	<Trash2 className="h-3.5 w-3.5" />
+																</Button>
+															)}
+														</div>
 													</div>
 													<p className="text-sm text-muted-foreground">
 														{n.message}
 													</p>
+													{n.scheduledAt && (
+														<p
+															className={`text-xs font-medium ${isScheduled ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}
+														>
+															{isScheduled
+																? "Programată pentru: "
+																: "A fost programată pentru: "}
+															{new Date(n.scheduledAt).toLocaleDateString(
+																"ro-RO",
+																{
+																	day: "numeric",
+																	month: "long",
+																	year: "numeric",
+																	hour: "2-digit",
+																	minute: "2-digit",
+																},
+															)}
+														</p>
+													)}
 													<div className="flex items-center gap-2 text-xs text-muted-foreground">
 														<span>
 															{targetLabelMap[n.targetType] ?? n.targetType}
