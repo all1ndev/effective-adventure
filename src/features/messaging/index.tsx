@@ -229,12 +229,14 @@ export function Messaging() {
 									</div>
 									<div
 										ref={threadRef}
-										className="flex min-h-0 flex-1 flex-col justify-end overflow-y-auto"
+										className="flex min-h-0 flex-1 flex-col overflow-y-auto"
 									>
-										<MessageThread
-											messages={threadMessages}
-											currentUserId={currentUserId}
-										/>
+										<div className="mt-auto">
+											<MessageThread
+												messages={threadMessages}
+												currentUserId={currentUserId}
+											/>
+										</div>
 									</div>
 									{currentUserRole !== "admin" && (
 										<MessageInput onSend={handleSend} />
