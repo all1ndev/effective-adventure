@@ -13,7 +13,12 @@ export default function NotificationsPage() {
 	if (isPending || !role) return null;
 
 	if (role === "admin" || role === "doctor") {
-		return <SendNotifications />;
+		return (
+			<>
+				<PushNotificationManager />
+				<SendNotifications />
+			</>
+		);
 	}
 
 	return (

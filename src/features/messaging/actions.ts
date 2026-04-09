@@ -206,6 +206,39 @@ export async function sendMessage(conversationId: string, body: string) {
 		description: `A trimis un mesaj`,
 	});
 
+	// Send push notification to the other party
+	const conv = await db
+		.select({ patientId: conversation.patientId })
+		.from(conversation)
+		.where(eq(conversation.id, conversationId))
+		.limit(1);
+
+	if (conv.length > 0) {
+		const { sendPushToUser } = await import("@/lib/push");
+
+		if (session.user.role === "admin" || session.user.role === "doctor") {
+			// Doctor/admin sent → notify patient
+			await sendPushToUser(conv[0].patientId, {
+				title: "Mesaj nou",
+				body: `${senderName}: ${body.slice(0, 100)}`,
+			});
+		} else {
+			// Patient sent → notify their doctor
+			const patientRecord = await db
+				.select({ doctorId: patient.doctorId })
+				.from(patient)
+				.where(eq(patient.userId, session.user.id))
+				.limit(1);
+
+			if (patientRecord.length > 0 && patientRecord[0].doctorId) {
+				await sendPushToUser(patientRecord[0].doctorId, {
+					title: "Mesaj nou de la pacient",
+					body: `${session.user.name}: ${body.slice(0, 100)}`,
+				});
+			}
+		}
+	}
+
 	revalidatePath("/messaging");
 	return { success: true, message: newMsg };
 }

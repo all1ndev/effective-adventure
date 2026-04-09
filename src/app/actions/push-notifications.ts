@@ -1,44 +1,62 @@
 "use server";
 
-import webpush, { PushSubscription } from "web-push";
+import { eq, and } from "drizzle-orm";
+import { db } from "@/db";
+import { pushSubscription } from "@/db/push-subscription-schema";
+import { getSessionOrThrow } from "@/lib/auth-utils";
 
-webpush.setVapidDetails(
-	"mailto:testingemailveronica@gmail.com",
-	process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-	process.env.VAPID_PRIVATE_KEY!,
-);
+interface PushSubscriptionData {
+	endpoint: string;
+	keys: { p256dh: string; auth: string };
+}
 
-let subscription: PushSubscription | null = null;
+export async function subscribeUser(sub: PushSubscriptionData) {
+	const session = await getSessionOrThrow();
 
-export async function subscribeUser(sub: PushSubscription) {
-	subscription = sub;
-	// In a production environment, store the subscription in a database
+	const existing = await db
+		.select()
+		.from(pushSubscription)
+		.where(
+			and(
+				eq(pushSubscription.userId, session.user.id),
+				eq(pushSubscription.endpoint, sub.endpoint),
+			),
+		)
+		.limit(1);
+
+	if (existing.length > 0) {
+		return { success: true };
+	}
+
+	await db.insert(pushSubscription).values({
+		id: crypto.randomUUID(),
+		userId: session.user.id,
+		endpoint: sub.endpoint,
+		p256dh: sub.keys.p256dh,
+		auth: sub.keys.auth,
+	});
+
 	return { success: true };
 }
 
 export async function unsubscribeUser() {
-	subscription = null;
-	// In a production environment, remove the subscription from the database
+	const session = await getSessionOrThrow();
+
+	await db
+		.delete(pushSubscription)
+		.where(eq(pushSubscription.userId, session.user.id));
+
 	return { success: true };
 }
 
 export async function sendNotification(message: string) {
-	if (!subscription) {
-		throw new Error("No subscription available");
-	}
+	const session = await getSessionOrThrow();
+	const { sendPushToUser } = await import("@/lib/push");
 
-	try {
-		await webpush.sendNotification(
-			subscription,
-			JSON.stringify({
-				title: "Transplant Care",
-				body: message,
-				icon: "/icon-192x192.png",
-			}),
-		);
-		return { success: true };
-	} catch (error) {
-		console.error("Error sending push notification:", error);
-		return { success: false, error: "Failed to send notification" };
-	}
+	await sendPushToUser(session.user.id, {
+		title: "Transplant Care",
+		body: message,
+	});
+
+	return { success: true };
 }

@@ -185,8 +185,10 @@ export async function createNotification(input: CreateNotificationInput) {
 		return { error: "Nu s-au găsit pacienți pentru criteriul selectat." };
 	}
 
+	const notificationId = crypto.randomUUID();
+
 	await db.insert(notification).values({
-		id: crypto.randomUUID(),
+		id: notificationId,
 		title: input.title,
 		message: input.message,
 		severity: input.severity,
@@ -196,6 +198,25 @@ export async function createNotification(input: CreateNotificationInput) {
 		createdBy: session.user.id,
 		createdByName: session.user.name ?? "Medic",
 	});
+
+	// Send instant push notification to all targets
+	const { sendPushToUsers } = await import("@/lib/push");
+	await sendPushToUsers(targetUserIds, {
+		title: input.title,
+		body: input.message,
+	});
+
+	// Queue reminders for scheduled events (calendar)
+	if (input.scheduledAt) {
+		const { queueReminders } = await import("@/lib/queue-reminders");
+		await queueReminders({
+			userIds: targetUserIds,
+			eventTitle: input.title,
+			scheduledAt: new Date(input.scheduledAt),
+			sourceType: "calendar",
+			sourceId: notificationId,
+		});
+	}
 
 	await logAudit({
 		userId: session.user.id,

@@ -62,3 +62,11 @@ export {
 	notificationReadRelations,
 } from "./notification-schema";
 export { auditActionEnum, auditEntityEnum, auditLog } from "./audit-log-schema";
+export {
+	pushSubscription,
+	pushSubscriptionRelations,
+} from "./push-subscription-schema";
+export {
+	notificationQueue,
+	notificationQueueRelations,
+} from "./notification-queue-schema";

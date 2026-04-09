@@ -82,6 +82,13 @@ export async function createLabResultForPatient(
 
 	await generateLabResultAlerts(userId, parsed.data.tests);
 
+	// Notify patient about new lab results
+	const { sendPushToUser } = await import("@/lib/push");
+	await sendPushToUser(userId, {
+		title: "Rezultate noi de laborator",
+		body: "Au fost adăugate rezultate noi de laborator în fișa ta.",
+	});
+
 	await logAudit({
 		userId: session.user.id,
 		userName: session.user.name,
