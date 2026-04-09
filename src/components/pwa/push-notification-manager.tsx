@@ -41,9 +41,14 @@ export function PushNotificationManager() {
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
+	const [permissionDenied, setPermissionDenied] = useState(false);
 
 	useEffect(() => {
 		if (isSupported) {
+			if (Notification.permission === "denied") {
+				setPermissionDenied(true);
+			}
+
 			navigator.serviceWorker
 				.register("/sw.js", {
 					scope: "/",
@@ -61,9 +66,7 @@ export function PushNotificationManager() {
 		try {
 			const permission = await Notification.requestPermission();
 			if (permission !== "granted") {
-				setError(
-					"Permisiunea pentru notificări a fost refuzată. Activează notificările din setările browserului.",
-				);
+				setPermissionDenied(true);
 				return;
 			}
 
@@ -109,9 +112,11 @@ export function PushNotificationManager() {
 					<div className="space-y-1">
 						<h3 className="text-sm font-semibold">Notificări Push</h3>
 						<p className="text-sm text-muted-foreground">
-							{subscription
-								? "Ești abonat la notificări push."
-								: "Nu ești abonat la notificări push."}
+							{permissionDenied
+								? "Notificările sunt blocate de browser."
+								: subscription
+									? "Ești abonat la notificări push."
+									: "Nu ești abonat la notificări push."}
 						</p>
 					</div>
 					{subscription ? (
@@ -119,11 +124,22 @@ export function PushNotificationManager() {
 							Dezabonare
 						</Button>
 					) : (
-						<Button size="sm" onClick={subscribeToPush} disabled={isLoading}>
+						<Button
+							size="sm"
+							onClick={subscribeToPush}
+							disabled={isLoading || permissionDenied}
+						>
 							{isLoading ? "Se procesează..." : "Abonare"}
 						</Button>
 					)}
 				</div>
+				{permissionDenied && (
+					<p className="text-sm text-muted-foreground">
+						Pentru a activa notificările, apasă pe iconița de lacăt 🔒 din bara
+						de adrese a browserului, apoi schimbă setarea pentru
+						&quot;Notificări&quot; la &quot;Permite&quot; și reîncarcă pagina.
+					</p>
+				)}
 				{error && <p className="text-sm text-red-500">{error}</p>}
 				{subscription && (
 					<div className="flex gap-2">
