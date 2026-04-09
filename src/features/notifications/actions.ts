@@ -162,6 +162,15 @@ export async function createNotification(input: CreateNotificationInput) {
 		throw new Error("Neautorizat");
 	}
 
+	if (input.scheduledAt) {
+		const scheduled = new Date(input.scheduledAt);
+		const now = new Date();
+		now.setHours(0, 0, 0, 0);
+		if (scheduled < now) {
+			return { error: "Data programării nu poate fi în trecut." };
+		}
+	}
+
 	const targetUserIds = await resolveTargetUserIds(
 		input.targetType,
 		input.targetValue,

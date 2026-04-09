@@ -502,6 +502,7 @@ export function SendNotifications() {
 											<Input
 												type="date"
 												value={scheduledDate}
+												min={new Date().toISOString().split("T")[0]}
 												onChange={(e) => setScheduledDate(e.target.value)}
 												className="flex-1"
 											/>
