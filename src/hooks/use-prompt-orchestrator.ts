@@ -34,11 +34,19 @@ export function usePromptOrchestrator() {
 
 	const visitCountedRef = useRef(false);
 
-	// Increment visit count once per session (side effect only, no state)
+	// Increment visit count and sync timezone once per session
 	useEffect(() => {
 		if (!visitCountedRef.current) {
 			visitCountedRef.current = true;
 			incrementVisitCount();
+
+			// Auto-detect and save user timezone
+			const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+			if (tz) {
+				import("@/app/actions/update-timezone").then(({ updateTimezone }) =>
+					updateTimezone(tz),
+				);
+			}
 		}
 	}, []);
 
