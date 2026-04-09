@@ -10,6 +10,7 @@ import { labResult } from "@/db/lab-result-schema";
 import { user } from "@/db/auth-schema";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { logAudit } from "@/lib/audit";
+import { sendPushToUser } from "@/lib/push";
 
 export async function getDoctorPatients() {
 	const session = await getSessionOrThrow();
@@ -56,6 +57,11 @@ export async function createLabResultWithPdf(values: {
 		date: values.date,
 		tests: [],
 		pdfFileName: values.pdfFileName,
+	});
+
+	await sendPushToUser(values.patientId, {
+		title: "Rezultate de laborator noi",
+		body: "Medicul dumneavoastră a încărcat rezultate de laborator noi.",
 	});
 
 	await logAudit({

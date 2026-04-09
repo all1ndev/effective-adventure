@@ -72,6 +72,8 @@ export async function updateSymptomReport(id: string, values: unknown) {
 		.set(parsed.data)
 		.where(eq(symptomReport.id, id));
 
+	await generateSymptomAlerts(session.user.id, parsed.data);
+
 	await logAudit({
 		userId: session.user.id,
 		userName: session.user.name,
@@ -83,6 +85,7 @@ export async function updateSymptomReport(id: string, values: unknown) {
 	});
 
 	revalidatePath("/symptoms");
+	revalidatePath("/alerts");
 	return { success: true };
 }
 

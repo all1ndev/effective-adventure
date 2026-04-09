@@ -117,7 +117,10 @@ export async function GET(request: Request) {
 			and(
 				gte(notificationQueue.scheduledFor, todayStart),
 				lte(notificationQueue.scheduledFor, todayEnd),
-				// Filter to medication reminder types
+				inArray(notificationQueue.sourceType, [
+					"medication_reminder",
+					"medication_reminder_followup",
+				]),
 			),
 		);
 
