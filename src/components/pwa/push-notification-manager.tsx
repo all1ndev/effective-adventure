@@ -42,14 +42,10 @@ export function PushNotificationManager() {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [permissionDenied, setPermissionDenied] = useState(false);
-	const [debug, setDebug] = useState("");
 
 	useEffect(() => {
 		if (isSupported) {
-			const perm = Notification.permission;
-			setDebug(`permission: ${perm}`);
-
-			if (perm === "denied") {
+			if (Notification.permission === "denied") {
 				setPermissionDenied(true);
 			}
 
@@ -58,15 +54,9 @@ export function PushNotificationManager() {
 					scope: "/",
 					updateViaCache: "none",
 				})
-				.then((registration) => {
-					setDebug((d) => `${d} | sw: ok`);
-					return registration.pushManager.getSubscription();
-				})
-				.then((sub) => {
-					setDebug((d) => `${d} | sub: ${sub ? "yes" : "no"}`);
-					setSubscription(sub);
-				})
-				.catch((err) => setDebug((d) => `${d} | sw-err: ${String(err)}`));
+				.then((registration) => registration.pushManager.getSubscription())
+				.then((sub) => setSubscription(sub))
+				.catch(() => {});
 		}
 	}, [isSupported]);
 
@@ -91,8 +81,8 @@ export function PushNotificationManager() {
 			const serializedSub = JSON.parse(JSON.stringify(sub));
 			await subscribeUser(serializedSub);
 		} catch (err) {
-			const message = err instanceof Error ? err.message : JSON.stringify(err);
-			setError(`Eroare: ${message}`);
+			const msg = err instanceof Error ? err.message : JSON.stringify(err);
+			setError(`Eroare: ${msg}`);
 		} finally {
 			setIsLoading(false);
 		}
@@ -145,15 +135,12 @@ export function PushNotificationManager() {
 				</div>
 				{permissionDenied && (
 					<p className="text-sm text-muted-foreground">
-						Pentru a activa notificările, apasă pe iconița de lacăt 🔒 din bara
-						de adrese a browserului, apoi schimbă setarea pentru
-						&quot;Notificări&quot; la &quot;Permite&quot; și reîncarcă pagina.
+						Pentru a reactiva notificările: apasă pe iconița ⓘ sau 🔒 din bara
+						de adrese → Permisiuni (sau Setări site) → Notificări → Permite,
+						apoi reîncarcă pagina.
 					</p>
 				)}
 				{error && <p className="text-sm text-red-500">{error}</p>}
-				{debug && (
-					<p className="text-xs font-mono text-muted-foreground">{debug}</p>
-				)}
 				{subscription && (
 					<div className="flex gap-2">
 						<Input
