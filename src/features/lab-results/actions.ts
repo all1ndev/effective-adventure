@@ -102,24 +102,3 @@ export async function createLabResultForPatient(
 	revalidatePath("/alerts");
 	return { success: true };
 }
-
-export async function deleteLabResult(id: string) {
-	const session = await getSessionOrThrow();
-	if (!isMedicRole(session.user.role)) {
-		throw new Error("Neautorizat");
-	}
-	await db.delete(labResult).where(eq(labResult.id, id));
-
-	await logAudit({
-		userId: session.user.id,
-		userName: session.user.name,
-		userRole: session.user.role,
-		action: "delete",
-		entity: "lab_result",
-		entityId: id,
-		description: `A șters un rezultat de laborator`,
-	});
-
-	revalidatePath("/lab-results");
-	return { success: true };
-}
