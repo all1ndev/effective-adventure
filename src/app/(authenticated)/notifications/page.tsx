@@ -4,6 +4,7 @@ import { useSession } from "@/lib/auth-client";
 import { getUserRole } from "@/lib/roles";
 import { SendNotifications } from "@/features/notifications";
 import { PatientNotifications } from "@/features/notifications/patient-notifications";
+import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
 
 export default function NotificationsPage() {
 	const { data: session, isPending } = useSession();
@@ -15,5 +16,10 @@ export default function NotificationsPage() {
 		return <SendNotifications />;
 	}
 
-	return <PatientNotifications />;
+	return (
+		<>
+			<PushNotificationManager />
+			<PatientNotifications />
+		</>
+	);
 }
