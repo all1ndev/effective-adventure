@@ -7,6 +7,7 @@ import {
 	sendNotification,
 } from "@/app/actions/push-notifications";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -102,33 +103,42 @@ export function PushNotificationManager() {
 	}
 
 	return (
-		<div>
-			<h3 className="text-lg font-semibold">Notificări Push</h3>
-			{error && <p className="text-sm text-red-500">{error}</p>}
-			{subscription ? (
-				<>
-					<p>Ești abonat la notificări push.</p>
-					<Button onClick={unsubscribeFromPush} variant="outline">
-						Dezabonare
-					</Button>
-					<div className="mt-2 flex gap-2">
+		<Card>
+			<CardContent className="space-y-3 p-4">
+				<div className="flex items-center justify-between gap-4">
+					<div className="space-y-1">
+						<h3 className="text-sm font-semibold">Notificări Push</h3>
+						<p className="text-sm text-muted-foreground">
+							{subscription
+								? "Ești abonat la notificări push."
+								: "Nu ești abonat la notificări push."}
+						</p>
+					</div>
+					{subscription ? (
+						<Button size="sm" variant="outline" onClick={unsubscribeFromPush}>
+							Dezabonare
+						</Button>
+					) : (
+						<Button size="sm" onClick={subscribeToPush} disabled={isLoading}>
+							{isLoading ? "Se procesează..." : "Abonare"}
+						</Button>
+					)}
+				</div>
+				{error && <p className="text-sm text-red-500">{error}</p>}
+				{subscription && (
+					<div className="flex gap-2">
 						<Input
 							type="text"
 							placeholder="Introdu mesajul notificării"
 							value={message}
 							onChange={(e) => setMessage(e.target.value)}
 						/>
-						<Button onClick={sendTestNotification}>Trimite Test</Button>
+						<Button size="sm" onClick={sendTestNotification}>
+							Trimite Test
+						</Button>
 					</div>
-				</>
-			) : (
-				<>
-					<p>Nu ești abonat la notificări push.</p>
-					<Button onClick={subscribeToPush} disabled={isLoading}>
-						{isLoading ? "Se procesează..." : "Abonare"}
-					</Button>
-				</>
-			)}
-		</div>
+				)}
+			</CardContent>
+		</Card>
 	);
 }

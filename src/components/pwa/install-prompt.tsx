@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 const emptySubscribe = () => () => {};
 
@@ -75,28 +76,23 @@ export function InstallPrompt() {
 	}
 
 	return (
-		<div>
-			<h3 className="text-lg font-semibold">Instalează Aplicația</h3>
-			{canInstall ? (
-				<Button onClick={handleInstallClick}>
-					Adaugă pe Ecranul Principal
-				</Button>
-			) : isIOS ? (
-				<p>
-					Pentru a instala această aplicație pe dispozitivul iOS, apasă butonul
-					de partajare
-					<span role="img" aria-label="share icon">
-						{" "}
-						⎋{" "}
-					</span>
-					și apoi &quot;Adaugă pe Ecranul Principal&quot;
-					<span role="img" aria-label="plus icon">
-						{" "}
-						➕{" "}
-					</span>
-					.
-				</p>
-			) : null}
-		</div>
+		<Card>
+			<CardContent className="flex items-center justify-between gap-4 p-4">
+				<div className="space-y-1">
+					<h3 className="text-sm font-semibold">Instalează Aplicația</h3>
+					{isIOS && !canInstall && (
+						<p className="text-sm text-muted-foreground">
+							Apasă butonul de partajare ⎋ și apoi &quot;Adaugă pe Ecranul
+							Principal&quot; ➕
+						</p>
+					)}
+				</div>
+				{canInstall && (
+					<Button size="sm" onClick={handleInstallClick}>
+						Instalează
+					</Button>
+				)}
+			</CardContent>
+		</Card>
 	);
 }
