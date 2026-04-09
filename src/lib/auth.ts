@@ -5,6 +5,15 @@ import { db } from "@/db";
 import { sendEmail } from "@/lib/email";
 
 export const auth = betterAuth({
+	trustedOrigins: [
+		...(process.env.VERCEL_PROJECT_PRODUCTION_URL
+			? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
+			: []),
+		...(process.env.VERCEL_BRANCH_URL
+			? [`https://${process.env.VERCEL_BRANCH_URL}`]
+			: []),
+		...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+	],
 	database: drizzleAdapter(db, {
 		provider: "pg",
 	}),
