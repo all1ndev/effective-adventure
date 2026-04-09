@@ -69,6 +69,26 @@ export const medicationFormSchema = z.object({
 });
 export type MedicationFormValues = z.infer<typeof medicationFormSchema>;
 
+export const medicationReminderSchema = z.object({
+	id: z.string(),
+	medicationId: z.string(),
+	doseIndex: z.number().int().min(0).max(3),
+	time: z.string().regex(/^\d{2}:\d{2}$/, "Formatul trebuie să fie HH:mm"),
+	enabled: z.boolean(),
+});
+
+export type MedicationReminder = z.infer<typeof medicationReminderSchema>;
+
+export const upsertRemindersSchema = z.array(
+	z.object({
+		doseIndex: z.number().int().min(0).max(3),
+		time: z.string().regex(/^\d{2}:\d{2}$/, "Formatul trebuie să fie HH:mm"),
+		enabled: z.boolean(),
+	}),
+);
+
+export type UpsertRemindersInput = z.infer<typeof upsertRemindersSchema>;
+
 export const medicationLogFormSchema = z.object({
 	medicationId: z.string(),
 	status: z.union([

@@ -33,6 +33,10 @@ export {
 	medicationRelations,
 	medicationLogRelations,
 } from "./medication-schema";
+export {
+	medicationReminder,
+	medicationReminderRelations,
+} from "./medication-reminder-schema";
 export { labResult, labResultRelations } from "./lab-result-schema";
 export {
 	moodEnum,

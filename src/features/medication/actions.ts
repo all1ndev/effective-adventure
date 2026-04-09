@@ -6,14 +6,17 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { medication, medicationLog } from "@/db/medication-schema";
+import { medicationReminder } from "@/db/medication-reminder-schema";
 import { resolvePatientUserId } from "@/lib/patient-utils";
 import {
 	medicationFormSchema,
 	medicationLogFormSchema,
+	upsertRemindersSchema,
 	type MedicationFormValues,
 } from "./data/schema";
 import { generateMedicationAlerts } from "@/features/alerts/generate-alerts";
 import { logAudit } from "@/lib/audit";
+import { getDailyDoseCount } from "./lib/medication-schedule";
 
 function sanitizeMedicationData(data: MedicationFormValues) {
 	return {
@@ -22,6 +25,66 @@ function sanitizeMedicationData(data: MedicationFormValues) {
 		notes: data.notes || null,
 		category: data.category || "altele",
 	};
+}
+
+const DEFAULT_DOSE_TIMES = ["08:00", "14:00", "20:00", "23:00"];
+
+async function createDefaultReminders(medicationId: string, frequency: string) {
+	const count = getDailyDoseCount(frequency);
+	if (count === 0) return;
+
+	await db.insert(medicationReminder).values(
+		Array.from({ length: count }, (_, i) => ({
+			id: crypto.randomUUID(),
+			medicationId,
+			doseIndex: i,
+			time: DEFAULT_DOSE_TIMES[i] ?? "08:00",
+			enabled: false,
+		})),
+	);
+}
+
+async function reconcileReminders(
+	medicationId: string,
+	newFrequency: string,
+	oldFrequency: string,
+) {
+	const newCount = getDailyDoseCount(newFrequency);
+	const oldCount = getDailyDoseCount(oldFrequency);
+	if (newCount === oldCount) return;
+
+	if (newCount < oldCount) {
+		// Delete excess reminders
+		const existing = await db
+			.select()
+			.from(medicationReminder)
+			.where(eq(medicationReminder.medicationId, medicationId));
+
+		const toDelete = existing
+			.filter((r) => r.doseIndex >= newCount)
+			.map((r) => r.id);
+
+		if (toDelete.length > 0) {
+			await db
+				.delete(medicationReminder)
+				.where(inArray(medicationReminder.id, toDelete));
+		}
+	} else {
+		// Add new reminders for additional doses
+		const newReminders = [];
+		for (let i = oldCount; i < newCount; i++) {
+			newReminders.push({
+				id: crypto.randomUUID(),
+				medicationId,
+				doseIndex: i,
+				time: DEFAULT_DOSE_TIMES[i] ?? "08:00",
+				enabled: false,
+			});
+		}
+		if (newReminders.length > 0) {
+			await db.insert(medicationReminder).values(newReminders);
+		}
+	}
 }
 
 export async function getMedications() {
@@ -58,11 +121,14 @@ export async function createMedication(values: unknown) {
 		return { error: "Date invalide." };
 	}
 
+	const medId = crypto.randomUUID();
 	await db.insert(medication).values({
-		id: crypto.randomUUID(),
+		id: medId,
 		patientId: session.user.id,
 		...sanitizeMedicationData(parsed.data),
 	});
+
+	await createDefaultReminders(medId, parsed.data.frequency);
 
 	await logAudit({
 		userId: session.user.id,
@@ -95,12 +161,15 @@ export async function createMedicationForPatient(
 
 	const userId = await resolvePatientUserId(patientId);
 	const sanitized = sanitizeMedicationData(parsed.data);
+	const medId = crypto.randomUUID();
 
 	await db.insert(medication).values({
-		id: crypto.randomUUID(),
+		id: medId,
 		patientId: userId,
 		...sanitized,
 	});
+
+	await createDefaultReminders(medId, parsed.data.frequency);
 
 	await logAudit({
 		userId: session.user.id,
@@ -136,10 +205,14 @@ export async function updateMedication(id: string, values: unknown) {
 		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
+	const oldFrequency = existing[0].frequency;
+
 	await db
 		.update(medication)
 		.set(sanitizeMedicationData(parsed.data))
 		.where(eq(medication.id, id));
+
+	await reconcileReminders(id, parsed.data.frequency, oldFrequency);
 
 	await logAudit({
 		userId: session.user.id,
@@ -184,10 +257,14 @@ export async function updateMedicationForPatient(
 		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
+	const oldFrequency = existing[0].frequency;
+
 	await db
 		.update(medication)
 		.set(sanitizeMedicationData(parsed.data))
 		.where(eq(medication.id, id));
+
+	await reconcileReminders(id, parsed.data.frequency, oldFrequency);
 
 	await logAudit({
 		userId: session.user.id,
@@ -432,5 +509,118 @@ export async function createMedicationLogsBatch(values: unknown[]) {
 
 	revalidatePath("/medication");
 	revalidatePath("/alerts");
+	return { success: true };
+}
+
+export async function getMedicationReminders(medicationId: string) {
+	const session = await getSessionOrThrow();
+
+	// Verify ownership
+	const med = await db
+		.select({ id: medication.id })
+		.from(medication)
+		.where(
+			and(
+				eq(medication.id, medicationId),
+				eq(medication.patientId, session.user.id),
+			),
+		)
+		.limit(1);
+
+	if (med.length === 0) {
+		return [];
+	}
+
+	return db
+		.select()
+		.from(medicationReminder)
+		.where(eq(medicationReminder.medicationId, medicationId));
+}
+
+export async function getMedicationRemindersForPatient(
+	patientId: string,
+	medicationId: string,
+) {
+	const session = await getSessionOrThrow();
+
+	if (!isMedicRole(session.user.role)) {
+		throw new Error("Neautorizat");
+	}
+
+	const userId = await resolvePatientUserId(patientId);
+
+	const med = await db
+		.select({ id: medication.id })
+		.from(medication)
+		.where(
+			and(eq(medication.id, medicationId), eq(medication.patientId, userId)),
+		)
+		.limit(1);
+
+	if (med.length === 0) {
+		return [];
+	}
+
+	return db
+		.select()
+		.from(medicationReminder)
+		.where(eq(medicationReminder.medicationId, medicationId));
+}
+
+export async function upsertMedicationReminders(
+	medicationId: string,
+	values: unknown,
+) {
+	const session = await getSessionOrThrow();
+	const parsed = upsertRemindersSchema.safeParse(values);
+
+	if (!parsed.success) {
+		return { error: "Date invalide." };
+	}
+
+	// Verify ownership
+	const med = await db
+		.select({ id: medication.id, name: medication.name })
+		.from(medication)
+		.where(
+			and(
+				eq(medication.id, medicationId),
+				eq(medication.patientId, session.user.id),
+			),
+		)
+		.limit(1);
+
+	if (med.length === 0) {
+		return { error: "Medicamentul nu a fost găsit." };
+	}
+
+	// Delete existing and re-insert
+	await db
+		.delete(medicationReminder)
+		.where(eq(medicationReminder.medicationId, medicationId));
+
+	if (parsed.data.length > 0) {
+		await db.insert(medicationReminder).values(
+			parsed.data.map((r) => ({
+				id: crypto.randomUUID(),
+				medicationId,
+				doseIndex: r.doseIndex,
+				time: r.time,
+				enabled: r.enabled,
+			})),
+		);
+	}
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "update",
+		entity: "medication_reminder",
+		entityId: medicationId,
+		description: `A actualizat reminder-ele pentru ${med[0].name}`,
+	});
+
+	revalidatePath("/medication");
 	return { success: true };
 }

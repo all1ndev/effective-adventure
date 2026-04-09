@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
-import { Lock } from "lucide-react";
+import { useState, useMemo, useTransition, useEffect } from "react";
+import { Lock, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -21,8 +21,12 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { type Medication, type MedicationLog } from "../data/schema";
-import { createMedicationLogsBatch } from "../actions";
+import {
+	type Medication,
+	type MedicationLog,
+	type MedicationReminder,
+} from "../data/schema";
+import { createMedicationLogsBatch, getMedicationReminders } from "../actions";
 import {
 	isMedicationDueOnDate,
 	getDailyDoseCount,
@@ -62,6 +66,39 @@ export function DailyLogForm({
 	logs,
 	onSuccess,
 }: DailyLogFormProps) {
+	const [reminderMap, setReminderMap] = useState<
+		Map<string, MedicationReminder[]>
+	>(new Map());
+
+	useEffect(() => {
+		async function fetchReminders() {
+			const results = await Promise.all(
+				medications.map((m) =>
+					getMedicationReminders(m.id).then((r) => [m.id, r] as const),
+				),
+			);
+			const map = new Map<string, MedicationReminder[]>();
+			for (const [id, reminders] of results) {
+				const enabled = reminders
+					.filter((r) => r.enabled)
+					.map((r) => ({
+						id: r.id,
+						medicationId: r.medicationId,
+						doseIndex: r.doseIndex,
+						time: r.time,
+						enabled: r.enabled,
+					}));
+				if (enabled.length > 0) {
+					map.set(id, enabled);
+				}
+			}
+			setReminderMap(map);
+		}
+		if (medications.length > 0) {
+			fetchReminders();
+		}
+	}, [medications]);
+
 	const today = getLocalToday();
 	const todayLogs = logs.filter((l) => l.takenAt.startsWith(today));
 
@@ -243,11 +280,25 @@ export function DailyLogForm({
 																	: ""
 														}`}
 													>
-														{doseLabel && (
-															<p className="mb-2 text-xs font-medium text-muted-foreground">
-																{doseLabel}
-															</p>
-														)}
+														{(() => {
+															const reminder = reminderMap
+																.get(med.id)
+																?.find((r) => r.doseIndex === entry.doseIndex);
+															const scheduleInfo = reminder
+																? ` — programat la ${reminder.time}`
+																: "";
+															const label = doseLabel
+																? `${doseLabel}${scheduleInfo}`
+																: reminder
+																	? `Programat la ${reminder.time}`
+																	: null;
+															return label ? (
+																<p className="mb-2 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+																	{reminder && <Bell className="h-3 w-3" />}
+																	{label}
+																</p>
+															) : null;
+														})()}
 
 														{logged ? (
 															<p className="text-sm text-green-700 dark:text-green-400">

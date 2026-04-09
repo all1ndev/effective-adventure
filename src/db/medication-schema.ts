@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { pgTable, pgEnum, text, timestamp, index } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
+import { medicationReminder } from "./medication-reminder-schema";
 
 export const medication = pgTable(
 	"medication",
@@ -51,6 +52,7 @@ export const medicationRelations = relations(medication, ({ one, many }) => ({
 		references: [user.id],
 	}),
 	logs: many(medicationLog),
+	reminders: many(medicationReminder),
 }));
 
 export const medicationLogRelations = relations(medicationLog, ({ one }) => ({

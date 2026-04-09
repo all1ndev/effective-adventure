@@ -36,6 +36,7 @@ import {
 	deleteMedication,
 	deleteMedicationForPatient,
 } from "../actions";
+import { ReminderTimesEditor } from "./reminder-times-editor";
 
 interface EditMedicationDialogProps {
 	medication: Medication | null;
@@ -209,6 +210,14 @@ export function EditMedicationDialog({
 							{...register("notes")}
 						/>
 					</div>
+					{med && !patientId && (
+						<div className="sm:col-span-2 border-t pt-4">
+							<ReminderTimesEditor
+								medicationId={med.id}
+								frequency={frequencyValue || med.frequency}
+							/>
+						</div>
+					)}
 					<DialogFooter className="sm:col-span-2 flex gap-2">
 						<Button
 							type="button"

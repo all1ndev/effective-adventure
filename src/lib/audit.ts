@@ -18,7 +18,8 @@ type AuditEntity =
 	| "notification"
 	| "message"
 	| "journal_entry"
-	| "appointment";
+	| "appointment"
+	| "medication_reminder";
 
 interface LogAuditParams {
 	userId: string;

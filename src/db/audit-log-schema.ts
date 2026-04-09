@@ -28,6 +28,7 @@ export const auditEntityEnum = pgEnum("audit_entity", [
 	"message",
 	"journal_entry",
 	"appointment",
+	"medication_reminder",
 ]);
 
 export const auditLog = pgTable(
