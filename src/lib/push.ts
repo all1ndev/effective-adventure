@@ -42,6 +42,8 @@ export async function sendPushToUser(
 				await db
 					.delete(pushSubscription)
 					.where(eq(pushSubscription.id, sub.id));
+			} else {
+				console.error(`Push failed for subscription ${sub.id}:`, err);
 			}
 		}
 	}
