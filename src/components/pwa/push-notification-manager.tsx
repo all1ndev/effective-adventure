@@ -135,9 +135,8 @@ export function PushNotificationManager() {
 				</div>
 				{permissionDenied && (
 					<p className="text-sm text-muted-foreground">
-						Pentru a reactiva notificările: apasă pe iconița ⓘ sau 🔒 din bara
-						de adrese → Permisiuni (sau Setări site) → Notificări → Permite,
-						apoi reîncarcă pagina.
+						Permite notificările din setările browserului sau din setările
+						aplicației dacă este instalată, apoi reîncarcă pagina.
 					</p>
 				)}
 				{error && <p className="text-sm text-red-500">{error}</p>}
