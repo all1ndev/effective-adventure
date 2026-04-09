@@ -4,11 +4,9 @@ import { useState, useEffect, useSyncExternalStore } from "react";
 import {
 	subscribeUser,
 	unsubscribeUser,
-	sendNotification,
 } from "@/app/actions/push-notifications";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 function urlBase64ToUint8Array(base64String: string) {
 	const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -38,7 +36,6 @@ export function PushNotificationManager() {
 	const [subscription, setSubscription] = useState<PushSubscription | null>(
 		null,
 	);
-	const [message, setMessage] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [permissionDenied, setPermissionDenied] = useState(false);
@@ -94,64 +91,42 @@ export function PushNotificationManager() {
 		await unsubscribeUser();
 	}
 
-	async function sendTestNotification() {
-		if (subscription) {
-			await sendNotification(message);
-			setMessage("");
-		}
-	}
-
 	if (!isSupported) {
 		return <p>Notificările push nu sunt suportate în acest browser.</p>;
 	}
 
 	return (
 		<Card>
-			<CardContent className="space-y-3 p-4">
-				<div className="flex items-center justify-between gap-4">
-					<div className="space-y-1">
-						<h3 className="text-sm font-semibold">Notificări Push</h3>
-						<p className="text-sm text-muted-foreground">
-							{permissionDenied
-								? "Notificările sunt blocate de browser."
-								: subscription
-									? "Ești abonat la notificări push."
-									: "Nu ești abonat la notificări push."}
-						</p>
-					</div>
-					{subscription ? (
-						<Button size="sm" variant="outline" onClick={unsubscribeFromPush}>
-							Dezabonare
-						</Button>
-					) : (
-						<Button
-							size="sm"
-							onClick={subscribeToPush}
-							disabled={isLoading || permissionDenied}
-						>
-							{isLoading ? "Se procesează..." : "Abonare"}
-						</Button>
-					)}
-				</div>
-				{permissionDenied && (
+			<CardContent className="flex items-center justify-between gap-4 p-4">
+				<div className="space-y-1">
+					<h3 className="text-sm font-semibold">Notificări Push</h3>
 					<p className="text-sm text-muted-foreground">
-						Permite notificările din setările browserului sau din setările
-						aplicației dacă este instalată, apoi reîncarcă pagina.
+						{permissionDenied
+							? "Notificările sunt blocate de browser."
+							: subscription
+								? "Ești abonat la notificări push."
+								: "Nu ești abonat la notificări push."}
 					</p>
-				)}
-				{error && <p className="text-sm text-red-500">{error}</p>}
-				{subscription && (
-					<div className="flex gap-2">
-						<Input
-							type="text"
-							placeholder="Introdu mesajul notificării"
-							value={message}
-							onChange={(e) => setMessage(e.target.value)}
-						/>
-						<Button size="sm" onClick={sendTestNotification}>
-							Trimite Test
-						</Button>
-					</div>
+					{permissionDenied && (
+						<p className="text-sm text-muted-foreground">
+							Permite notificările din setările browserului sau din setările
+							aplicației dacă este instalată, apoi reîncarcă pagina.
+						</p>
+					)}
+					{error && <p className="text-sm text-red-500">{error}</p>}
+				</div>
+				{subscription ? (
+					<Button size="sm" variant="outline" onClick={unsubscribeFromPush}>
+						Dezabonare
+					</Button>
+				) : (
+					<Button
+						size="sm"
+						onClick={subscribeToPush}
+						disabled={isLoading || permissionDenied}
+					>
+						{isLoading ? "Se procesează..." : "Abonare"}
+					</Button>
 				)}
 			</CardContent>
 		</Card>
