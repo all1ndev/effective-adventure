@@ -5,8 +5,15 @@ import { revalidatePath } from "next/cache";
 import { getSessionOrThrow } from "@/lib/auth-utils";
 import { db } from "@/db";
 import { journalEntry } from "@/db/journal-schema";
+import { patient } from "@/db/patient-schema";
 import { journalEntryFormSchema } from "./data/schema";
 import { logAudit } from "@/lib/audit";
+import { sendPushToUser } from "@/lib/push";
+
+const moodLabels: Record<string, string> = {
+	"rau": "Rău",
+	"foarte-rau": "Foarte rău",
+};
 
 export async function createJournalEntry(values: unknown) {
 	const session = await getSessionOrThrow();
@@ -21,6 +28,29 @@ export async function createJournalEntry(values: unknown) {
 		date: today,
 		...parsed.data,
 	});
+
+	if (parsed.data.mood === "rau" || parsed.data.mood === "foarte-rau") {
+		const rows = await db
+			.select({
+				firstName: patient.firstName,
+				lastName: patient.lastName,
+				doctorId: patient.doctorId,
+			})
+			.from(patient)
+			.where(eq(patient.userId, session.user.id))
+			.limit(1);
+
+		if (rows.length > 0 && rows[0].doctorId) {
+			const patientName = `${rows[0].firstName} ${rows[0].lastName}`;
+			const label = moodLabels[parsed.data.mood];
+			const severity = parsed.data.mood === "foarte-rau" ? "CRITIC" : "Atenție";
+			await sendPushToUser(rows[0].doctorId, {
+				title: `[${severity}] Jurnal — ${patientName}`,
+				body: `Pacientul a raportat starea „${label}" în jurnalul de sănătate.`,
+			});
+		}
+	}
+
 	await logAudit({
 		userId: session.user.id,
 		userName: session.user.name,

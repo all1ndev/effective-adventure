@@ -20,8 +20,8 @@ const moods: { value: Mood; emoji: string; label: string }[] = [
 	{ value: "excelent", emoji: "😄", label: "Excelent" },
 	{ value: "bine", emoji: "🙂", label: "Bine" },
 	{ value: "neutru", emoji: "😐", label: "Neutru" },
-	{ value: "rau", emoji: "😕", label: "Rau" },
-	{ value: "foarte-rau", emoji: "😞", label: "Foarte rau" },
+	{ value: "rau", emoji: "😕", label: "Rău" },
+	{ value: "foarte-rau", emoji: "😞", label: "Foarte rău" },
 ];
 
 interface JournalEditorProps {
@@ -55,7 +55,7 @@ export function JournalEditor({ onSuccess }: JournalEditorProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Noua intrare in jurnal</CardTitle>
+				<CardTitle>Nouă intrare în jurnal</CardTitle>
 				<CardDescription>
 					{new Date().toLocaleDateString("ro-RO", {
 						weekday: "long",
@@ -68,12 +68,12 @@ export function JournalEditor({ onSuccess }: JournalEditorProps) {
 			<CardContent>
 				{submitted && (
 					<div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
-						Intrarea a fost salvata cu succes.
+						Intrarea a fost salvată cu succes.
 					</div>
 				)}
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
-						<Label>Cum va simtiti astazi?</Label>
+						<Label>Cum vă simțiți astăzi?</Label>
 						<div className="flex flex-wrap gap-2">
 							{moods.map((m) => (
 								<button
@@ -94,10 +94,10 @@ export function JournalEditor({ onSuccess }: JournalEditorProps) {
 						</div>
 					</div>
 					<div className="space-y-1.5">
-						<Label htmlFor="content">Note</Label>
+						<Label htmlFor="content">Notițe</Label>
 						<Textarea
 							id="content"
-							placeholder="Cum a fost ziua de azi? Ce ati simtit? Ce ati facut?"
+							placeholder="Descrieți cum vă simțiți..."
 							rows={5}
 							required
 							value={content}
@@ -105,7 +105,7 @@ export function JournalEditor({ onSuccess }: JournalEditorProps) {
 						/>
 					</div>
 					<Button type="submit" disabled={!selectedMood || isPending}>
-						{isPending ? "Se salveaza..." : "Salveaza intrarea"}
+						{isPending ? "Se salvează..." : "Salvează intrarea"}
 					</Button>
 				</form>
 			</CardContent>

@@ -3,20 +3,37 @@ import { db } from "@/db";
 import { alert } from "@/db/alert-schema";
 import { patient } from "@/db/patient-schema";
 import type { TestValue } from "@/db/lab-result-schema";
+import { sendPushToUser } from "@/lib/push";
 
-async function getPatientName(patientId: string): Promise<string> {
+type PatientInfo = { name: string; doctorId: string | null };
+
+async function getPatientInfo(patientId: string): Promise<PatientInfo> {
 	const rows = await db
-		.select({ firstName: patient.firstName, lastName: patient.lastName })
+		.select({
+			firstName: patient.firstName,
+			lastName: patient.lastName,
+			doctorId: patient.doctorId,
+		})
 		.from(patient)
 		.where(eq(patient.userId, patientId))
 		.limit(1);
-	if (rows.length === 0) return "Pacient necunoscut";
-	return `${rows[0].firstName} ${rows[0].lastName}`;
+	if (rows.length === 0) return { name: "Pacient necunoscut", doctorId: null };
+	return {
+		name: `${rows[0].firstName} ${rows[0].lastName}`,
+		doctorId: rows[0].doctorId,
+	};
 }
+
+const severityLabels: Record<string, string> = {
+	critical: "CRITIC",
+	warning: "Atenție",
+	info: "Info",
+};
 
 async function insertAlert(
 	patientId: string,
 	patientName: string,
+	doctorId: string | null,
 	type: "vital" | "simptom" | "laborator" | "medicatie",
 	severity: "critical" | "warning" | "info",
 	message: string,
@@ -29,6 +46,13 @@ async function insertAlert(
 		severity,
 		message,
 	});
+
+	if (doctorId && (severity === "critical" || severity === "warning")) {
+		await sendPushToUser(doctorId, {
+			title: `[${severityLabels[severity]}] ${patientName}`,
+			body: message,
+		});
+	}
 }
 
 // --- Vital signs thresholds (post-transplant hepatic) ---
@@ -49,15 +73,18 @@ export function computeVitalStatus(data: VitalData): VitalStatus {
 
 	// Blood pressure
 	if (data.systolic >= 180 || data.diastolic >= 120) return "critical";
+	if (data.systolic < 80) return "critical";
 	if (data.systolic >= 140 || data.diastolic >= 90) status = "warning";
 	if (data.systolic < 90 || data.diastolic < 60) status = "warning";
 
 	// Temperature
-	if (data.temperature >= 39) return "critical";
+	if (data.temperature >= 38) return "critical";
+	if (data.temperature < 34) return "critical";
 	if (data.temperature >= 37.5 || data.temperature < 35) status = "warning";
 
 	// Pulse
 	if (data.pulse > 120) return "critical";
+	if (data.pulse < 40) return "critical";
 	if (data.pulse > 100 || data.pulse < 50) status = "warning";
 
 	return status;
@@ -71,6 +98,10 @@ function buildVitalAlertMessages(data: VitalData): string[] {
 		messages.push(
 			`Tensiune arterială critic ridicată: ${data.systolic}/${data.diastolic} mmHg`,
 		);
+	} else if (data.systolic < 80) {
+		messages.push(
+			`Hipotensiune severă: ${data.systolic}/${data.diastolic} mmHg`,
+		);
 	} else if (data.systolic >= 140 || data.diastolic >= 90) {
 		messages.push(
 			`Tensiune arterială ridicată: ${data.systolic}/${data.diastolic} mmHg`,
@@ -81,12 +112,14 @@ function buildVitalAlertMessages(data: VitalData): string[] {
 		);
 	}
 
-	if (data.temperature >= 39) {
+	if (data.temperature >= 38) {
 		messages.push(
-			`Febră ridicată: ${data.temperature}°C — risc de infecție post-transplant`,
+			`Febră: ${data.temperature}°C — risc de infecție post-transplant`,
 		);
 	} else if (data.temperature >= 37.5) {
 		messages.push(`Temperatură subfebrilă: ${data.temperature}°C`);
+	} else if (data.temperature < 34) {
+		messages.push(`Hipotermie severă: ${data.temperature}°C`);
 	} else if (data.temperature < 35) {
 		messages.push(`Hipotermie: ${data.temperature}°C`);
 	}
@@ -95,6 +128,8 @@ function buildVitalAlertMessages(data: VitalData): string[] {
 		messages.push(`Tahicardie severă: ${data.pulse} bpm`);
 	} else if (data.pulse > 100) {
 		messages.push(`Tahicardie: ${data.pulse} bpm`);
+	} else if (data.pulse < 40) {
+		messages.push(`Bradicardie severă: ${data.pulse} bpm`);
 	} else if (data.pulse < 50) {
 		messages.push(`Bradicardie: ${data.pulse} bpm`);
 	}
@@ -109,11 +144,13 @@ export async function generateVitalSignAlerts(
 	const status = computeVitalStatus(data);
 	if (status === "normal") return;
 
-	const name = await getPatientName(patientId);
+	const { name, doctorId } = await getPatientInfo(patientId);
 	const messages = buildVitalAlertMessages(data);
 
 	await Promise.all(
-		messages.map((msg) => insertAlert(patientId, name, "vital", status, msg)),
+		messages.map((msg) =>
+			insertAlert(patientId, name, doctorId, "vital", status, msg),
+		),
 	);
 }
 
@@ -150,11 +187,11 @@ export async function generateSymptomAlerts(
 		notes?: string | null;
 	},
 ) {
-	const name = await getPatientName(patientId);
+	const { name, doctorId } = await getPatientInfo(patientId);
 	const symptomsLower = data.symptoms.map((s) => s.toLowerCase());
 
 	const hasCriticalSymptom = symptomsLower.some((s) =>
-		CRITICAL_SYMPTOMS.some((cs) => s.includes(cs)),
+		CRITICAL_SYMPTOMS.includes(s),
 	);
 
 	// Determine alert severity
@@ -177,6 +214,7 @@ export async function generateSymptomAlerts(
 	await insertAlert(
 		patientId,
 		name,
+		doctorId,
 		"simptom",
 		alertSeverity,
 		`Simptome ${severityLabel} raportate: ${data.symptoms.join(", ")}`,
@@ -194,12 +232,13 @@ export async function generateMedicationAlerts(
 ) {
 	if (data.status === "luat") return;
 
-	const name = await getPatientName(patientId);
+	const { name, doctorId } = await getPatientInfo(patientId);
 
 	if (data.status === "omis") {
 		await insertAlert(
 			patientId,
 			name,
+			doctorId,
 			"medicatie",
 			"warning",
 			`Doză omisă: ${data.medicationName}`,
@@ -208,6 +247,7 @@ export async function generateMedicationAlerts(
 		await insertAlert(
 			patientId,
 			name,
+			doctorId,
 			"medicatie",
 			"info",
 			`Doză întârziată: ${data.medicationName}`,
@@ -221,15 +261,19 @@ export async function generateLabResultAlerts(
 	patientId: string,
 	tests: TestValue[],
 ) {
-	const name = await getPatientName(patientId);
+	const { name, doctorId } = await getPatientInfo(patientId);
 	const alerts: Promise<void>[] = [];
 
 	for (const test of tests) {
 		const deviation =
 			test.value < test.refMin
-				? ((test.refMin - test.value) / test.refMin) * 100
+				? test.refMin > 0
+					? ((test.refMin - test.value) / test.refMin) * 100
+					: 100
 				: test.value > test.refMax
-					? ((test.value - test.refMax) / test.refMax) * 100
+					? test.refMax > 0
+						? ((test.value - test.refMax) / test.refMax) * 100
+						: 100
 					: 0;
 
 		if (deviation === 0) continue;
@@ -242,6 +286,7 @@ export async function generateLabResultAlerts(
 				insertAlert(
 					patientId,
 					name,
+					doctorId,
 					"laborator",
 					"critical",
 					`${test.name}: ${test.value} ${test.unit} — mult ${direction} intervalul de referință (${refRange})`,
@@ -252,6 +297,7 @@ export async function generateLabResultAlerts(
 				insertAlert(
 					patientId,
 					name,
+					doctorId,
 					"laborator",
 					"warning",
 					`${test.name}: ${test.value} ${test.unit} — ${direction} intervalul de referință (${refRange})`,
@@ -262,6 +308,7 @@ export async function generateLabResultAlerts(
 				insertAlert(
 					patientId,
 					name,
+					doctorId,
 					"laborator",
 					"info",
 					`${test.name}: ${test.value} ${test.unit} — ușor ${direction} referință (${refRange})`,

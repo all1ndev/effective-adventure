@@ -10,8 +10,8 @@ const moodConfig = {
 	"excelent": { emoji: "😄", label: "Excelent", color: "text-green-600" },
 	"bine": { emoji: "🙂", label: "Bine", color: "text-emerald-600" },
 	"neutru": { emoji: "😐", label: "Neutru", color: "text-muted-foreground" },
-	"rau": { emoji: "😕", label: "Rau", color: "text-orange-600" },
-	"foarte-rau": { emoji: "😞", label: "Foarte rau", color: "text-destructive" },
+	"rau": { emoji: "😕", label: "Rău", color: "text-orange-600" },
+	"foarte-rau": { emoji: "😞", label: "Foarte rău", color: "text-destructive" },
 };
 
 export function JournalList({ entries, onSelect }: JournalListProps) {
