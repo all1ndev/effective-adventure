@@ -3,6 +3,7 @@
 import { DoctorDashboard } from "@/features/doctor-dashboard";
 import { PatientDashboard } from "@/features/patient-dashboard";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
 import { useSession } from "@/lib/auth-client";
 import { getUserRole } from "@/lib/roles";
 
@@ -14,6 +15,7 @@ export default function Page() {
 		return (
 			<>
 				<InstallPrompt />
+				<PushNotificationManager />
 				<DoctorDashboard />
 			</>
 		);
@@ -21,6 +23,7 @@ export default function Page() {
 		return (
 			<>
 				<InstallPrompt />
+				<PushNotificationManager />
 				<PatientDashboard />
 			</>
 		);

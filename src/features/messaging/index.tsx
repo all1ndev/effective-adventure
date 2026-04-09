@@ -7,7 +7,8 @@ import { Main } from "@/components/layout/main";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Spinner } from "@/components/ui/spinner";
-import { Phone } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConversationList } from "./components/conversation-list";
@@ -102,6 +103,15 @@ export function Messaging() {
 	}, []);
 
 	const activeConv = conversations.find((c) => c.id === activeId);
+	const isAdminOrDoctor =
+		currentUserRole === "admin" || currentUserRole === "doctor";
+
+	// On mobile, go back to conversation list
+	function handleBack() {
+		setActiveId("");
+		activeIdRef.current = "";
+		setThreadMessages([]);
+	}
 
 	async function handleSend(body: string) {
 		if (!activeId) return;
@@ -145,8 +155,16 @@ export function Messaging() {
 					</div>
 				) : (
 					<div className="flex h-full w-full">
-						{(currentUserRole === "admin" || currentUserRole === "doctor") && (
-							<aside className="w-72 shrink-0 border-r p-4">
+						{isAdminOrDoctor && (
+							<aside
+								className={cn(
+									"shrink-0 border-r p-4",
+									// Mobile: full width, hidden when a conversation is active
+									activeId ? "hidden md:block" : "w-full md:w-72",
+									// Desktop: always fixed width
+									"md:w-72",
+								)}
+							>
 								<h2 className="mb-3 text-lg font-bold">Mesagerie</h2>
 								<ConversationList
 									conversations={conversations}
@@ -155,20 +173,38 @@ export function Messaging() {
 								/>
 							</aside>
 						)}
-						<div className="flex flex-1 flex-col overflow-hidden">
+						<div
+							className={cn(
+								"flex flex-1 flex-col overflow-hidden",
+								// Mobile: hidden when no conversation is active (show list instead)
+								isAdminOrDoctor && !activeId && "hidden md:flex",
+							)}
+						>
 							{activeConv ? (
 								<>
 									<div className="flex items-center justify-between border-b px-4 py-3">
-										<div>
-											<h3 className="font-semibold">
-												{activeConv.patientName}
-											</h3>
-											<p className="text-xs text-muted-foreground">
-												{currentUserRole === "admin" ||
-												currentUserRole === "doctor"
-													? `Pacient${activeConv.doctorName ? ` · Dr. ${activeConv.doctorName}` : ""}`
-													: "Medic responsabil"}
-											</p>
+										<div className="flex items-center gap-3">
+											{isAdminOrDoctor && (
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={handleBack}
+													className="shrink-0 md:hidden"
+												>
+													<ArrowLeft className="h-4 w-4" />
+													<span className="sr-only">Înapoi</span>
+												</Button>
+											)}
+											<div>
+												<h3 className="font-semibold">
+													{activeConv.patientName}
+												</h3>
+												<p className="text-xs text-muted-foreground">
+													{isAdminOrDoctor
+														? `Pacient${activeConv.doctorName ? ` · Dr. ${activeConv.doctorName}` : ""}`
+														: "Medic responsabil"}
+												</p>
+											</div>
 										</div>
 										{activeConv.phone && (
 											<Button
@@ -196,7 +232,7 @@ export function Messaging() {
 								</>
 							) : (
 								<div className="flex flex-1 items-center justify-center text-muted-foreground">
-									{currentUserRole === "admin" || currentUserRole === "doctor"
+									{isAdminOrDoctor
 										? "Selectați o conversație"
 										: "Nu există o conversație activă"}
 								</div>

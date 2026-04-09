@@ -10,12 +10,6 @@ function getIsStandalone() {
 	return window.matchMedia("(display-mode: standalone)").matches;
 }
 
-function getIsMobile() {
-	return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
-		navigator.userAgent,
-	);
-}
-
 function getIsIOS() {
 	return (
 		/iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
@@ -31,11 +25,6 @@ export function InstallPrompt() {
 	const isStandalone = useSyncExternalStore(
 		emptySubscribe,
 		getIsStandalone,
-		() => false,
-	);
-	const isMobile = useSyncExternalStore(
-		emptySubscribe,
-		getIsMobile,
 		() => false,
 	);
 	const isIOS = useSyncExternalStore(emptySubscribe, getIsIOS, () => false);
@@ -71,7 +60,7 @@ export function InstallPrompt() {
 		deferredPromptRef.current = null;
 	}
 
-	if (isStandalone || !isMobile) {
+	if (isStandalone) {
 		return null;
 	}
 
