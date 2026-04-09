@@ -155,7 +155,7 @@ export function Messaging() {
 				</div>
 			</Header>
 
-			<Main className="flex flex-1 overflow-hidden p-0">
+			<Main fixed className="flex flex-1 overflow-hidden p-0">
 				{loading ? (
 					<div className="flex flex-1 items-center justify-center">
 						<Spinner className="size-6" />
@@ -227,7 +227,10 @@ export function Messaging() {
 											</Button>
 										)}
 									</div>
-									<div ref={threadRef} className="flex-1 overflow-y-auto">
+									<div
+										ref={threadRef}
+										className="flex min-h-0 flex-1 flex-col justify-end overflow-y-auto"
+									>
 										<MessageThread
 											messages={threadMessages}
 											currentUserId={currentUserId}
