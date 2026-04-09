@@ -42,10 +42,14 @@ export function PushNotificationManager() {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [permissionDenied, setPermissionDenied] = useState(false);
+	const [debug, setDebug] = useState("");
 
 	useEffect(() => {
 		if (isSupported) {
-			if (Notification.permission === "denied") {
+			const perm = Notification.permission;
+			setDebug(`permission: ${perm}`);
+
+			if (perm === "denied") {
 				setPermissionDenied(true);
 			}
 
@@ -54,9 +58,15 @@ export function PushNotificationManager() {
 					scope: "/",
 					updateViaCache: "none",
 				})
-				.then((registration) => registration.pushManager.getSubscription())
-				.then((sub) => setSubscription(sub))
-				.catch((err) => console.error("SW registration failed:", err));
+				.then((registration) => {
+					setDebug((d) => `${d} | sw: ok`);
+					return registration.pushManager.getSubscription();
+				})
+				.then((sub) => {
+					setDebug((d) => `${d} | sub: ${sub ? "yes" : "no"}`);
+					setSubscription(sub);
+				})
+				.catch((err) => setDebug((d) => `${d} | sw-err: ${String(err)}`));
 		}
 	}, [isSupported]);
 
@@ -81,8 +91,8 @@ export function PushNotificationManager() {
 			const serializedSub = JSON.parse(JSON.stringify(sub));
 			await subscribeUser(serializedSub);
 		} catch (err) {
-			console.error("Subscribe failed:", err);
-			setError("Abonarea a eșuat. Încearcă din nou.");
+			const message = err instanceof Error ? err.message : JSON.stringify(err);
+			setError(`Eroare: ${message}`);
 		} finally {
 			setIsLoading(false);
 		}
@@ -141,6 +151,9 @@ export function PushNotificationManager() {
 					</p>
 				)}
 				{error && <p className="text-sm text-red-500">{error}</p>}
+				{debug && (
+					<p className="text-xs font-mono text-muted-foreground">{debug}</p>
+				)}
 				{subscription && (
 					<div className="flex gap-2">
 						<Input
