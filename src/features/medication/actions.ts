@@ -13,6 +13,7 @@ import {
 	type MedicationFormValues,
 } from "./data/schema";
 import { generateMedicationAlerts } from "@/features/alerts/generate-alerts";
+import { logAudit } from "@/lib/audit";
 
 function sanitizeMedicationData(data: MedicationFormValues) {
 	return {
@@ -63,6 +64,15 @@ export async function createMedication(values: unknown) {
 		...sanitizeMedicationData(parsed.data),
 	});
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "medication",
+		description: `A adăugat medicamentul ${parsed.data.name} (${parsed.data.dose}, ${parsed.data.frequency})`,
+	});
+
 	revalidatePath("/medication");
 	return { success: true };
 }
@@ -90,6 +100,15 @@ export async function createMedicationForPatient(
 		id: crypto.randomUUID(),
 		patientId: userId,
 		...sanitized,
+	});
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "medication",
+		description: `A adăugat medicamentul ${sanitized.name} pentru pacient`,
 	});
 
 	revalidatePath(`/patients/${patientId}/medication`);
@@ -121,6 +140,16 @@ export async function updateMedication(id: string, values: unknown) {
 		.update(medication)
 		.set(sanitizeMedicationData(parsed.data))
 		.where(eq(medication.id, id));
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "update",
+		entity: "medication",
+		entityId: id,
+		description: `A actualizat medicamentul ${parsed.data.name}`,
+	});
 
 	revalidatePath("/medication");
 	return { success: true };
@@ -160,6 +189,16 @@ export async function updateMedicationForPatient(
 		.set(sanitizeMedicationData(parsed.data))
 		.where(eq(medication.id, id));
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "update",
+		entity: "medication",
+		entityId: id,
+		description: `A actualizat medicamentul ${parsed.data.name} pentru pacient`,
+	});
+
 	revalidatePath(`/patients/${patientId}/medication`);
 	revalidatePath("/medication");
 	return { success: true };
@@ -189,6 +228,16 @@ export async function deleteMedicationForPatient(
 
 	await db.delete(medication).where(eq(medication.id, id));
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "delete",
+		entity: "medication",
+		entityId: id,
+		description: `A șters un medicament al pacientului`,
+	});
+
 	revalidatePath(`/patients/${patientId}/medication`);
 	revalidatePath("/medication");
 	return { success: true };
@@ -210,6 +259,16 @@ export async function deleteMedication(id: string) {
 	}
 
 	await db.delete(medication).where(eq(medication.id, id));
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "delete",
+		entity: "medication",
+		entityId: id,
+		description: `A șters un medicament`,
+	});
 
 	revalidatePath("/medication");
 	return { success: true };
@@ -297,6 +356,15 @@ export async function createMedicationLog(values: unknown) {
 		status: parsed.data.status,
 	});
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "medication_log",
+		description: `A înregistrat ${med[0].name} cu status: ${parsed.data.status}`,
+	});
+
 	revalidatePath("/medication");
 	revalidatePath("/alerts");
 	return { success: true };
@@ -352,6 +420,15 @@ export async function createMedicationLogsBatch(values: unknown[]) {
 			}),
 		);
 	await Promise.all(alertPromises);
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "medication_log",
+		description: `A înregistrat jurnalul zilnic pentru ${parsedEntries.length} medicament(e)`,
+	});
 
 	revalidatePath("/medication");
 	revalidatePath("/alerts");

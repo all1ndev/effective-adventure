@@ -9,6 +9,7 @@ import { patient } from "@/db/patient-schema";
 import { labResult } from "@/db/lab-result-schema";
 import { user } from "@/db/auth-schema";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { logAudit } from "@/lib/audit";
 
 export async function getDoctorPatients() {
 	const session = await getSessionOrThrow();
@@ -55,6 +56,15 @@ export async function createLabResultWithPdf(values: {
 		date: values.date,
 		tests: [],
 		pdfFileName: values.pdfFileName,
+	});
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "lab_result",
+		description: `A trimis rezultate de laborator (PDF) pentru pacient`,
 	});
 
 	revalidatePath("/lab-results");
@@ -104,6 +114,16 @@ export async function deleteSentLabResult(id: string) {
 			.from("lab-results")
 			.remove([record.pdfFileName]);
 	}
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "delete",
+		entity: "lab_result",
+		entityId: id,
+		description: `A șters un rezultat de laborator trimis`,
+	});
 
 	revalidatePath("/send-lab-results");
 	revalidatePath("/lab-results");

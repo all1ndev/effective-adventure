@@ -10,6 +10,7 @@ import { eq, asc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { randomUUID, randomBytes } from "crypto";
 import { sendCredentialsEmail } from "@/lib/email";
+import { logAudit } from "@/lib/audit";
 
 export async function getDoctors() {
 	const session = await getSessionOrThrow();
@@ -102,6 +103,15 @@ export async function addDoctorWithUser(values: unknown) {
 			loginUrl,
 		});
 
+		await logAudit({
+			userId: session.user.id,
+			userName: session.user.name,
+			userRole: session.user.role,
+			action: "create",
+			entity: "doctor",
+			description: `A creat medicul ${data.firstName} ${data.lastName}`,
+		});
+
 		revalidatePath("/doctors");
 		revalidatePath("/add-doctor");
 		return { success: true };
@@ -139,6 +149,16 @@ export async function deleteDoctor(id: string) {
 		if (userId) {
 			await db.delete(user).where(eq(user.id, userId));
 		}
+
+		await logAudit({
+			userId: session.user.id,
+			userName: session.user.name,
+			userRole: session.user.role,
+			action: "delete",
+			entity: "doctor",
+			entityId: id,
+			description: `A șters un medic`,
+		});
 
 		revalidatePath("/doctors");
 		return { success: true };
@@ -199,6 +219,16 @@ export async function updateDoctor(id: string, values: unknown) {
 				})
 				.where(eq(user.id, doctorRecord[0].userId));
 		}
+
+		await logAudit({
+			userId: session.user.id,
+			userName: session.user.name,
+			userRole: session.user.role,
+			action: "update",
+			entity: "doctor",
+			entityId: id,
+			description: `A actualizat medicul ${data.firstName} ${data.lastName}`,
+		});
 
 		revalidatePath("/doctors");
 		return { success: true };

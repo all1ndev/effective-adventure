@@ -85,6 +85,13 @@
 			"when": 1775691855096,
 			"tag": "0011_stale_ma_gnuci",
 			"breakpoints": true
+		},
+		{
+			"idx": 12,
+			"version": "7",
+			"when": 1775739955419,
+			"tag": "0012_add-audit-log",
+			"breakpoints": true
 		}
 	]
 }

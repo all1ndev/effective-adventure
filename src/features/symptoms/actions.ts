@@ -9,6 +9,7 @@ import { symptomReport } from "@/db/symptoms-schema";
 import { resolvePatientUserId } from "@/lib/patient-utils";
 import { symptomReportFormSchema } from "./data/schema";
 import { generateSymptomAlerts } from "@/features/alerts/generate-alerts";
+import { logAudit } from "@/lib/audit";
 
 export async function createSymptomReport(values: unknown) {
 	const session = await getSessionOrThrow();
@@ -28,6 +29,15 @@ export async function createSymptomReport(values: unknown) {
 	});
 
 	await generateSymptomAlerts(session.user.id, parsed.data);
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "symptom_report",
+		description: `A raportat simptome: ${(parsed.data.symptoms as string[]).join(", ")}`,
+	});
 
 	revalidatePath("/symptoms");
 	revalidatePath("/alerts");
@@ -62,6 +72,16 @@ export async function updateSymptomReport(id: string, values: unknown) {
 		.set(parsed.data)
 		.where(eq(symptomReport.id, id));
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "update",
+		entity: "symptom_report",
+		entityId: id,
+		description: `A actualizat raportul de simptome`,
+	});
+
 	revalidatePath("/symptoms");
 	return { success: true };
 }
@@ -85,6 +105,16 @@ export async function deleteSymptomReport(id: string) {
 	}
 
 	await db.delete(symptomReport).where(eq(symptomReport.id, id));
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "delete",
+		entity: "symptom_report",
+		entityId: id,
+		description: `A șters un raport de simptome`,
+	});
 
 	revalidatePath("/symptoms");
 	return { success: true };

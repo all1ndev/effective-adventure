@@ -9,6 +9,7 @@ import { notification, notificationRead } from "@/db/notification-schema";
 import { patient } from "@/db/patient-schema";
 import { medication } from "@/db/medication-schema";
 import { user } from "@/db/auth-schema";
+import { logAudit } from "@/lib/audit";
 
 type TargetType =
 	| "patient"
@@ -182,6 +183,15 @@ export async function createNotification(input: CreateNotificationInput) {
 		createdByName: session.user.name ?? "Medic",
 	});
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "notification",
+		description: `A creat notificarea "${input.title}" pentru ${targetUserIds.length} destinatar(i)`,
+	});
+
 	revalidatePath("/notifications");
 	return { success: true, recipientCount: targetUserIds.length };
 }
@@ -220,6 +230,16 @@ export async function deleteNotification(notificationId: string) {
 		.delete(notificationRead)
 		.where(eq(notificationRead.notificationId, notificationId));
 	await db.delete(notification).where(eq(notification.id, notificationId));
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "delete",
+		entity: "notification",
+		entityId: notificationId,
+		description: `A șters notificarea "${target.title}"`,
+	});
 
 	revalidatePath("/notifications");
 	return { success: true };

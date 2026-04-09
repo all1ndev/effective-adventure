@@ -12,6 +12,7 @@ import {
 	computeVitalStatus,
 	generateVitalSignAlerts,
 } from "@/features/alerts/generate-alerts";
+import { logAudit } from "@/lib/audit";
 
 export async function createVitalSign(values: unknown) {
 	const session = await getSessionOrThrow();
@@ -35,6 +36,15 @@ export async function createVitalSign(values: unknown) {
 	if (status !== "normal") {
 		await generateVitalSignAlerts(session.user.id, parsed.data);
 	}
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "vital_sign",
+		description: `A înregistrat semne vitale: TA ${parsed.data.systolic}/${parsed.data.diastolic}, puls ${parsed.data.pulse}, temp ${parsed.data.temperature}°C`,
+	});
 
 	revalidatePath("/vital-signs");
 	revalidatePath("/alerts");
@@ -70,6 +80,16 @@ export async function updateVitalSign(id: string, values: unknown) {
 		await generateVitalSignAlerts(session.user.id, parsed.data);
 	}
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "update",
+		entity: "vital_sign",
+		entityId: id,
+		description: `A actualizat semne vitale`,
+	});
+
 	revalidatePath("/vital-signs");
 	revalidatePath("/alerts");
 	return { success: true, status };
@@ -89,6 +109,16 @@ export async function deleteVitalSign(id: string) {
 	}
 
 	await db.delete(vitalSign).where(eq(vitalSign.id, id));
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "delete",
+		entity: "vital_sign",
+		entityId: id,
+		description: `A șters o înregistrare de semne vitale`,
+	});
 
 	revalidatePath("/vital-signs");
 	return { success: true };

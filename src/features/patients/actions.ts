@@ -16,6 +16,7 @@ import { eq, asc, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { randomUUID, randomBytes } from "crypto";
 import { sendCredentialsEmail } from "@/lib/email";
+import { logAudit } from "@/lib/audit";
 
 export async function getAdmins() {
 	const session = await getSessionOrThrow();
@@ -185,6 +186,15 @@ export async function addPatientWithUser(values: unknown) {
 			loginUrl,
 		});
 
+		await logAudit({
+			userId: session.user.id,
+			userName: session.user.name,
+			userRole: session.user.role,
+			action: "create",
+			entity: "patient",
+			description: `A creat pacientul ${data.firstName} ${data.lastName}`,
+		});
+
 		revalidatePath("/patients");
 		revalidatePath("/add-patient");
 		revalidatePath("/medication");
@@ -247,6 +257,16 @@ export async function updateFullPatient(id: string, values: unknown) {
 				updatedAt: new Date(),
 			})
 			.where(eq(patient.id, id));
+
+		await logAudit({
+			userId: session.user.id,
+			userName: session.user.name,
+			userRole: session.user.role,
+			action: "update",
+			entity: "patient",
+			entityId: id,
+			description: `A actualizat pacientul ${data.firstName} ${data.lastName}`,
+		});
 
 		revalidatePath("/patients");
 		return { success: true };
@@ -328,6 +348,16 @@ export async function deletePatient(id: string) {
 			await db.delete(user).where(eq(user.id, userId));
 		}
 
+		await logAudit({
+			userId: session.user.id,
+			userName: session.user.name,
+			userRole: session.user.role,
+			action: "delete",
+			entity: "patient",
+			entityId: id,
+			description: `A șters un pacient`,
+		});
+
 		revalidatePath("/patients");
 		revalidatePath("/messaging");
 		return { success: true };
@@ -365,6 +395,15 @@ export async function deletePatients(ids: string[]) {
 		if (userIds.length > 0) {
 			await db.delete(user).where(inArray(user.id, userIds));
 		}
+
+		await logAudit({
+			userId: session.user.id,
+			userName: session.user.name,
+			userRole: session.user.role,
+			action: "delete",
+			entity: "patient",
+			description: `A șters ${ids.length} pacienți`,
+		});
 
 		revalidatePath("/patients");
 		revalidatePath("/messaging");

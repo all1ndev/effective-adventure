@@ -61,3 +61,4 @@ export {
 	notificationRelations,
 	notificationReadRelations,
 } from "./notification-schema";
+export { auditActionEnum, auditEntityEnum, auditLog } from "./audit-log-schema";

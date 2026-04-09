@@ -8,6 +8,7 @@ import { conversation, message } from "@/db/messaging-schema";
 import { patient } from "@/db/patient-schema";
 import { doctor } from "@/db/doctor-schema";
 import { user } from "@/db/auth-schema";
+import { logAudit } from "@/lib/audit";
 
 export async function getCurrentUser() {
 	const session = await getSessionOrThrow();
@@ -195,6 +196,16 @@ export async function sendMessage(conversationId: string, body: string) {
 			lastMessageAt: new Date(),
 		})
 		.where(eq(conversation.id, conversationId));
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "message",
+		entityId: conversationId,
+		description: `A trimis un mesaj`,
+	});
+
 	revalidatePath("/messaging");
 	return { success: true, message: newMsg };
 }

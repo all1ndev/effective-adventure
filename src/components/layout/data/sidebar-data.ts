@@ -15,6 +15,7 @@ import {
 	BookOpen,
 	NotebookPen,
 	CalendarDays,
+	ScrollText,
 } from "lucide-react";
 import { type SidebarData } from "../types";
 import { type AppRole } from "@/lib/roles";
@@ -81,6 +82,11 @@ export const adminSidebarData: SidebarData = {
 					title: "Mesagerie",
 					url: "/messaging",
 					icon: MessageSquare,
+				},
+				{
+					title: "Jurnal de audit",
+					url: "/audit-log",
+					icon: ScrollText,
 				},
 			],
 		},

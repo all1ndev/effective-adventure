@@ -9,6 +9,7 @@ import { labResult } from "@/db/lab-result-schema";
 import { resolvePatientUserId } from "@/lib/patient-utils";
 import { labResultFormSchema } from "./data/schema";
 import { generateLabResultAlerts } from "@/features/alerts/generate-alerts";
+import { logAudit } from "@/lib/audit";
 
 export async function getLabResults() {
 	const session = await getSessionOrThrow();
@@ -46,6 +47,15 @@ export async function createLabResult(values: unknown) {
 
 	await generateLabResultAlerts(session.user.id, parsed.data.tests);
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "lab_result",
+		description: `A adăugat rezultate de laborator`,
+	});
+
 	revalidatePath("/lab-results");
 	revalidatePath("/alerts");
 	return { success: true };
@@ -72,6 +82,15 @@ export async function createLabResultForPatient(
 
 	await generateLabResultAlerts(userId, parsed.data.tests);
 
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "lab_result",
+		description: `A adăugat rezultate de laborator pentru pacient`,
+	});
+
 	revalidatePath(`/patients/${patientId}/lab-results`);
 	revalidatePath("/alerts");
 	return { success: true };
@@ -83,6 +102,17 @@ export async function deleteLabResult(id: string) {
 		throw new Error("Neautorizat");
 	}
 	await db.delete(labResult).where(eq(labResult.id, id));
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "delete",
+		entity: "lab_result",
+		entityId: id,
+		description: `A șters un rezultat de laborator`,
+	});
+
 	revalidatePath("/lab-results");
 	return { success: true };
 }

@@ -6,6 +6,7 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { db } from "@/db";
 import { journalEntry } from "@/db/journal-schema";
 import { journalEntryFormSchema } from "./data/schema";
+import { logAudit } from "@/lib/audit";
 
 export async function createJournalEntry(values: unknown) {
 	const session = await getSessionOrThrow();
@@ -19,6 +20,14 @@ export async function createJournalEntry(values: unknown) {
 		userId: session.user.id,
 		date: today,
 		...parsed.data,
+	});
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "create",
+		entity: "journal_entry",
+		description: `A adăugat o intrare în jurnal`,
 	});
 	revalidatePath("/journal");
 	return { success: true };
@@ -41,6 +50,15 @@ export async function updateJournalEntry(id: string, values: unknown) {
 		return { error: "Inregistrarea nu a fost gasita." };
 	}
 	await db.update(journalEntry).set(parsed.data).where(eq(journalEntry.id, id));
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "update",
+		entity: "journal_entry",
+		entityId: id,
+		description: `A actualizat o intrare în jurnal`,
+	});
 	revalidatePath("/journal");
 	return { success: true };
 }
@@ -58,6 +76,15 @@ export async function deleteJournalEntry(id: string) {
 		return { error: "Inregistrarea nu a fost gasita." };
 	}
 	await db.delete(journalEntry).where(eq(journalEntry.id, id));
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "delete",
+		entity: "journal_entry",
+		entityId: id,
+		description: `A șters o intrare din jurnal`,
+	});
 	revalidatePath("/journal");
 	return { success: true };
 }

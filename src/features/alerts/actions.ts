@@ -7,6 +7,7 @@ import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { alert } from "@/db/alert-schema";
 import { patient } from "@/db/patient-schema";
+import { logAudit } from "@/lib/audit";
 
 export async function getAlerts() {
 	const session = await getSessionOrThrow();
@@ -42,6 +43,17 @@ export async function dismissAlert(id: string) {
 		throw new Error("Neautorizat");
 	}
 	await db.update(alert).set({ dismissed: true }).where(eq(alert.id, id));
+
+	await logAudit({
+		userId: session.user.id,
+		userName: session.user.name,
+		userRole: session.user.role,
+		action: "update",
+		entity: "alert",
+		entityId: id,
+		description: `A respins o alertă`,
+	});
+
 	revalidatePath("/alerts");
 	return { success: true };
 }
