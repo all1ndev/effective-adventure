@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useMemo, useTransition, useEffect } from "react";
+import {
+	useState,
+	useMemo,
+	useTransition,
+	useEffect,
+	useCallback,
+} from "react";
 import { Lock, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ReminderSettingsDialog } from "./reminder-settings-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -69,14 +76,24 @@ export function DailyLogForm({
 	const [reminderMap, setReminderMap] = useState<
 		Map<string, MedicationReminder[]>
 	>(new Map());
+	const [reminderDialogMed, setReminderDialogMed] = useState<{
+		id: string;
+		name: string;
+		frequency: string;
+	} | null>(null);
+
+	const [reminderVersion, setReminderVersion] = useState(0);
 
 	useEffect(() => {
-		async function fetchReminders() {
-			const results = await Promise.all(
-				medications.map((m) =>
-					getMedicationReminders(m.id).then((r) => [m.id, r] as const),
-				),
-			);
+		if (medications.length === 0) return;
+
+		let cancelled = false;
+		Promise.all(
+			medications.map((m) =>
+				getMedicationReminders(m.id).then((r) => [m.id, r] as const),
+			),
+		).then((results) => {
+			if (cancelled) return;
 			const map = new Map<string, MedicationReminder[]>();
 			for (const [id, reminders] of results) {
 				const enabled = reminders
@@ -93,11 +110,16 @@ export function DailyLogForm({
 				}
 			}
 			setReminderMap(map);
-		}
-		if (medications.length > 0) {
-			fetchReminders();
-		}
-	}, [medications]);
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [medications, reminderVersion]);
+
+	const refreshReminders = useCallback(() => {
+		setReminderVersion((v) => v + 1);
+	}, []);
 
 	const today = getLocalToday();
 	const todayLogs = logs.filter((l) => l.takenAt.startsWith(today));
@@ -249,16 +271,34 @@ export function DailyLogForm({
 
 								return (
 									<div key={med.id} className="rounded-lg border p-4">
-										<div className="mb-3">
-											<p className="font-medium">{med.name}</p>
-											<p className="text-sm text-muted-foreground">
-												{med.dose} — {med.frequency}
-											</p>
-											{med.notes && (
-												<p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-													📋 {med.notes}
+										<div className="mb-3 flex items-start justify-between">
+											<div>
+												<p className="font-medium">{med.name}</p>
+												<p className="text-sm text-muted-foreground">
+													{med.dose} — {med.frequency}
 												</p>
-											)}
+												{med.notes && (
+													<p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+														📋 {med.notes}
+													</p>
+												)}
+											</div>
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8 shrink-0"
+												onClick={() =>
+													setReminderDialogMed({
+														id: med.id,
+														name: med.name,
+														frequency: med.frequency,
+													})
+												}
+											>
+												<Bell className="h-4 w-4" />
+												<span className="sr-only">Setări notificări</span>
+											</Button>
 										</div>
 
 										<div className="space-y-3">
@@ -455,6 +495,19 @@ export function DailyLogForm({
 					</form>
 				)}
 			</CardContent>
+
+			{reminderDialogMed && (
+				<ReminderSettingsDialog
+					medicationId={reminderDialogMed.id}
+					medicationName={reminderDialogMed.name}
+					frequency={reminderDialogMed.frequency}
+					open={!!reminderDialogMed}
+					onOpenChange={(open) => {
+						if (!open) setReminderDialogMed(null);
+					}}
+					onSaved={refreshReminders}
+				/>
+			)}
 		</Card>
 	);
 }

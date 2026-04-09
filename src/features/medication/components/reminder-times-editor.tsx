@@ -19,6 +19,7 @@ interface ReminderEntry {
 interface ReminderTimesEditorProps {
 	medicationId: string;
 	frequency: string;
+	onSaved?: () => void;
 }
 
 const DEFAULT_DOSE_TIMES = ["08:00", "14:00", "20:00", "23:00"];
@@ -26,6 +27,7 @@ const DEFAULT_DOSE_TIMES = ["08:00", "14:00", "20:00", "23:00"];
 export function ReminderTimesEditor({
 	medicationId,
 	frequency,
+	onSaved,
 }: ReminderTimesEditorProps) {
 	const doseCount = getDailyDoseCount(frequency);
 	const [entries, setEntries] = useState<ReminderEntry[]>([]);
@@ -79,6 +81,7 @@ export function ReminderTimesEditor({
 				return;
 			}
 			toast.success("Reminder-ele au fost salvate.");
+			onSaved?.();
 		});
 	}
 
