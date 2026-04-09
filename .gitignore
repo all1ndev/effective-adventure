@@ -42,3 +42,6 @@ next-env.d.ts
 
 # uploads
 /uploads
+
+# local export utility
+/scripts/gtp_export.py
