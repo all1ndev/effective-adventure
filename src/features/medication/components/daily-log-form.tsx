@@ -23,6 +23,10 @@ import {
 import { toast } from "sonner";
 import { type Medication, type MedicationLog } from "../data/schema";
 import { createMedicationLogsBatch } from "../actions";
+import {
+	isMedicationDueOnDate,
+	getDailyDoseCount,
+} from "../lib/medication-schedule";
 
 interface DailyLogFormProps {
 	medications: Medication[];
@@ -43,12 +47,6 @@ const statusOptions = [
 	{ value: "intarziat", label: "Întârziat" },
 ];
 
-function getDailyDoses(frequency: string): number {
-	const match = frequency.match(/^(\d+)x pe zi$/);
-	if (match) return parseInt(match[1], 10);
-	return 1;
-}
-
 function getDoseLabel(doseIndex: number, totalDoses: number): string {
 	if (totalDoses <= 1) return "";
 	return `Doza ${doseIndex + 1}/${totalDoses}`;
@@ -59,10 +57,6 @@ function getLocalToday(): string {
 	return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-function isFutureMedication(startDate: string): boolean {
-	return startDate > getLocalToday();
-}
-
 export function DailyLogForm({
 	medications,
 	logs,
@@ -71,15 +65,16 @@ export function DailyLogForm({
 	const today = getLocalToday();
 	const todayLogs = logs.filter((l) => l.takenAt.startsWith(today));
 
-	const activeMeds = medications.filter(
-		(m) => !isFutureMedication(m.startDate),
+	const activeMeds = medications.filter((m) => isMedicationDueOnDate(m, today));
+	const futureMeds = medications.filter((m) => m.startDate > today);
+	const notDueToday = medications.filter(
+		(m) => m.startDate <= today && !isMedicationDueOnDate(m, today),
 	);
-	const futureMeds = medications.filter((m) => isFutureMedication(m.startDate));
 
 	const buildEntries = (): LogEntry[] => {
 		const entries: LogEntry[] = [];
 		for (const med of activeMeds) {
-			const dailyDoses = getDailyDoses(med.frequency);
+			const dailyDoses = getDailyDoseCount(med.frequency);
 			const medTodayLogs = todayLogs.filter((l) => l.medicationId === med.id);
 
 			for (let i = 0; i < dailyDoses; i++) {
@@ -210,7 +205,7 @@ export function DailyLogForm({
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div className="space-y-3">
 							{activeMeds.map((med) => {
-								const dailyDoses = getDailyDoses(med.frequency);
+								const dailyDoses = getDailyDoseCount(med.frequency);
 								const medEntries = entries.filter(
 									(e) => e.medicationId === med.id,
 								);
@@ -325,6 +320,26 @@ export function DailyLogForm({
 									</div>
 								);
 							})}
+
+							{notDueToday.map((med) => (
+								<div
+									key={med.id}
+									className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/30 p-4 opacity-70"
+								>
+									<div className="flex items-start justify-between">
+										<div>
+											<p className="font-medium">{med.name}</p>
+											<p className="text-sm text-muted-foreground">
+												{med.dose} — {med.frequency}
+											</p>
+										</div>
+										<Lock className="h-4 w-4 text-muted-foreground" />
+									</div>
+									<p className="mt-2 text-xs text-muted-foreground">
+										Nu este programat astăzi
+									</p>
+								</div>
+							))}
 
 							{futureMeds.map((med) => (
 								<div
