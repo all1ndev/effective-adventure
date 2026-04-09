@@ -1,92 +1,50 @@
 "use client";
 
-import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { X, Download } from "lucide-react";
 
-const emptySubscribe = () => () => {};
-
-function getIsStandalone() {
-	return window.matchMedia("(display-mode: standalone)").matches;
+interface InstallPromptBannerProps {
+	isIOS: boolean;
+	onAccept: () => void;
+	onDismiss: () => void;
 }
 
-function getIsIOS() {
+export function InstallPromptBanner({
+	isIOS,
+	onAccept,
+	onDismiss,
+}: InstallPromptBannerProps) {
 	return (
-		/iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
-	);
-}
-
-interface BeforeInstallPromptEvent extends Event {
-	prompt: () => Promise<void>;
-	userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-export function InstallPrompt() {
-	const isStandalone = useSyncExternalStore(
-		emptySubscribe,
-		getIsStandalone,
-		() => false,
-	);
-	const isIOS = useSyncExternalStore(emptySubscribe, getIsIOS, () => false);
-
-	const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(null);
-	const [canInstall, setCanInstall] = useState(false);
-
-	useEffect(() => {
-		function handleBeforeInstallPrompt(e: Event) {
-			e.preventDefault();
-			deferredPromptRef.current = e as BeforeInstallPromptEvent;
-			setCanInstall(true);
-		}
-
-		window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-		return () => {
-			window.removeEventListener(
-				"beforeinstallprompt",
-				handleBeforeInstallPrompt,
-			);
-		};
-	}, []);
-
-	async function handleInstallClick() {
-		const prompt = deferredPromptRef.current;
-		if (!prompt) return;
-
-		await prompt.prompt();
-		const { outcome } = await prompt.userChoice;
-		if (outcome === "accepted") {
-			setCanInstall(false);
-		}
-		deferredPromptRef.current = null;
-	}
-
-	if (isStandalone) {
-		return null;
-	}
-
-	// Nothing to show if no install prompt and not iOS
-	if (!canInstall && !isIOS) {
-		return null;
-	}
-
-	return (
-		<Card>
-			<CardContent className="flex items-center justify-between gap-4 p-4">
-				<div className="space-y-1">
-					<h3 className="text-sm font-semibold">Instalează Aplicația</h3>
-					{isIOS && !canInstall && (
-						<p className="text-sm text-muted-foreground">
-							Apasă butonul de partajare ⎋ și apoi &quot;Adaugă pe Ecranul
-							Principal&quot; ➕
-						</p>
-					)}
-				</div>
-				{canInstall && (
-					<Button size="sm" onClick={handleInstallClick}>
+		<div className="border-b bg-muted/50 px-4 py-2 flex items-center justify-between gap-3 text-sm animate-in slide-in-from-top-2 duration-300">
+			<div className="flex items-center gap-2 min-w-0">
+				<Download className="h-4 w-4 shrink-0 text-muted-foreground" />
+				{isIOS ? (
+					<p className="text-muted-foreground truncate">
+						Instalează aplicația: apasă butonul de partajare ⎋ apoi &quot;Adaugă
+						pe Ecranul Principal&quot; ➕
+					</p>
+				) : (
+					<p className="text-muted-foreground truncate">
+						Instalează TransplantCare pentru acces rapid
+					</p>
+				)}
+			</div>
+			<div className="flex items-center gap-2 shrink-0">
+				{!isIOS && (
+					<Button size="sm" variant="default" onClick={onAccept}>
 						Instalează
 					</Button>
 				)}
-			</CardContent>
-		</Card>
+				<Button
+					size="icon"
+					variant="ghost"
+					className="h-7 w-7"
+					onClick={onDismiss}
+				>
+					<X className="h-4 w-4" />
+					<span className="sr-only">Închide</span>
+				</Button>
+			</div>
+		</div>
 	);
 }

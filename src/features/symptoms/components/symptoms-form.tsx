@@ -75,6 +75,14 @@ export function SymptomsForm({
 					? "Raportul a fost actualizat cu succes."
 					: "Simptomele au fost raportate cu succes.",
 			);
+
+			if (!editId) {
+				window.dispatchEvent(
+					new CustomEvent("tc:engagement", {
+						detail: { type: "symptoms" },
+					}),
+				);
+			}
 			form.reset({
 				symptoms: [],
 				severity: undefined as unknown as SymptomReportFormValues["severity"],

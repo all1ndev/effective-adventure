@@ -9,6 +9,7 @@ import { useSession } from "@/lib/auth-client";
 import { Toaster } from "@/components/ui/sonner";
 
 import { Suspense } from "react";
+import { PromptBannerSlot } from "@/components/pwa/prompt-banner-slot";
 
 export default function AuthenticatedRootLayout({
 	children,
@@ -30,7 +31,10 @@ export default function AuthenticatedRootLayout({
 		<Suspense>
 			<ThemeProvider>
 				<DirectionProvider>
-					<AuthenticatedLayout>{children}</AuthenticatedLayout>
+					<AuthenticatedLayout>
+						<PromptBannerSlot />
+						{children}
+					</AuthenticatedLayout>
 					<Toaster richColors closeButton />
 				</DirectionProvider>
 			</ThemeProvider>

@@ -4,7 +4,7 @@ import { useSession } from "@/lib/auth-client";
 import { getUserRole } from "@/lib/roles";
 import { SendNotifications } from "@/features/notifications";
 import { PatientNotifications } from "@/features/notifications/patient-notifications";
-import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
+import { PushPromptInline } from "@/components/pwa/push-prompt-inline";
 
 export default function NotificationsPage() {
 	const { data: session, isPending } = useSession();
@@ -15,7 +15,7 @@ export default function NotificationsPage() {
 	if (role === "admin" || role === "doctor") {
 		return (
 			<>
-				<PushNotificationManager />
+				<PushPromptInline />
 				<SendNotifications />
 			</>
 		);
@@ -23,7 +23,7 @@ export default function NotificationsPage() {
 
 	return (
 		<>
-			<PushNotificationManager />
+			<PushPromptInline />
 			<PatientNotifications />
 		</>
 	);

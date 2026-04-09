@@ -71,6 +71,14 @@ export function VitalSignsForm({
 					: "Semnele vitale au fost înregistrate cu succes.",
 			);
 
+			if (!editId) {
+				window.dispatchEvent(
+					new CustomEvent("tc:engagement", {
+						detail: { type: "vital_signs" },
+					}),
+				);
+			}
+
 			if (result.status === "critical") {
 				toast.warning(
 					"Valorile introduse sunt critice. Medicul dumneavoastră va fi notificat.",
