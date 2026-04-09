@@ -220,7 +220,7 @@ export function SendNotifications() {
 
 			toast.success(
 				scheduledAt
-					? `Notificare programată pentru ${new Date(scheduledAt).toLocaleString("ro-RO")} către ${result.recipientCount} pacient${result.recipientCount === 1 ? "" : "i"}.`
+					? `Notificare trimisă către ${result.recipientCount} pacient${result.recipientCount === 1 ? "" : "i"} cu programare pe ${new Date(scheduledAt).toLocaleString("ro-RO")}.`
 					: `Notificare trimisă către ${result.recipientCount} pacient${result.recipientCount === 1 ? "" : "i"}.`,
 			);
 			setTitle("");
@@ -496,14 +496,13 @@ export function SendNotifications() {
 									<div className="space-y-1.5">
 										<Label className="flex items-center gap-1.5">
 											<CalendarClock className="h-4 w-4" />
-											Programare (opțional)
+											Data și ora programării (opțional)
 										</Label>
 										<div className="flex gap-2">
 											<Input
 												type="date"
 												value={scheduledDate}
 												onChange={(e) => setScheduledDate(e.target.value)}
-												min={new Date().toISOString().split("T")[0]}
 												className="flex-1"
 											/>
 											<Input
@@ -515,7 +514,8 @@ export function SendNotifications() {
 											/>
 										</div>
 										<p className="text-xs text-muted-foreground">
-											Lăsați gol pentru trimitere imediată.
+											Adăugați data și ora la care pacientul trebuie să se
+											prezinte.
 										</p>
 									</div>
 
@@ -550,8 +550,7 @@ export function SendNotifications() {
 												severityConfig[n.severity] ?? severityConfig.info;
 											const isScheduled =
 												n.scheduledAt && new Date(n.scheduledAt) > new Date();
-											const canDelete =
-												now - new Date(n.createdAt).getTime() < 5 * 60 * 1000;
+											const canDelete = n.readCount === 0;
 											return (
 												<div
 													key={n.id}
@@ -566,7 +565,7 @@ export function SendNotifications() {
 																	className="text-xs gap-1"
 																>
 																	<CalendarClock className="h-3 w-3" />
-																	Programată
+																	Cu programare
 																</Badge>
 															)}
 														</div>
@@ -594,9 +593,7 @@ export function SendNotifications() {
 														<p
 															className={`text-xs font-medium ${isScheduled ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}
 														>
-															{isScheduled
-																? "Programată pentru: "
-																: "A fost programată pentru: "}
+															{"Data programării: "}
 															{new Date(n.scheduledAt).toLocaleDateString(
 																"ro-RO",
 																{

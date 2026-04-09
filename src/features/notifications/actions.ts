@@ -203,11 +203,17 @@ export async function deleteNotification(notificationId: string) {
 		return { error: "Notificarea nu a fost găsită." };
 	}
 
-	const elapsed = Date.now() - new Date(target.createdAt).getTime();
-	const fiveMinutes = 5 * 60 * 1000;
+	const reads = await db
+		.select()
+		.from(notificationRead)
+		.where(eq(notificationRead.notificationId, notificationId))
+		.limit(1);
 
-	if (elapsed > fiveMinutes) {
-		return { error: "Notificarea poate fi ștearsă doar în primele 5 minute." };
+	if (reads.length > 0) {
+		return {
+			error:
+				"Notificarea nu poate fi ștearsă deoarece a fost confirmată de cel puțin un pacient.",
+		};
 	}
 
 	await db
@@ -233,13 +239,9 @@ export async function getNotificationsForPatient() {
 		.from(notificationRead)
 		.where(eq(notificationRead.userId, userId));
 
-	const readSet = new Set(reads.map((r) => r.notificationId));
-
-	const now = new Date();
 	const myNotifications: typeof allNotifications = [];
 
 	for (const n of allNotifications) {
-		if (n.scheduledAt && new Date(n.scheduledAt) > now) continue;
 		const targets = await resolveTargetUserIds(
 			n.targetType as TargetType,
 			n.targetValue ?? undefined,
@@ -249,9 +251,12 @@ export async function getNotificationsForPatient() {
 		}
 	}
 
+	const readMap = new Map(reads.map((r) => [r.notificationId, r.readAt]));
+
 	return myNotifications.map((n) => ({
 		...n,
-		read: readSet.has(n.id),
+		read: readMap.has(n.id),
+		readAt: readMap.get(n.id) ?? null,
 	}));
 }
 
@@ -297,6 +302,22 @@ export async function markAllNotificationsAsRead() {
 			userId,
 		})),
 	);
+
+	revalidatePath("/notifications");
+	return { success: true };
+}
+
+export async function deleteNotificationForPatient(notificationId: string) {
+	const session = await getSessionOrThrow();
+
+	await db
+		.delete(notificationRead)
+		.where(
+			and(
+				eq(notificationRead.notificationId, notificationId),
+				eq(notificationRead.userId, session.user.id),
+			),
+		);
 
 	revalidatePath("/notifications");
 	return { success: true };
