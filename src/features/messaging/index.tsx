@@ -190,7 +190,9 @@ export function Messaging() {
 											currentUserId={currentUserId}
 										/>
 									</div>
-									<MessageInput onSend={handleSend} />
+									{currentUserRole !== "admin" && (
+										<MessageInput onSend={handleSend} />
+									)}
 								</>
 							) : (
 								<div className="flex flex-1 items-center justify-center text-muted-foreground">

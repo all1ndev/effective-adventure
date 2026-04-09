@@ -149,36 +149,11 @@ export async function getMessages(conversationId: string) {
 export async function sendMessage(conversationId: string, body: string) {
 	const session = await getSessionOrThrow();
 
-	let senderName = session.user.name;
-
-	// Admin sends as the responsible doctor
 	if (session.user.role === "admin") {
-		const conv = await db
-			.select({ patientId: conversation.patientId })
-			.from(conversation)
-			.where(eq(conversation.id, conversationId))
-			.limit(1);
-
-		if (conv.length > 0) {
-			const patientRecord = await db
-				.select({ doctorId: patient.doctorId })
-				.from(patient)
-				.where(eq(patient.userId, conv[0].patientId))
-				.limit(1);
-
-			if (patientRecord.length > 0 && patientRecord[0].doctorId) {
-				const doctor = await db
-					.select({ name: user.name })
-					.from(user)
-					.where(eq(user.id, patientRecord[0].doctorId))
-					.limit(1);
-
-				if (doctor.length > 0) {
-					senderName = doctor[0].name;
-				}
-			}
-		}
+		throw new Error("Adminul poate doar vizualiza conversațiile.");
 	}
+
+	const senderName = session.user.name;
 
 	const newMsg = {
 		id: crypto.randomUUID(),
