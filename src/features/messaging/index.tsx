@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { ConversationList } from "./components/conversation-list";
 import { MessageThread } from "./components/message-thread";
 import { MessageInput } from "./components/message-input";
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
 	getCurrentUser,
 	getConversations,
@@ -32,7 +31,6 @@ export function Messaging() {
 	const [currentUserId, setCurrentUserId] = useState<string>("");
 	const [currentUserRole, setCurrentUserRole] = useState<string>("");
 	const [loading, setLoading] = useState(true);
-	const isMobile = useIsMobile();
 	const activeIdRef = useRef("");
 	const threadRef = useRef<HTMLDivElement>(null);
 	const lastMsgCountRef = useRef(0);
@@ -67,8 +65,9 @@ export function Messaging() {
 		])
 			.then(() => {
 				// On mobile, admin/doctor start on the conversation list
+				const mobile = window.innerWidth < 768;
 				const skipAutoSelect =
-					isMobile && (userRole === "admin" || userRole === "doctor");
+					mobile && (userRole === "admin" || userRole === "doctor");
 				if (firstActiveId && !skipAutoSelect) {
 					setActiveId(firstActiveId);
 					activeIdRef.current = firstActiveId;
@@ -79,7 +78,7 @@ export function Messaging() {
 				toast.error("Eroare la încărcarea mesageriei.");
 			})
 			.finally(() => setLoading(false));
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+	}, []);  
 
 	// Poll active conversation messages every 3 seconds
 	useEffect(() => {
