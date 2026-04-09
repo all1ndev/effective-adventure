@@ -75,6 +75,11 @@ export function InstallPrompt() {
 		return null;
 	}
 
+	// Nothing to show if no install prompt and not iOS
+	if (!canInstall && !isIOS) {
+		return null;
+	}
+
 	return (
 		<Card>
 			<CardContent className="flex items-center justify-between gap-4 p-4">

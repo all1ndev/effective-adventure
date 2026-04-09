@@ -91,8 +91,8 @@ export function PushNotificationManager() {
 		await unsubscribeUser();
 	}
 
-	if (!isSupported) {
-		return <p>Notificările push nu sunt suportate în acest browser.</p>;
+	if (!isSupported || subscription) {
+		return null;
 	}
 
 	return (
@@ -103,9 +103,7 @@ export function PushNotificationManager() {
 					<p className="text-sm text-muted-foreground">
 						{permissionDenied
 							? "Notificările sunt blocate de browser."
-							: subscription
-								? "Ești abonat la notificări push."
-								: "Nu ești abonat la notificări push."}
+							: "Nu ești abonat la notificări push."}
 					</p>
 					{permissionDenied && (
 						<p className="text-sm text-muted-foreground">
@@ -115,19 +113,13 @@ export function PushNotificationManager() {
 					)}
 					{error && <p className="text-sm text-red-500">{error}</p>}
 				</div>
-				{subscription ? (
-					<Button size="sm" variant="outline" onClick={unsubscribeFromPush}>
-						Dezabonare
-					</Button>
-				) : (
-					<Button
-						size="sm"
-						onClick={subscribeToPush}
-						disabled={isLoading || permissionDenied}
-					>
-						{isLoading ? "Se procesează..." : "Abonare"}
-					</Button>
-				)}
+				<Button
+					size="sm"
+					onClick={subscribeToPush}
+					disabled={isLoading || permissionDenied}
+				>
+					{isLoading ? "Se procesează..." : "Abonare"}
+				</Button>
 			</CardContent>
 		</Card>
 	);
