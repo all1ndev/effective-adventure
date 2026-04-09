@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { medication, medicationLog } from "@/db/medication-schema";
-import { lte, or, isNull, gte } from "drizzle-orm";
+import { lte, gte, and, inArray } from "drizzle-orm";
 import {
 	isMedicationDueOnDate,
 	getDailyDoseCount,
@@ -53,12 +53,21 @@ export async function GET(request: Request) {
 		});
 	}
 
-	// Fetch all existing logs in the date range
-	const allLogs = await db.select().from(medicationLog);
-	const logsInRange = allLogs.filter((l) => {
-		const logDate = l.takenAt.substring(0, 10);
-		return logDate >= checkStart && logDate <= checkEnd;
-	});
+	// Fetch only logs in the date range (takenAt is ISO text, so string comparison works)
+	const medIds = activeMedications.map((m) => m.id);
+	const logsInRange =
+		medIds.length > 0
+			? await db
+					.select()
+					.from(medicationLog)
+					.where(
+						and(
+							inArray(medicationLog.medicationId, medIds),
+							gte(medicationLog.takenAt, checkStart),
+							lte(medicationLog.takenAt, `${checkEnd}T23:59:59`),
+						),
+					)
+			: [];
 
 	// Group logs by medicationId + date
 	const logCountMap = new Map<string, number>();

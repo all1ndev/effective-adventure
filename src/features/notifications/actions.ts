@@ -84,7 +84,12 @@ async function resolveTargetUserIds(
 			if (allPatientMeds.length === 0) return [];
 
 			const { medicationLog } = await import("@/db/medication-schema");
-			const allLogs = await db.select().from(medicationLog);
+			const { inArray } = await import("drizzle-orm");
+			const medIds = allPatientMeds.map((m) => m.medId);
+			const allLogs = await db
+				.select()
+				.from(medicationLog)
+				.where(inArray(medicationLog.medicationId, medIds));
 
 			const patientCompliance = new Map<
 				string,
