@@ -38,6 +38,8 @@ export function PushNotificationManager() {
 		null,
 	);
 	const [message, setMessage] = useState("");
+	const [error, setError] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		if (isSupported) {
@@ -47,21 +49,39 @@ export function PushNotificationManager() {
 					updateViaCache: "none",
 				})
 				.then((registration) => registration.pushManager.getSubscription())
-				.then((sub) => setSubscription(sub));
+				.then((sub) => setSubscription(sub))
+				.catch((err) => console.error("SW registration failed:", err));
 		}
 	}, [isSupported]);
 
 	async function subscribeToPush() {
-		const registration = await navigator.serviceWorker.ready;
-		const sub = await registration.pushManager.subscribe({
-			userVisibleOnly: true,
-			applicationServerKey: urlBase64ToUint8Array(
-				process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-			),
-		});
-		setSubscription(sub);
-		const serializedSub = JSON.parse(JSON.stringify(sub));
-		await subscribeUser(serializedSub);
+		setError(null);
+		setIsLoading(true);
+		try {
+			const permission = await Notification.requestPermission();
+			if (permission !== "granted") {
+				setError(
+					"Permisiunea pentru notificări a fost refuzată. Activează notificările din setările browserului.",
+				);
+				return;
+			}
+
+			const registration = await navigator.serviceWorker.ready;
+			const sub = await registration.pushManager.subscribe({
+				userVisibleOnly: true,
+				applicationServerKey: urlBase64ToUint8Array(
+					process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+				),
+			});
+			setSubscription(sub);
+			const serializedSub = JSON.parse(JSON.stringify(sub));
+			await subscribeUser(serializedSub);
+		} catch (err) {
+			console.error("Subscribe failed:", err);
+			setError("Abonarea a eșuat. Încearcă din nou.");
+		} finally {
+			setIsLoading(false);
+		}
 	}
 
 	async function unsubscribeFromPush() {
@@ -84,6 +104,7 @@ export function PushNotificationManager() {
 	return (
 		<div>
 			<h3 className="text-lg font-semibold">Notificări Push</h3>
+			{error && <p className="text-sm text-red-500">{error}</p>}
 			{subscription ? (
 				<>
 					<p>Ești abonat la notificări push.</p>
@@ -103,7 +124,9 @@ export function PushNotificationManager() {
 			) : (
 				<>
 					<p>Nu ești abonat la notificări push.</p>
-					<Button onClick={subscribeToPush}>Abonare</Button>
+					<Button onClick={subscribeToPush} disabled={isLoading}>
+						{isLoading ? "Se procesează..." : "Abonare"}
+					</Button>
 				</>
 			)}
 		</div>
