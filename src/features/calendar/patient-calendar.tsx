@@ -110,7 +110,7 @@ export function PatientCalendar() {
 					</Card>
 				) : (
 					<div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-						<Card className="shrink-0">
+						<Card className="mx-auto shrink-0 lg:mx-0">
 							<CardContent className="p-3">
 								<Calendar
 									mode="single"
@@ -120,7 +120,7 @@ export function PatientCalendar() {
 									modifiers={{ appointment: appointmentDates }}
 									classNames={{
 										today:
-											"rounded-md bg-accent text-accent-foreground [&_button]:border [&_button]:border-primary data-[selected=true]:bg-transparent data-[selected=true]:rounded-none",
+											"rounded-md bg-accent text-accent-foreground [&_button]:border [&_button]:border-primary data-[selected=true]:bg-transparent data-[selected=true]:rounded-none data-[selected=true]:[&_button]:text-primary",
 									}}
 									modifiersClassNames={{
 										appointment:
