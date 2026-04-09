@@ -14,6 +14,7 @@ import {
 	MessageSquare,
 	BookOpen,
 	NotebookPen,
+	CalendarDays,
 } from "lucide-react";
 import { type SidebarData } from "../types";
 import { type AppRole } from "@/lib/roles";
@@ -72,6 +73,11 @@ export const adminSidebarData: SidebarData = {
 					icon: BellRing,
 				},
 				{
+					title: "Calendar",
+					url: "/calendar",
+					icon: CalendarDays,
+				},
+				{
 					title: "Mesagerie",
 					url: "/messaging",
 					icon: MessageSquare,
@@ -119,6 +125,11 @@ export const doctorSidebarData: SidebarData = {
 					icon: BellRing,
 				},
 				{
+					title: "Calendar",
+					url: "/calendar",
+					icon: CalendarDays,
+				},
+				{
 					title: "Mesagerie",
 					url: "/messaging",
 					icon: MessageSquare,
@@ -164,6 +175,11 @@ export const patientSidebarData: SidebarData = {
 					title: "Notificări",
 					url: "/notifications",
 					icon: BellRing,
+				},
+				{
+					title: "Calendar",
+					url: "/calendar",
+					icon: CalendarDays,
 				},
 				{
 					title: "Mesagerie",
