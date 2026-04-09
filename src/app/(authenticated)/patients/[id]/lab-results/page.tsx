@@ -6,7 +6,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { LabResultsTable } from "@/features/lab-results/components/lab-results-table";
 import { LabResultsChart } from "@/features/lab-results/components/lab-results-chart";
-import { LabResultsForm } from "@/features/lab-results/components/lab-results-form";
 import { getLabResultsByPatientId } from "@/features/lab-results/actions";
 import type { LabResult } from "@/features/lab-results/data/schema";
 import { Header } from "@/components/layout/header";
@@ -57,7 +56,6 @@ export default function PatientLabResultsPage({
 						Analize și interpretare cu valori de referință.
 					</p>
 				</div>
-				<LabResultsForm patientId={id} onSuccess={fetchData} />
 				{loading ? (
 					<div className="flex flex-1 items-center justify-center">
 						<Spinner className="size-6" />
