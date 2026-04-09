@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ConversationList } from "./components/conversation-list";
 import { MessageThread } from "./components/message-thread";
 import { MessageInput } from "./components/message-input";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
 	getCurrentUser,
 	getConversations,
@@ -31,6 +32,7 @@ export function Messaging() {
 	const [currentUserId, setCurrentUserId] = useState<string>("");
 	const [currentUserRole, setCurrentUserRole] = useState<string>("");
 	const [loading, setLoading] = useState(true);
+	const isMobile = useIsMobile();
 	const activeIdRef = useRef("");
 	const threadRef = useRef<HTMLDivElement>(null);
 	const lastMsgCountRef = useRef(0);
@@ -51,10 +53,12 @@ export function Messaging() {
 	// Initial load
 	useEffect(() => {
 		let firstActiveId = "";
+		let userRole = "";
 		Promise.all([
 			getCurrentUser().then((u) => {
 				setCurrentUserId(u.id);
 				setCurrentUserRole(u.role ?? "");
+				userRole = u.role ?? "";
 			}),
 			getConversations().then((data) => {
 				setConversations(data);
@@ -62,7 +66,10 @@ export function Messaging() {
 			}),
 		])
 			.then(() => {
-				if (firstActiveId) {
+				// On mobile, admin/doctor start on the conversation list
+				const skipAutoSelect =
+					isMobile && (userRole === "admin" || userRole === "doctor");
+				if (firstActiveId && !skipAutoSelect) {
 					setActiveId(firstActiveId);
 					activeIdRef.current = firstActiveId;
 					return getMessages(firstActiveId).then(setThreadMessages);
@@ -72,7 +79,7 @@ export function Messaging() {
 				toast.error("Eroare la încărcarea mesageriei.");
 			})
 			.finally(() => setLoading(false));
-	}, []);
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	// Poll active conversation messages every 3 seconds
 	useEffect(() => {
