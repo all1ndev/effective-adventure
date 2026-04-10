@@ -120,11 +120,11 @@ export function PatientCalendar() {
 									modifiers={{ appointment: appointmentDates }}
 									classNames={{
 										today:
-											"rounded-md bg-accent text-accent-foreground [&_button]:ring-1 [&_button]:ring-inset [&_button]:ring-primary",
+											"rounded-md bg-accent text-accent-foreground [&_button]:border [&_button]:border-primary data-[selected=true]:bg-transparent data-[selected=true]:rounded-none data-[selected=true]:[&_button]:text-primary",
 									}}
 									modifiersClassNames={{
 										appointment:
-											"[&_button]:font-bold [&_button:not([data-selected-single=true])]:bg-primary/20 [&_button:not([data-selected-single=true])]:text-foreground dark:[&_button:not([data-selected-single=true])]:bg-primary/30",
+											"[&_button]:bg-primary/15 [&_button]:font-semibold [&_button]:text-primary dark:[&_button]:bg-primary/25",
 									}}
 								/>
 							</CardContent>
