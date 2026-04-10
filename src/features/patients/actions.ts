@@ -51,6 +51,30 @@ export async function getPatients() {
 		.orderBy(asc(patient.lastName));
 }
 
+export async function getPatientById(id: string) {
+	const session = await getSessionOrThrow();
+	if (!isMedicRole(session.user.role)) {
+		throw new Error("Neautorizat");
+	}
+
+	const rows = await db
+		.select()
+		.from(patient)
+		.where(eq(patient.id, id))
+		.limit(1);
+
+	const record = rows[0];
+	if (!record) {
+		return null;
+	}
+
+	if (session.user.role !== "admin" && record.doctorId !== session.user.id) {
+		throw new Error("Neautorizat");
+	}
+
+	return record;
+}
+
 export async function getRecentPatients() {
 	const session = await getSessionOrThrow();
 	if (!isMedicRole(session.user.role)) {

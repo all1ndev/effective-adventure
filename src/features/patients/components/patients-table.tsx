@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
 	type SortingState,
 	type VisibilityState,
@@ -25,37 +26,22 @@ import { DataTablePagination, DataTableToolbar } from "@/components/data-table";
 import { etiologies } from "../data/data";
 import { type Patient } from "../data/schema";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { EditPatientSheet } from "./edit-patient-sheet";
 import { getPatientsColumns } from "./patients-columns";
-
-interface Admin {
-	id: string;
-	name: string;
-	email: string;
-}
 
 type DataTableProps = {
 	data: Patient[];
-	admins: Admin[];
-	onRefresh?: () => void;
 };
 
-export function PatientsTable({ data, admins, onRefresh }: DataTableProps) {
+export function PatientsTable({ data }: DataTableProps) {
+	const router = useRouter();
 	const [rowSelection, setRowSelection] = useState({});
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
 		status: false,
 		etiology: false,
 	});
 	const [sorting, setSorting] = useState<SortingState>([]);
-	const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
-	const [editSheetOpen, setEditSheetOpen] = useState(false);
 
-	function handleEdit(patient: Patient) {
-		setEditingPatient(patient);
-		setEditSheetOpen(true);
-	}
-
-	const columns = useMemo(() => getPatientsColumns(handleEdit), []);
+	const columns = useMemo(() => getPatientsColumns(), []);
 
 	const {
 		columnFilters,
@@ -111,7 +97,7 @@ export function PatientsTable({ data, admins, onRefresh }: DataTableProps) {
 		>
 			<DataTableToolbar
 				table={table}
-				searchPlaceholder="Cauta dupa nume..."
+				searchPlaceholder="Caută după nume..."
 				searchKey="lastName"
 				filters={[
 					{
@@ -163,7 +149,8 @@ export function PatientsTable({ data, admins, onRefresh }: DataTableProps) {
 								<TableRow
 									key={row.id}
 									data-state={row.getIsSelected() && "selected"}
-									className="group/row"
+									className="group/row cursor-pointer"
+									onClick={() => router.push(`/patients/${row.original.id}`)}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell
@@ -188,7 +175,7 @@ export function PatientsTable({ data, admins, onRefresh }: DataTableProps) {
 									colSpan={table.getVisibleLeafColumns().length}
 									className="h-24 text-center"
 								>
-									Nu s-au gasit rezultate.
+									Nu s-au găsit rezultate.
 								</TableCell>
 							</TableRow>
 						)}
@@ -197,14 +184,6 @@ export function PatientsTable({ data, admins, onRefresh }: DataTableProps) {
 			</div>
 			<DataTablePagination table={table} className="mt-auto" />
 			<DataTableBulkActions table={table} />
-
-			<EditPatientSheet
-				patient={editingPatient}
-				open={editSheetOpen}
-				onOpenChange={setEditSheetOpen}
-				admins={admins}
-				onSaved={onRefresh}
-			/>
 		</div>
 	);
 }
