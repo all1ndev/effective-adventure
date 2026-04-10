@@ -13,11 +13,12 @@ export async function GET(request: Request) {
 
 	const results: Record<string, unknown> = {};
 
+	// Queue new reminders first, then deliver everything due in the same run
 	const jobs: { name: string; handler: (req: Request) => Promise<Response> }[] =
 		[
-			{ name: "send-reminders", handler: sendReminders },
 			{ name: "medication-reminders", handler: medicationReminders },
 			{ name: "missed-medications", handler: missedMedications },
+			{ name: "send-reminders", handler: sendReminders },
 		];
 
 	for (const job of jobs) {
