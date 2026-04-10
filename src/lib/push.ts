@@ -1,7 +1,7 @@
 "use server";
 
 import webpush from "web-push";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { pushSubscription } from "@/db/push-subscription-schema";
 
@@ -11,6 +11,22 @@ webpush.setVapidDetails(
 	process.env.VAPID_PRIVATE_KEY!,
 );
 
+async function logPush(
+	userId: string,
+	endpoint: string,
+	title: string,
+	status: string,
+	error: string | null,
+) {
+	try {
+		await db.execute(
+			sql`INSERT INTO push_log (id, user_id, endpoint_prefix, title, status, error) VALUES (${crypto.randomUUID()}, ${userId}, ${endpoint.slice(0, 60)}, ${title}, ${status}, ${error})`,
+		);
+	} catch {
+		// swallow log errors
+	}
+}
+
 export async function sendPushToUser(
 	userId: string,
 	payload: { title: string; body: string },
@@ -19,6 +35,11 @@ export async function sendPushToUser(
 		.select()
 		.from(pushSubscription)
 		.where(eq(pushSubscription.userId, userId));
+
+	if (subscriptions.length === 0) {
+		await logPush(userId, "-", payload.title, "no_subscription", null);
+		return;
+	}
 
 	for (const sub of subscriptions) {
 		try {
@@ -33,17 +54,32 @@ export async function sendPushToUser(
 					icon: "/icon-192x192.png",
 				}),
 			);
+			await logPush(userId, sub.endpoint, payload.title, "sent", null);
 		} catch (err: unknown) {
 			const statusCode =
 				err && typeof err === "object" && "statusCode" in err
 					? (err as { statusCode: number }).statusCode
 					: null;
+			const errMsg = err instanceof Error ? err.message : String(err);
 			if (statusCode === 410 || statusCode === 404) {
 				await db
 					.delete(pushSubscription)
 					.where(eq(pushSubscription.id, sub.id));
+				await logPush(
+					userId,
+					sub.endpoint,
+					payload.title,
+					"deleted_stale",
+					errMsg,
+				);
 			} else {
-				console.error(`Push failed for subscription ${sub.id}:`, err);
+				await logPush(
+					userId,
+					sub.endpoint,
+					payload.title,
+					`error_${statusCode ?? "unknown"}`,
+					errMsg,
+				);
 			}
 		}
 	}
