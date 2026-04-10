@@ -25,6 +25,7 @@ export interface ActivePrompt {
 export function usePromptOrchestrator() {
 	const { data: session } = useSession();
 	const role = getUserRole(session?.user?.role);
+	const userId = session?.user?.id ?? null;
 
 	const pushSub = usePushSubscription();
 	const install = useInstallPrompt();
@@ -32,13 +33,13 @@ export function usePromptOrchestrator() {
 	// Track dismissed prompts within the session (to hide after dismiss without re-reading localStorage)
 	const [dismissed, setDismissed] = useState<Set<PromptType>>(new Set());
 
-	const visitCountedRef = useRef(false);
+	const visitCountedRef = useRef<string | null>(null);
 
-	// Increment visit count and sync timezone once per session
+	// Increment visit count and sync timezone once per session (per user)
 	useEffect(() => {
-		if (!visitCountedRef.current) {
-			visitCountedRef.current = true;
-			incrementVisitCount();
+		if (userId && visitCountedRef.current !== userId) {
+			visitCountedRef.current = userId;
+			incrementVisitCount(userId);
 
 			// Auto-detect and save user timezone
 			const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -48,7 +49,7 @@ export function usePromptOrchestrator() {
 				);
 			}
 		}
-	}, []);
+	}, [userId]);
 
 	// Compute which prompts to show (pure derivation, no setState)
 	const { activeBanners, activeInline } = useMemo(() => {
@@ -58,7 +59,7 @@ export function usePromptOrchestrator() {
 		};
 		if (!role) return noop;
 
-		const state = getPromptState();
+		const state = getPromptState(userId);
 
 		const pushEligible =
 			pushSub.isSupported && !pushSub.subscription && !pushSub.permissionDenied;
@@ -96,6 +97,7 @@ export function usePromptOrchestrator() {
 		return { activeBanners: newBanners, activeInline: newInline };
 	}, [
 		role,
+		userId,
 		dismissed,
 		pushSub.isSupported,
 		pushSub.subscription,
@@ -105,28 +107,31 @@ export function usePromptOrchestrator() {
 		install.isIOS,
 	]);
 
-	const dismissPrompt = useCallback((type: PromptType) => {
-		recordDismissal(type);
-		setDismissed((prev) => new Set(prev).add(type));
-	}, []);
+	const dismissPrompt = useCallback(
+		(type: PromptType) => {
+			recordDismissal(type, userId);
+			setDismissed((prev) => new Set(prev).add(type));
+		},
+		[userId],
+	);
 
 	const acceptPush = useCallback(async () => {
 		const success = await pushSub.subscribeToPush();
 		if (success) {
-			recordAcceptance("push");
+			recordAcceptance("push", userId);
 			setDismissed((prev) => new Set(prev).add("push"));
 		}
 		return success;
-	}, [pushSub]);
+	}, [pushSub, userId]);
 
 	const acceptInstall = useCallback(async () => {
 		const success = await install.triggerInstall();
 		if (success) {
-			recordAcceptance("install");
+			recordAcceptance("install", userId);
 			setDismissed((prev) => new Set(prev).add("install"));
 		}
 		return success;
-	}, [install]);
+	}, [install, userId]);
 
 	return {
 		activeBanners,

@@ -45,7 +45,15 @@ export function usePushSubscription() {
 			navigator.serviceWorker
 				.register("/sw.js", { scope: "/", updateViaCache: "none" })
 				.then((registration) => registration.pushManager.getSubscription())
-				.then((sub) => setSubscription(sub))
+				.then((sub) => {
+					setSubscription(sub);
+					// Ensure the current user owns this browser subscription
+					// (no-op if already saved for this user)
+					if (sub) {
+						const serialized = JSON.parse(JSON.stringify(sub));
+						subscribeUser(serialized).catch(() => {});
+					}
+				})
 				.catch(() => {});
 		}
 	}, [isSupported]);

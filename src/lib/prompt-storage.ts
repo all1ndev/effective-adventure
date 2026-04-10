@@ -1,4 +1,8 @@
-const STORAGE_KEY = "tc_prompt_state";
+const STORAGE_KEY_PREFIX = "tc_prompt_state";
+
+function storageKey(userId: string | null | undefined): string {
+	return userId ? `${STORAGE_KEY_PREFIX}_${userId}` : STORAGE_KEY_PREFIX;
+}
 
 export interface PromptState {
 	visitCount: number;
@@ -27,9 +31,9 @@ function getDefaultState(): PromptState {
 	};
 }
 
-export function getPromptState(): PromptState {
+export function getPromptState(userId?: string | null): PromptState {
 	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
+		const raw = localStorage.getItem(storageKey(userId));
 		if (!raw) return getDefaultState();
 		return { ...getDefaultState(), ...JSON.parse(raw) };
 	} catch {
@@ -37,44 +41,62 @@ export function getPromptState(): PromptState {
 	}
 }
 
-export function updatePromptState(partial: Partial<PromptState>): PromptState {
-	const current = getPromptState();
+export function updatePromptState(
+	partial: Partial<PromptState>,
+	userId?: string | null,
+): PromptState {
+	const current = getPromptState(userId);
 	const updated = { ...current, ...partial };
 	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+		localStorage.setItem(storageKey(userId), JSON.stringify(updated));
 	} catch {
 		// localStorage full or unavailable
 	}
 	return updated;
 }
 
-export function incrementVisitCount(): PromptState {
-	const state = getPromptState();
-	return updatePromptState({
-		visitCount: state.visitCount + 1,
-		lastVisitAt: new Date().toISOString(),
-	});
+export function incrementVisitCount(userId?: string | null): PromptState {
+	const state = getPromptState(userId);
+	return updatePromptState(
+		{
+			visitCount: state.visitCount + 1,
+			lastVisitAt: new Date().toISOString(),
+		},
+		userId,
+	);
 }
 
-export function recordDismissal(prompt: "push" | "install"): PromptState {
-	const state = getPromptState();
+export function recordDismissal(
+	prompt: "push" | "install",
+	userId?: string | null,
+): PromptState {
+	const state = getPromptState(userId);
 	if (prompt === "push") {
-		return updatePromptState({
-			pushDismissedAt: new Date().toISOString(),
-			pushDismissCount: state.pushDismissCount + 1,
-		});
+		return updatePromptState(
+			{
+				pushDismissedAt: new Date().toISOString(),
+				pushDismissCount: state.pushDismissCount + 1,
+			},
+			userId,
+		);
 	}
-	return updatePromptState({
-		installDismissedAt: new Date().toISOString(),
-		installDismissCount: state.installDismissCount + 1,
-	});
+	return updatePromptState(
+		{
+			installDismissedAt: new Date().toISOString(),
+			installDismissCount: state.installDismissCount + 1,
+		},
+		userId,
+	);
 }
 
-export function recordAcceptance(prompt: "push" | "install"): PromptState {
+export function recordAcceptance(
+	prompt: "push" | "install",
+	userId?: string | null,
+): PromptState {
 	if (prompt === "push") {
-		return updatePromptState({ pushAccepted: true });
+		return updatePromptState({ pushAccepted: true }, userId);
 	}
-	return updatePromptState({ installAccepted: true });
+	return updatePromptState({ installAccepted: true }, userId);
 }
 
 function daysSince(isoDate: string | null): number | null {
