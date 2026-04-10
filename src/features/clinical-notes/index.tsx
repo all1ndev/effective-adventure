@@ -14,6 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { NotesForm } from "./components/notes-form";
 import { NotesList } from "./components/notes-list";
 import { getClinicalNotesByPatientId } from "./actions";
+import { getPatientById } from "@/features/patients/actions";
 import type { ClinicalNote } from "./data/schema";
 
 interface ClinicalNotesProps {
@@ -22,6 +23,7 @@ interface ClinicalNotesProps {
 
 export function ClinicalNotes({ patientId }: ClinicalNotesProps) {
 	const [notes, setNotes] = useState<ClinicalNote[]>([]);
+	const [patientName, setPatientName] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	const fetchData = useCallback(() => {
@@ -36,6 +38,14 @@ export function ClinicalNotes({ patientId }: ClinicalNotesProps) {
 	}, [patientId]);
 
 	useEffect(fetchData, [fetchData]);
+
+	useEffect(() => {
+		getPatientById(patientId)
+			.then((p) => {
+				if (p) setPatientName(`${p.lastName} ${p.firstName}`);
+			})
+			.catch(() => {});
+	}, [patientId]);
 
 	return (
 		<>
@@ -63,7 +73,9 @@ export function ClinicalNotes({ patientId }: ClinicalNotesProps) {
 					</Button>
 				</div>
 				<div>
-					<h2 className="text-2xl font-bold tracking-tight">Note clinice</h2>
+					<h2 className="text-2xl font-bold tracking-tight">
+						Note clinice{patientName ? ` — ${patientName}` : ""}
+					</h2>
 					<p className="text-muted-foreground">
 						Observații clinice structurate per vizită.
 					</p>

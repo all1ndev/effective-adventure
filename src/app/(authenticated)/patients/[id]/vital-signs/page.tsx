@@ -10,6 +10,7 @@ import { RoleGuard } from "@/components/role-guard";
 import { VitalSignsChart } from "@/features/vital-signs/components/vital-signs-chart";
 import { VitalSignsTable } from "@/features/vital-signs/components/vital-signs-table";
 import { getVitalSignsByPatientId } from "@/features/vital-signs/actions";
+import { getPatientById } from "@/features/patients/actions";
 import type { VitalEntry } from "@/features/vital-signs/data/schema";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
@@ -24,6 +25,7 @@ export default function PatientVitalSignsPage({
 }) {
 	const { id } = use(params);
 	const [data, setData] = useState<VitalEntry[]>([]);
+	const [patientName, setPatientName] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
@@ -35,6 +37,14 @@ export default function PatientVitalSignsPage({
 				toast.error("Eroare la încărcarea semnelor vitale.");
 			})
 			.finally(() => setLoading(false));
+	}, [id]);
+
+	useEffect(() => {
+		getPatientById(id)
+			.then((p) => {
+				if (p) setPatientName(`${p.lastName} ${p.firstName}`);
+			})
+			.catch(() => {});
 	}, [id]);
 
 	return (
@@ -63,7 +73,7 @@ export default function PatientVitalSignsPage({
 				</div>
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">
-						Semne vitale — Pacient #{id}
+						Semne vitale{patientName ? ` — ${patientName}` : ""}
 					</h2>
 					<p className="text-muted-foreground">
 						Evoluția semnelor vitale ale pacientului.

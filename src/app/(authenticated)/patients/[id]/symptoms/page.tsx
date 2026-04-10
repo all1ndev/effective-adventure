@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { SymptomsList } from "@/features/symptoms/components/symptoms-list";
 import { getSymptomReportsByPatientId } from "@/features/symptoms/actions";
+import { getPatientById } from "@/features/patients/actions";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Search } from "@/components/search";
@@ -24,6 +25,7 @@ export default function PatientSymptomsPage({
 	const [data, setData] = useState<
 		Awaited<ReturnType<typeof getSymptomReportsByPatientId>>
 	>([]);
+	const [patientName, setPatientName] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
@@ -35,6 +37,14 @@ export default function PatientSymptomsPage({
 				toast.error("Eroare la încărcarea simptomelor.");
 			})
 			.finally(() => setLoading(false));
+	}, [id]);
+
+	useEffect(() => {
+		getPatientById(id)
+			.then((p) => {
+				if (p) setPatientName(`${p.lastName} ${p.firstName}`);
+			})
+			.catch(() => {});
 	}, [id]);
 
 	return (
@@ -63,7 +73,7 @@ export default function PatientSymptomsPage({
 				</div>
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">
-						Simptome — Pacient #{id}
+						Simptome{patientName ? ` — ${patientName}` : ""}
 					</h2>
 					<p className="text-muted-foreground">
 						Rapoarte de simptome ale pacientului.

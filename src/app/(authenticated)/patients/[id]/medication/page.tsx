@@ -15,6 +15,7 @@ import {
 	getMedicationsByPatientId,
 	getMedicationLogsByPatientId,
 } from "@/features/medication/actions";
+import { getPatientById } from "@/features/patients/actions";
 import type {
 	Medication,
 	MedicationLog,
@@ -33,7 +34,16 @@ export default function PatientMedicationPage({
 	const { id } = use(params);
 	const [meds, setMeds] = useState<Medication[]>([]);
 	const [logs, setLogs] = useState<MedicationLog[]>([]);
+	const [patientName, setPatientName] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		getPatientById(id)
+			.then((p) => {
+				if (p) setPatientName(`${p.lastName} ${p.firstName}`);
+			})
+			.catch(() => {});
+	}, [id]);
 
 	const fetchData = useCallback(() => {
 		Promise.all([
@@ -91,7 +101,7 @@ export default function PatientMedicationPage({
 				</div>
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">
-						Medicație — Pacient #{id}
+						Medicație{patientName ? ` — ${patientName}` : ""}
 					</h2>
 					<p className="text-muted-foreground">
 						Gestionați prescripțiile și conformitatea.
