@@ -124,7 +124,7 @@ export function PatientCalendar() {
 									}}
 									modifiersClassNames={{
 										appointment:
-											"[&_button]:bg-primary/15 [&_button]:font-semibold [&_button]:text-foreground dark:[&_button]:bg-primary/25",
+											"[&_button]:bg-primary/15 [&_button]:font-semibold [&_button]:text-foreground dark:[&_button]:bg-primary/25 dark:[&_button[data-selected-single=true]]:text-white",
 									}}
 								/>
 							</CardContent>
