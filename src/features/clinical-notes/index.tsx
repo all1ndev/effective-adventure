@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/components/layout/header";
 import { Main } from "@/components/layout/main";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { NotesForm } from "./components/notes-form";
 import { NotesList } from "./components/notes-list";
@@ -45,8 +48,22 @@ export function ClinicalNotes({ patientId }: ClinicalNotesProps) {
 			</Header>
 
 			<Main className="flex flex-1 flex-col gap-6">
+				<div className="flex items-center gap-2">
+					<Button
+						type="button"
+						variant="ghost"
+						size="sm"
+						asChild
+						className="gap-1"
+					>
+						<Link href={`/patients/${patientId}`}>
+							<ArrowLeft className="h-4 w-4" />
+							Înapoi la pacient
+						</Link>
+					</Button>
+				</div>
 				<div>
-					<h2 className="text-2xl font-bold tracking-tight">Note Clinice</h2>
+					<h2 className="text-2xl font-bold tracking-tight">Note clinice</h2>
 					<p className="text-muted-foreground">
 						Observații clinice structurate per vizită.
 					</p>

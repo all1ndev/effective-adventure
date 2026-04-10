@@ -1,7 +1,10 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { RoleGuard } from "@/components/role-guard";
 import { SymptomsList } from "@/features/symptoms/components/symptoms-list";
@@ -44,6 +47,20 @@ export default function PatientSymptomsPage({
 				</div>
 			</Header>
 			<Main className="flex flex-1 flex-col gap-6">
+				<div className="flex items-center gap-2">
+					<Button
+						type="button"
+						variant="ghost"
+						size="sm"
+						asChild
+						className="gap-1"
+					>
+						<Link href={`/patients/${id}`}>
+							<ArrowLeft className="h-4 w-4" />
+							Înapoi la pacient
+						</Link>
+					</Button>
+				</div>
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">
 						Simptome — Pacient #{id}
