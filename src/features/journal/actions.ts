@@ -15,6 +15,30 @@ const moodLabels: Record<string, string> = {
 	"foarte-rau": "Foarte rău",
 };
 
+async function notifyDoctorOfBadMood(patientUserId: string, mood: string) {
+	if (mood !== "rau" && mood !== "foarte-rau") return;
+
+	const rows = await db
+		.select({
+			firstName: patient.firstName,
+			lastName: patient.lastName,
+			doctorId: patient.doctorId,
+		})
+		.from(patient)
+		.where(eq(patient.userId, patientUserId))
+		.limit(1);
+
+	if (rows.length === 0 || !rows[0].doctorId) return;
+
+	const patientName = `${rows[0].firstName} ${rows[0].lastName}`;
+	const label = moodLabels[mood];
+	const severity = mood === "foarte-rau" ? "CRITIC" : "Atenție";
+	await sendPushToUser(rows[0].doctorId, {
+		title: `[${severity}] Jurnal — ${patientName}`,
+		body: `Pacientul a raportat starea „${label}" în jurnalul de sănătate.`,
+	});
+}
+
 export async function createJournalEntry(values: unknown) {
 	const session = await getSessionOrThrow();
 	const parsed = journalEntryFormSchema.safeParse(values);
@@ -29,27 +53,7 @@ export async function createJournalEntry(values: unknown) {
 		...parsed.data,
 	});
 
-	if (parsed.data.mood === "rau" || parsed.data.mood === "foarte-rau") {
-		const rows = await db
-			.select({
-				firstName: patient.firstName,
-				lastName: patient.lastName,
-				doctorId: patient.doctorId,
-			})
-			.from(patient)
-			.where(eq(patient.userId, session.user.id))
-			.limit(1);
-
-		if (rows.length > 0 && rows[0].doctorId) {
-			const patientName = `${rows[0].firstName} ${rows[0].lastName}`;
-			const label = moodLabels[parsed.data.mood];
-			const severity = parsed.data.mood === "foarte-rau" ? "CRITIC" : "Atenție";
-			await sendPushToUser(rows[0].doctorId, {
-				title: `[${severity}] Jurnal — ${patientName}`,
-				body: `Pacientul a raportat starea „${label}" în jurnalul de sănătate.`,
-			});
-		}
-	}
+	await notifyDoctorOfBadMood(session.user.id, parsed.data.mood);
 
 	await logAudit({
 		userId: session.user.id,
@@ -80,6 +84,16 @@ export async function updateJournalEntry(id: string, values: unknown) {
 		return { error: "Inregistrarea nu a fost gasita." };
 	}
 	await db.update(journalEntry).set(parsed.data).where(eq(journalEntry.id, id));
+
+	// Notify doctor if mood transitioned to bad (not on every edit)
+	const previousMood = existing[0].mood;
+	const newMood = parsed.data.mood;
+	const wasBad = previousMood === "rau" || previousMood === "foarte-rau";
+	const isBad = newMood === "rau" || newMood === "foarte-rau";
+	if (isBad && (!wasBad || previousMood !== newMood)) {
+		await notifyDoctorOfBadMood(session.user.id, newMood);
+	}
+
 	await logAudit({
 		userId: session.user.id,
 		userName: session.user.name,

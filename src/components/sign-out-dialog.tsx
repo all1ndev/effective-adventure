@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
+import { unsubscribeUser } from "@/app/actions/push-notifications";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface SignOutDialogProps {
@@ -11,6 +12,15 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
 	const router = useRouter();
 
 	const handleSignOut = async () => {
+		// Remove push subscription from DB before session is destroyed
+		try {
+			const registration = await navigator.serviceWorker?.getRegistration();
+			const sub = await registration?.pushManager?.getSubscription();
+			if (sub) await sub.unsubscribe();
+			await unsubscribeUser();
+		} catch {
+			// Best-effort — don't block logout if push cleanup fails
+		}
 		await signOut();
 		router.replace("/sign-in");
 	};

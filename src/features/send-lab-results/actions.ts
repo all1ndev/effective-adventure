@@ -11,6 +11,7 @@ import { user } from "@/db/auth-schema";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { logAudit } from "@/lib/audit";
 import { sendPushToUser } from "@/lib/push";
+import { assertDoctorOwnsPatientByUserId } from "@/lib/patient-utils";
 
 export async function getDoctorPatients() {
 	const session = await getSessionOrThrow();
@@ -50,6 +51,12 @@ export async function createLabResultWithPdf(values: {
 	if (!values.patientId || !values.date || !values.pdfFileName) {
 		return { error: "Toate câmpurile sunt obligatorii." };
 	}
+
+	await assertDoctorOwnsPatientByUserId(
+		session.user.role,
+		session.user.id,
+		values.patientId,
+	);
 
 	await db.insert(labResult).values({
 		id: crypto.randomUUID(),
@@ -109,9 +116,20 @@ export async function deleteSentLabResult(id: string) {
 	}
 
 	const [record] = await db
-		.select({ pdfFileName: labResult.pdfFileName })
+		.select({
+			pdfFileName: labResult.pdfFileName,
+			patientId: labResult.patientId,
+		})
 		.from(labResult)
 		.where(eq(labResult.id, id));
+
+	if (!record) throw new Error("Rezultatul nu a fost găsit.");
+
+	await assertDoctorOwnsPatientByUserId(
+		session.user.role,
+		session.user.id,
+		record.patientId,
+	);
 
 	await db.delete(labResult).where(eq(labResult.id, id));
 

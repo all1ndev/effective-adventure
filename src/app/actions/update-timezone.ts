@@ -12,8 +12,9 @@ export async function updateTimezone(timezone: string) {
 	try {
 		Intl.DateTimeFormat(undefined, { timeZone: timezone });
 	} catch {
-		return;
+		return { error: "Fus orar invalid." };
 	}
 
 	await db.update(user).set({ timezone }).where(eq(user.id, session.user.id));
+	return { success: true };
 }

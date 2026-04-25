@@ -36,7 +36,10 @@ export function JournalEditor({ onSuccess }: JournalEditorProps) {
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		if (!selectedMood) return;
+		if (!selectedMood) {
+			toast.error("Selectați o stare emoțională.");
+			return;
+		}
 		startTransition(async () => {
 			const result = await createJournalEntry({ mood: selectedMood, content });
 			if (result.error) {

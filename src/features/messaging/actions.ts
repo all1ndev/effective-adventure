@@ -138,7 +138,33 @@ export async function getConversations() {
 }
 
 export async function getMessages(conversationId: string) {
-	await getSessionOrThrow();
+	const session = await getSessionOrThrow();
+
+	// Verify user has access to this conversation
+	const conv = await db
+		.select({ patientId: conversation.patientId })
+		.from(conversation)
+		.where(eq(conversation.id, conversationId))
+		.limit(1);
+
+	if (!conv[0]) throw new Error("Conversația nu a fost găsită.");
+
+	if (session.user.role === "user") {
+		if (conv[0].patientId !== session.user.id) {
+			throw new Error("Neautorizat");
+		}
+	} else if (session.user.role === "doctor") {
+		const patientRecord = await db
+			.select({ doctorId: patient.doctorId })
+			.from(patient)
+			.where(eq(patient.userId, conv[0].patientId))
+			.limit(1);
+		if (patientRecord[0]?.doctorId !== session.user.id) {
+			throw new Error("Neautorizat");
+		}
+	}
+	// admin can read all conversations
+
 	return db
 		.select()
 		.from(message)
@@ -151,6 +177,30 @@ export async function sendMessage(conversationId: string, body: string) {
 
 	if (session.user.role === "admin") {
 		throw new Error("Adminul poate doar vizualiza conversațiile.");
+	}
+
+	// Verify user has access to this conversation
+	const conv = await db
+		.select({ patientId: conversation.patientId })
+		.from(conversation)
+		.where(eq(conversation.id, conversationId))
+		.limit(1);
+
+	if (!conv[0]) throw new Error("Conversația nu a fost găsită.");
+
+	if (session.user.role === "user") {
+		if (conv[0].patientId !== session.user.id) {
+			throw new Error("Neautorizat");
+		}
+	} else if (session.user.role === "doctor") {
+		const patientRecord = await db
+			.select({ doctorId: patient.doctorId })
+			.from(patient)
+			.where(eq(patient.userId, conv[0].patientId))
+			.limit(1);
+		if (patientRecord[0]?.doctorId !== session.user.id) {
+			throw new Error("Neautorizat");
+		}
 	}
 
 	const senderName = session.user.name;
@@ -181,14 +231,8 @@ export async function sendMessage(conversationId: string, body: string) {
 		description: `A trimis un mesaj`,
 	});
 
-	// Send push notification to the other party
-	const conv = await db
-		.select({ patientId: conversation.patientId })
-		.from(conversation)
-		.where(eq(conversation.id, conversationId))
-		.limit(1);
-
-	if (conv.length > 0) {
+	// Send push notification to the other party (reuse conv from ownership check above)
+	{
 		const { sendPushToUser } = await import("@/lib/push");
 
 		if (session.user.role === "admin" || session.user.role === "doctor") {

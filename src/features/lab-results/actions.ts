@@ -5,7 +5,10 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { labResult } from "@/db/lab-result-schema";
-import { resolvePatientUserId } from "@/lib/patient-utils";
+import {
+	resolvePatientUserId,
+	assertDoctorOwnsPatient,
+} from "@/lib/patient-utils";
 
 export async function getLabResults() {
 	const session = await getSessionOrThrow();
@@ -21,6 +24,7 @@ export async function getLabResultsByPatientId(patientId: string) {
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, patientId);
 	const userId = await resolvePatientUserId(patientId);
 	return db
 		.select()

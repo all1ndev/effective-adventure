@@ -17,6 +17,7 @@ import { revalidatePath } from "next/cache";
 import { randomUUID, randomBytes } from "crypto";
 import { sendCredentialsEmail } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
+import { assertDoctorOwnsPatient } from "@/lib/patient-utils";
 
 export async function getAdmins() {
 	const session = await getSessionOrThrow();
@@ -236,6 +237,7 @@ export async function updateFullPatient(id: string, values: unknown) {
 	if (!isMedicRole(session.user.role)) {
 		return { success: false, error: "Neautorizat" };
 	}
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, id);
 
 	const parsed = editPatientFormSchema.safeParse(values);
 	if (!parsed.success) {
@@ -326,6 +328,7 @@ export async function updatePatient(id: string, values: unknown) {
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, id);
 
 	const parsed = patientFormSchema.safeParse(values);
 	if (!parsed.success) {
@@ -348,6 +351,7 @@ export async function deletePatient(id: string) {
 	if (!isMedicRole(session.user.role)) {
 		return { success: false, error: "Neautorizat" };
 	}
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, id);
 
 	try {
 		// Find the patient's userId first
@@ -363,14 +367,14 @@ export async function deletePatient(id: string) {
 
 		const { userId } = patientRecord[0];
 
-		// Delete the patient profile
-		await db.delete(patient).where(eq(patient.id, id));
-
-		// Delete the user account if it exists (cascades sessions, accounts, etc.)
-		if (userId) {
-			const { user } = await import("@/db/auth-schema");
-			await db.delete(user).where(eq(user.id, userId));
-		}
+		// Delete patient + user atomically
+		await db.transaction(async (tx) => {
+			await tx.delete(patient).where(eq(patient.id, id));
+			if (userId) {
+				const { user } = await import("@/db/auth-schema");
+				await tx.delete(user).where(eq(user.id, userId));
+			}
+		});
 
 		await logAudit({
 			userId: session.user.id,
@@ -396,6 +400,11 @@ export async function deletePatients(ids: string[]) {
 	const session = await getSessionOrThrow();
 	if (!isMedicRole(session.user.role)) {
 		return { success: false, error: "Neautorizat" };
+	}
+
+	// Verify ownership of all patients before deleting any
+	for (const id of ids) {
+		await assertDoctorOwnsPatient(session.user.role, session.user.id, id);
 	}
 
 	try {

@@ -21,3 +21,52 @@ export async function resolvePatientUserId(patientId: string): Promise<string> {
 	}
 	return userId;
 }
+
+/**
+ * Verifies that a doctor owns the patient (by patient table ID).
+ * Admins are always allowed. Throws if unauthorized.
+ */
+export async function assertDoctorOwnsPatient(
+	role: string | null | undefined,
+	doctorUserId: string | null | undefined,
+	patientTableId: string,
+): Promise<void> {
+	if (role === "admin") return;
+
+	const record = await db
+		.select({ doctorId: patient.doctorId })
+		.from(patient)
+		.where(eq(patient.id, patientTableId))
+		.limit(1);
+
+	if (!record[0]) {
+		throw new Error("Pacientul nu a fost găsit.");
+	}
+	if (record[0].doctorId !== doctorUserId) {
+		throw new Error("Neautorizat");
+	}
+}
+
+/**
+ * Same as assertDoctorOwnsPatient but looks up by user ID instead of patient table ID.
+ */
+export async function assertDoctorOwnsPatientByUserId(
+	role: string | null | undefined,
+	doctorUserId: string | null | undefined,
+	patientUserId: string,
+): Promise<void> {
+	if (role === "admin") return;
+
+	const record = await db
+		.select({ doctorId: patient.doctorId })
+		.from(patient)
+		.where(eq(patient.userId, patientUserId))
+		.limit(1);
+
+	if (!record[0]) {
+		throw new Error("Pacientul nu a fost găsit.");
+	}
+	if (record[0].doctorId !== doctorUserId) {
+		throw new Error("Neautorizat");
+	}
+}

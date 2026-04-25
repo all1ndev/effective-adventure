@@ -6,7 +6,10 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { symptomReport } from "@/db/symptoms-schema";
-import { resolvePatientUserId } from "@/lib/patient-utils";
+import {
+	resolvePatientUserId,
+	assertDoctorOwnsPatient,
+} from "@/lib/patient-utils";
 import { symptomReportFormSchema } from "./data/schema";
 import { generateSymptomAlerts } from "@/features/alerts/generate-alerts";
 import { logAudit } from "@/lib/audit";
@@ -139,6 +142,8 @@ export async function getSymptomReportsByPatientId(patientId: string) {
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
+
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, patientId);
 
 	const userId = await resolvePatientUserId(patientId);
 

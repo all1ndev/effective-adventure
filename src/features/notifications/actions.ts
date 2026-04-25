@@ -248,6 +248,11 @@ export async function deleteNotification(notificationId: string) {
 		return { error: "Notificarea nu a fost găsită." };
 	}
 
+	// Doctors can only delete their own notifications
+	if (session.user.role !== "admin" && target.createdBy !== session.user.id) {
+		return { error: "Neautorizat" };
+	}
+
 	const reads = await db
 		.select()
 		.from(notificationRead)
@@ -282,6 +287,11 @@ export async function deleteNotification(notificationId: string) {
 
 export async function getNotificationsForPatient() {
 	const session = await getSessionOrThrow();
+
+	if (isMedicRole(session.user.role)) {
+		return [];
+	}
+
 	const userId = session.user.id;
 
 	const allNotifications = await db

@@ -7,7 +7,10 @@ import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { medication, medicationLog } from "@/db/medication-schema";
 import { medicationReminder } from "@/db/medication-reminder-schema";
-import { resolvePatientUserId } from "@/lib/patient-utils";
+import {
+	resolvePatientUserId,
+	assertDoctorOwnsPatient,
+} from "@/lib/patient-utils";
 import {
 	medicationFormSchema,
 	medicationLogFormSchema,
@@ -153,6 +156,8 @@ export async function createMedicationForPatient(
 		throw new Error("Neautorizat");
 	}
 
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, patientId);
+
 	const parsed = medicationFormSchema.safeParse(values);
 
 	if (!parsed.success) {
@@ -239,6 +244,8 @@ export async function updateMedicationForPatient(
 		throw new Error("Neautorizat");
 	}
 
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, patientId);
+
 	const parsed = medicationFormSchema.safeParse(values);
 
 	if (!parsed.success) {
@@ -290,6 +297,8 @@ export async function deleteMedicationForPatient(
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
+
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, patientId);
 
 	const userId = await resolvePatientUserId(patientId);
 
@@ -546,6 +555,8 @@ export async function getMedicationRemindersForPatient(
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
+
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, patientId);
 
 	const userId = await resolvePatientUserId(patientId);
 

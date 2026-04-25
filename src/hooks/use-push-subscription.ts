@@ -75,9 +75,9 @@ export function usePushSubscription() {
 					process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
 				),
 			});
-			setSubscription(sub);
 			const serializedSub = JSON.parse(JSON.stringify(sub));
 			await subscribeUser(serializedSub);
+			setSubscription(sub);
 			return true;
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : JSON.stringify(err);
@@ -89,9 +89,13 @@ export function usePushSubscription() {
 	}
 
 	async function unsubscribeFromPush() {
-		await subscription?.unsubscribe();
-		setSubscription(null);
-		await unsubscribeUser();
+		try {
+			await unsubscribeUser();
+			await subscription?.unsubscribe();
+			setSubscription(null);
+		} catch {
+			setError("Eroare la dezabonare.");
+		}
 	}
 
 	return {

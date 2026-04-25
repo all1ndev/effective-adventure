@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { alert } from "@/db/alert-schema";
 import { patient } from "@/db/patient-schema";
 import { logAudit } from "@/lib/audit";
+import { assertDoctorOwnsPatientByUserId } from "@/lib/patient-utils";
 
 export async function getAlerts() {
 	const session = await getSessionOrThrow();
@@ -42,6 +43,20 @@ export async function dismissAlert(id: string) {
 	if (!isMedicRole(session.user.role)) {
 		throw new Error("Neautorizat");
 	}
+
+	// Verify doctor owns the patient this alert belongs to
+	const alertRecord = await db
+		.select({ patientId: alert.patientId })
+		.from(alert)
+		.where(eq(alert.id, id))
+		.limit(1);
+	if (!alertRecord[0]) throw new Error("Alerta nu a fost găsită.");
+	await assertDoctorOwnsPatientByUserId(
+		session.user.role,
+		session.user.id,
+		alertRecord[0].patientId,
+	);
+
 	await db.update(alert).set({ dismissed: true }).where(eq(alert.id, id));
 
 	await logAudit({

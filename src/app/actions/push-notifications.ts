@@ -28,6 +28,12 @@ export async function subscribeUser(sub: PushSubscriptionData) {
 		return { success: true };
 	}
 
+	// Remove any stale records for this endpoint from other users
+	// (e.g., previous user logged out without cleanup)
+	await db
+		.delete(pushSubscription)
+		.where(eq(pushSubscription.endpoint, sub.endpoint));
+
 	await db.insert(pushSubscription).values({
 		id: crypto.randomUUID(),
 		userId: session.user.id,

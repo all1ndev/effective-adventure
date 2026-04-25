@@ -6,7 +6,10 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
 import { vitalSign } from "@/db/vital-signs-schema";
-import { resolvePatientUserId } from "@/lib/patient-utils";
+import {
+	resolvePatientUserId,
+	assertDoctorOwnsPatient,
+} from "@/lib/patient-utils";
 import { vitalEntryFormSchema } from "./data/schema";
 import {
 	computeVitalStatus,
@@ -141,6 +144,7 @@ export async function getVitalSignsByPatientId(patientId: string) {
 		throw new Error("Neautorizat");
 	}
 
+	await assertDoctorOwnsPatient(session.user.role, session.user.id, patientId);
 	const userId = await resolvePatientUserId(patientId);
 
 	return db
