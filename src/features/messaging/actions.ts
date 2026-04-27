@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, desc, asc, inArray } from "drizzle-orm";
+import { eq, desc, asc, inArray, and, ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSessionOrThrow } from "@/lib/auth-utils";
 import { db } from "@/db";
@@ -165,6 +165,24 @@ export async function getMessages(conversationId: string) {
 	}
 	// admin can read all conversations
 
+	// Mark incoming messages as read (skip admin — read-only viewer)
+	if (session.user.role !== "admin") {
+		await db
+			.update(message)
+			.set({ read: true })
+			.where(
+				and(
+					eq(message.conversationId, conversationId),
+					ne(message.senderId, session.user.id),
+					eq(message.read, false),
+				),
+			);
+		await db
+			.update(conversation)
+			.set({ unreadCount: 0 })
+			.where(eq(conversation.id, conversationId));
+	}
+
 	return db
 		.select()
 		.from(message)
@@ -211,7 +229,7 @@ export async function sendMessage(conversationId: string, body: string) {
 		senderId: session.user.id,
 		senderName,
 		body,
-		read: true,
+		read: false,
 	};
 	await db.insert(message).values(newMsg);
 	await db
@@ -219,6 +237,7 @@ export async function sendMessage(conversationId: string, body: string) {
 		.set({
 			lastMessage: body,
 			lastMessageAt: new Date(),
+			unreadCount: sql`${conversation.unreadCount} + 1`,
 		})
 		.where(eq(conversation.id, conversationId));
 	await logAudit({

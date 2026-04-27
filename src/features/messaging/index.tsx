@@ -78,7 +78,7 @@ export function Messaging() {
 				toast.error("Eroare la încărcarea mesageriei.");
 			})
 			.finally(() => setLoading(false));
-	}, []);  
+	}, []);
 
 	// Poll active conversation messages every 3 seconds
 	useEffect(() => {
@@ -234,6 +234,8 @@ export function Messaging() {
 											<MessageThread
 												messages={threadMessages}
 												currentUserId={currentUserId}
+												patientId={activeConv.patientId}
+												viewerRole={currentUserRole}
 											/>
 										</div>
 									</div>

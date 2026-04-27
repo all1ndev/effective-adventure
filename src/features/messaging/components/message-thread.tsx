@@ -10,16 +10,23 @@ interface MessageItem {
 interface MessageThreadProps {
 	messages: MessageItem[];
 	currentUserId?: string;
+	patientId?: string;
+	viewerRole?: string;
 }
 
 export function MessageThread({
 	messages,
 	currentUserId = "",
+	patientId = "",
+	viewerRole = "",
 }: MessageThreadProps) {
 	return (
 		<div className="flex flex-col gap-3 p-4">
 			{messages.map((msg) => {
-				const isOwn = msg.senderId === currentUserId;
+				const isOwn =
+					viewerRole === "admin"
+						? msg.senderId !== patientId
+						: msg.senderId === currentUserId;
 				return (
 					<div
 						key={msg.id}

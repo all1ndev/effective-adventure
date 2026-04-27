@@ -395,10 +395,17 @@ export async function getSentNotifications() {
 		throw new Error("Neautorizat");
 	}
 
-	const notifications = await db
-		.select()
-		.from(notification)
-		.orderBy(desc(notification.createdAt));
+	const notifications =
+		session.user.role === "admin"
+			? await db
+					.select()
+					.from(notification)
+					.orderBy(desc(notification.createdAt))
+			: await db
+					.select()
+					.from(notification)
+					.where(eq(notification.createdBy, session.user.id))
+					.orderBy(desc(notification.createdAt));
 
 	const allReads = await db.select().from(notificationRead);
 
