@@ -1172,9 +1172,9 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 
 						<Card>
 							<CardHeader>
-								<CardTitle>Checklist inițială</CardTitle>
+								<CardTitle>Ghid completare fișă</CardTitle>
 								<CardDescription>
-									Asigură-te că toate secțiunile formularului sunt completate.
+									Secțiunile formularului și prioritatea fiecăreia.
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-3 text-sm">
