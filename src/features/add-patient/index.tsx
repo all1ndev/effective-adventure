@@ -1172,22 +1172,36 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 
 						<Card>
 							<CardHeader>
-								<CardTitle>Checklist initiala</CardTitle>
+								<CardTitle>Checklist inițială</CardTitle>
 								<CardDescription>
-									Asigura-te ca toate variabilele sunt completate.
+									Asigură-te că toate secțiunile formularului sunt completate.
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-3 text-sm">
-								<div className="flex items-center justify-between">
-									<span>Profil pacient (ID, varsta, sex)</span>
+								<div className="flex items-center justify-between gap-2">
+									<span>Conturi (telefon, email, medic responsabil)</span>
 									<Badge variant="outline">Obligatoriu</Badge>
 								</div>
-								<div className="flex items-center justify-between">
-									<span>Transplant hepatic + donator</span>
+								<div className="flex items-center justify-between gap-2">
+									<span>Profil pacient (nume, prenume, ID)</span>
+									<Badge variant="outline">Obligatoriu</Badge>
+								</div>
+								<div className="flex items-center justify-between gap-2">
+									<span>
+										Date antropometrice (vârstă, sex, greutate, înălțime)
+									</span>
+									<Badge variant="outline">Recomandat</Badge>
+								</div>
+								<div className="flex items-center justify-between gap-2">
+									<span>Transplant hepatic (dată, etiologie, donator)</span>
 									<Badge variant="outline">Critic</Badge>
 								</div>
-								<div className="flex items-center justify-between">
-									<span>Schema terapeutică (medicație)</span>
+								<div className="flex items-center justify-between gap-2">
+									<span>Istoric rejet și complicații</span>
+									<Badge variant="outline">Opțional</Badge>
+								</div>
+								<div className="flex items-center justify-between gap-2">
+									<span>Schemă terapeutică (medicație)</span>
 									<Badge variant="outline">Recomandat</Badge>
 								</div>
 							</CardContent>
