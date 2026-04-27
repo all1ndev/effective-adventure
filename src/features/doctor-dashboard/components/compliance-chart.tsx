@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
 	BarChart,
 	Bar,
@@ -25,10 +26,12 @@ interface ComplianceChartProps {
 }
 
 export function ComplianceChart({ patients }: ComplianceChartProps) {
+	const router = useRouter();
 	const chartData = patients
 		.filter((p) => p.status === "activ")
 		.map((p) => ({
-			name: p.name.split(" ")[0],
+			id: p.id,
+			name: p.name,
 			rate: p.complianceRate,
 		}));
 
@@ -36,18 +39,21 @@ export function ComplianceChart({ patients }: ComplianceChartProps) {
 		<Card>
 			<CardHeader>
 				<CardTitle className="text-base">
-					Rata de conformitate medicatie
+					Rata de conformitate medicație
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<ResponsiveContainer width="100%" height={200}>
-					<BarChart data={chartData} barSize={32}>
+				<ResponsiveContainer width="100%" height={240}>
+					<BarChart data={chartData} barSize={32} margin={{ bottom: 40 }}>
 						<CartesianGrid strokeDasharray="3 3" className="stroke-border" />
 						<XAxis
 							dataKey="name"
 							fontSize={12}
 							tickLine={false}
 							axisLine={false}
+							interval={0}
+							angle={-25}
+							textAnchor="end"
 						/>
 						<YAxis
 							fontSize={12}
@@ -58,7 +64,15 @@ export function ComplianceChart({ patients }: ComplianceChartProps) {
 						/>
 						<Tooltip formatter={(v) => [`${v}%`, "Conformitate"]} />
 						<ReferenceLine y={90} stroke="#22c55e" strokeDasharray="4 4" />
-						<Bar dataKey="rate" radius={[4, 4, 0, 0]}>
+						<Bar
+							dataKey="rate"
+							radius={[4, 4, 0, 0]}
+							cursor="pointer"
+							onClick={(data) => {
+								const id = (data as { id?: string }).id;
+								if (id) router.push(`/patients/${id}`);
+							}}
+						>
 							{chartData.map((entry, index) => (
 								<Cell
 									key={index}
