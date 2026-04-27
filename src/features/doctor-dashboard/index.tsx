@@ -87,11 +87,9 @@ export function DoctorDashboard() {
 								</div>
 							</CardContent>
 						</Card>
-						<UpcomingAppointmentsCard
-							appointments={data.upcomingAppointments}
-						/>
+						<AlertSummaryWidget alerts={data.alerts} />
 					</div>
-					<AlertSummaryWidget alerts={data.alerts} />
+					<UpcomingAppointmentsCard appointments={data.upcomingAppointments} />
 					<RecentConversationsCard conversations={data.recentConversations} />
 				</div>
 
