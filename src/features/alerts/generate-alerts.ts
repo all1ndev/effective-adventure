@@ -2,7 +2,6 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { alert } from "@/db/alert-schema";
 import { patient } from "@/db/patient-schema";
-import type { TestValue } from "@/db/lab-result-schema";
 import { sendPushToUser } from "@/lib/push";
 
 type PatientInfo = { name: string; doctorId: string | null };
@@ -37,6 +36,7 @@ async function insertAlert(
 	type: "vital" | "simptom" | "laborator" | "medicatie",
 	severity: "critical" | "warning" | "info",
 	message: string,
+	notify: boolean = severity === "critical" || severity === "warning",
 ) {
 	await db.insert(alert).values({
 		id: crypto.randomUUID(),
@@ -47,7 +47,7 @@ async function insertAlert(
 		message,
 	});
 
-	if (doctorId && (severity === "critical" || severity === "warning")) {
+	if (notify && doctorId) {
 		await sendPushToUser(doctorId, {
 			title: `[${severityLabels[severity]}] ${patientName}`,
 			body: message,
@@ -218,6 +218,7 @@ export async function generateSymptomAlerts(
 		"simptom",
 		alertSeverity,
 		`Simptome ${severityLabel} raportate: ${data.symptoms.join(", ")}`,
+		alertSeverity === "critical",
 	);
 }
 
@@ -242,6 +243,7 @@ export async function generateMedicationAlerts(
 			"medicatie",
 			"warning",
 			`Doză omisă: ${data.medicationName}`,
+			false,
 		);
 	} else if (data.status === "intarziat") {
 		await insertAlert(
@@ -253,69 +255,4 @@ export async function generateMedicationAlerts(
 			`Doză întârziată: ${data.medicationName}`,
 		);
 	}
-}
-
-// --- Lab result alerts ---
-
-export async function generateLabResultAlerts(
-	patientId: string,
-	tests: TestValue[],
-) {
-	const { name, doctorId } = await getPatientInfo(patientId);
-	const alerts: Promise<void>[] = [];
-
-	for (const test of tests) {
-		const deviation =
-			test.value < test.refMin
-				? test.refMin > 0
-					? ((test.refMin - test.value) / test.refMin) * 100
-					: 100
-				: test.value > test.refMax
-					? test.refMax > 0
-						? ((test.value - test.refMax) / test.refMax) * 100
-						: 100
-					: 0;
-
-		if (deviation === 0) continue;
-
-		const direction = test.value < test.refMin ? "sub" : "peste";
-		const refRange = `${test.refMin}–${test.refMax} ${test.unit}`;
-
-		if (deviation > 50) {
-			alerts.push(
-				insertAlert(
-					patientId,
-					name,
-					doctorId,
-					"laborator",
-					"critical",
-					`${test.name}: ${test.value} ${test.unit} — mult ${direction} intervalul de referință (${refRange})`,
-				),
-			);
-		} else if (deviation > 20) {
-			alerts.push(
-				insertAlert(
-					patientId,
-					name,
-					doctorId,
-					"laborator",
-					"warning",
-					`${test.name}: ${test.value} ${test.unit} — ${direction} intervalul de referință (${refRange})`,
-				),
-			);
-		} else {
-			alerts.push(
-				insertAlert(
-					patientId,
-					name,
-					doctorId,
-					"laborator",
-					"info",
-					`${test.name}: ${test.value} ${test.unit} — ușor ${direction} referință (${refRange})`,
-				),
-			);
-		}
-	}
-
-	await Promise.all(alerts);
 }
