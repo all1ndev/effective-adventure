@@ -31,6 +31,7 @@ export function Messaging() {
 	const [currentUserId, setCurrentUserId] = useState<string>("");
 	const [currentUserRole, setCurrentUserRole] = useState<string>("");
 	const [loading, setLoading] = useState(true);
+	const [threadLoading, setThreadLoading] = useState(false);
 	const activeIdRef = useRef("");
 	const threadRef = useRef<HTMLDivElement>(null);
 	const lastMsgCountRef = useRef(0);
@@ -71,6 +72,7 @@ export function Messaging() {
 				if (firstActiveId && !skipAutoSelect) {
 					setActiveId(firstActiveId);
 					activeIdRef.current = firstActiveId;
+					setThreadLoading(true);
 					if (userRole !== "admin") {
 						setConversations((prev) =>
 							prev.map((c) =>
@@ -78,7 +80,9 @@ export function Messaging() {
 							),
 						);
 					}
-					return getMessages(firstActiveId).then(setThreadMessages);
+					return getMessages(firstActiveId)
+						.then(setThreadMessages)
+						.finally(() => setThreadLoading(false));
 				}
 			})
 			.catch(() => {
@@ -114,14 +118,19 @@ export function Messaging() {
 			setActiveId(id);
 			activeIdRef.current = id;
 			setThreadMessages([]);
+			setThreadLoading(true);
 			if (currentUserRole !== "admin") {
 				setConversations((prev) =>
 					prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)),
 				);
 			}
-			getMessages(id).then((msgs) => {
-				if (activeIdRef.current === id) setThreadMessages(msgs);
-			});
+			getMessages(id)
+				.then((msgs) => {
+					if (activeIdRef.current === id) setThreadMessages(msgs);
+				})
+				.finally(() => {
+					if (activeIdRef.current === id) setThreadLoading(false);
+				});
 		},
 		[currentUserRole],
 	);
@@ -250,12 +259,18 @@ export function Messaging() {
 										ref={threadRef}
 										className="min-h-0 flex-1 overflow-y-auto"
 									>
-										<MessageThread
-											messages={threadMessages}
-											currentUserId={currentUserId}
-											patientId={activeConv.patientId}
-											viewerRole={currentUserRole}
-										/>
+										{threadLoading ? (
+											<div className="flex h-full items-center justify-center">
+												<Spinner className="size-5" />
+											</div>
+										) : (
+											<MessageThread
+												messages={threadMessages}
+												currentUserId={currentUserId}
+												patientId={activeConv.patientId}
+												viewerRole={currentUserRole}
+											/>
+										)}
 									</div>
 									{currentUserRole !== "admin" && (
 										<MessageInput onSend={handleSend} />
