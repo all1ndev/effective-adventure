@@ -103,7 +103,7 @@ const patientFormSchema = z.object({
 	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	patientEmail: z
 		.string()
-		.email("Adresa de email invalida.")
+		.email("Adresa de email invalidă.")
 		.min(1, "Câmpul este obligatoriu."),
 	doctorAccount: z.string().min(1, "Câmpul este obligatoriu."),
 });
@@ -144,7 +144,7 @@ const REQUIRED_FIELD_LABELS: Record<string, string> = {
 	patientEmail: "Email pacient",
 	doctorAccount: "Medic responsabil",
 	sex: "Sex",
-	preferredLanguage: "Limba preferata",
+	preferredLanguage: "Limba preferată",
 	etiology: "Etiologia bolii hepatice",
 	donorType: "Tip donator",
 };
@@ -239,12 +239,12 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 			const result = await addPatientWithUser(data);
 
 			if (!result.success) {
-				setSubmitError(result.error ?? "Eroare necunoscuta");
+				setSubmitError(result.error ?? "Eroare necunoscută");
 				toast.error(result.error ?? "Eroare la salvarea pacientului");
 				return;
 			}
 
-			toast.success("Pacientul a fost adaugat cu succes!");
+			toast.success("Pacientul a fost adăugat cu succes!");
 			form.reset(defaultValues);
 			getRecentPatients()
 				.then(setRecentPatients)
@@ -254,7 +254,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 
 	function onInvalid() {
 		setSubmitError(null);
-		toast.error("Completati toate campurile obligatorii inainte de salvare.");
+		toast.error("Completați toate câmpurile obligatorii înainte de salvare.");
 	}
 
 	return (
@@ -281,15 +281,15 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 				<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
 					<Card>
 						<CardHeader>
-							<CardTitle>Fisa initiala pacient</CardTitle>
+							<CardTitle>Fișă inițială pacient</CardTitle>
 						</CardHeader>
 						<CardContent>
 							{hasValidationErrors && (
 								<Alert variant="destructive" className="mb-6">
 									<AlertCircle className="h-4 w-4" />
-									<AlertTitle>Campuri obligatorii necompletate</AlertTitle>
+									<AlertTitle>Câmpuri obligatorii necompletate</AlertTitle>
 									<AlertDescription>
-										<p>Urmatoarele campuri obligatorii trebuie completate:</p>
+										<p>Următoarele câmpuri obligatorii trebuie completate:</p>
 										<ul className="mt-2 list-disc pl-4">
 											{missingRequiredFields.map((label) => (
 												<li key={label} className="font-medium">
@@ -360,7 +360,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 														>
 															<FormControl>
 																<SelectTrigger>
-																	<SelectValue placeholder="Selecteaza medicul" />
+																	<SelectValue placeholder="Selectează medicul" />
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
@@ -476,7 +476,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 														</FormLabel>
 														<FormControl>
 															<Input
-																placeholder="Cod intern / initiale"
+																placeholder="Cod intern / inițiale"
 																className={
 																	formErrors.patientId
 																		? "border-destructive"
@@ -494,7 +494,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="age"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Varsta</FormLabel>
+														<FormLabel>Vârsta</FormLabel>
 														<FormControl>
 															<Input
 																type="number"
@@ -525,7 +525,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 														>
 															<FormControl>
 																<SelectTrigger>
-																	<SelectValue placeholder="Selecteaza" />
+																	<SelectValue placeholder="Selectează" />
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
@@ -573,7 +573,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="heightCm"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Inaltime</FormLabel>
+														<FormLabel>Înălțime</FormLabel>
 														<FormControl>
 															<Input
 																type="number"
@@ -615,9 +615,9 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="nationality"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Nationalitate</FormLabel>
+														<FormLabel>Naționalitate</FormLabel>
 														<FormControl>
-															<Input placeholder="Ex: romana" {...field} />
+															<Input placeholder="Ex: română" {...field} />
 														</FormControl>
 														<FormMessage />
 													</FormItem>
@@ -628,22 +628,22 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												name="preferredLanguage"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Limba preferata</FormLabel>
+														<FormLabel>Limba preferată</FormLabel>
 														<Select
 															onValueChange={field.onChange}
 															value={field.value}
 														>
 															<FormControl>
 																<SelectTrigger>
-																	<SelectValue placeholder="Selecteaza" />
+																	<SelectValue placeholder="Selectează" />
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="ro">Romana</SelectItem>
-																<SelectItem value="en">Engleza</SelectItem>
-																<SelectItem value="it">Italiana</SelectItem>
-																<SelectItem value="fr">Franceza</SelectItem>
-																<SelectItem value="de">Germana</SelectItem>
+																<SelectItem value="ro">Română</SelectItem>
+																<SelectItem value="en">Engleză</SelectItem>
+																<SelectItem value="it">Italiană</SelectItem>
+																<SelectItem value="fr">Franceză</SelectItem>
+																<SelectItem value="de">Germană</SelectItem>
 															</SelectContent>
 														</Select>
 														<FormMessage />
@@ -685,7 +685,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 														>
 															<FormControl>
 																<SelectTrigger>
-																	<SelectValue placeholder="Selecteaza" />
+																	<SelectValue placeholder="Selectează" />
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
@@ -713,7 +713,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 															<FormLabel>Etiologie - alte detalii</FormLabel>
 															<FormControl>
 																<Input
-																	placeholder="Specificati etiologia"
+																	placeholder="Specificați etiologia"
 																	{...field}
 																/>
 															</FormControl>
@@ -770,7 +770,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 														>
 															<FormControl>
 																<SelectTrigger>
-																	<SelectValue placeholder="Selecteaza" />
+																	<SelectValue placeholder="Selectează" />
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
@@ -797,7 +797,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 														>
 															<FormControl>
 																<SelectTrigger>
-																	<SelectValue placeholder="Selecteaza" />
+																	<SelectValue placeholder="Selectează" />
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
@@ -820,9 +820,9 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 												render={({ field }) => (
 													<FormItem className="flex items-center justify-between rounded-lg border p-4">
 														<div>
-															<FormLabel>Rejet in antecedente</FormLabel>
+															<FormLabel>Rejet în antecedente</FormLabel>
 															<FormDescription>
-																Indicati daca au existat episoade de rejet.
+																Indicați dacă au existat episoade de rejet.
 															</FormDescription>
 														</div>
 														<FormControl>
@@ -862,7 +862,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 															>
 																<FormControl>
 																	<SelectTrigger>
-																		<SelectValue placeholder="Selecteaza" />
+																		<SelectValue placeholder="Selectează" />
 																	</SelectTrigger>
 																</FormControl>
 																<SelectContent>
@@ -881,10 +881,10 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 											name="majorComplications"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Complicatii majore post-LT</FormLabel>
+													<FormLabel>Complicații majore post-LT</FormLabel>
 													<FormControl>
 														<Textarea
-															placeholder="Ex: tromboza artera hepatica, stenoza biliara, infectii severe"
+															placeholder="Ex: tromboză arteră hepatică, stenoză biliară, infecții severe"
 															className="min-h-[100px]"
 															{...field}
 														/>
@@ -1095,7 +1095,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 
 									<div className="flex flex-wrap gap-3">
 										<Button type="submit" disabled={isPending}>
-											{isPending ? "Se salveaza..." : "Salveaza pacient"}
+											{isPending ? "Se salvează..." : "Salvează pacient"}
 										</Button>
 										<Button
 											type="button"
@@ -1106,7 +1106,7 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 											}}
 											disabled={isPending}
 										>
-											Reseteaza formularul
+											Resetează formularul
 										</Button>
 									</div>
 								</form>
@@ -1117,9 +1117,9 @@ export function DoctorPatients({ admins }: { admins: Admin[] }) {
 					<div className="space-y-6">
 						<Card>
 							<CardHeader>
-								<CardTitle>Pacienti recenti</CardTitle>
+								<CardTitle>Pacienți recenți</CardTitle>
 								<CardDescription>
-									Ultimii pacienti adaugati de echipa medicala.
+									Ultimii pacienți adăugați de echipa medicală.
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">

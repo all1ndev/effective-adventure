@@ -81,7 +81,7 @@ export async function updateJournalEntry(id: string, values: unknown) {
 		)
 		.limit(1);
 	if (existing.length === 0) {
-		return { error: "Inregistrarea nu a fost gasita." };
+		return { error: "Înregistrarea nu a fost găsită." };
 	}
 	await db.update(journalEntry).set(parsed.data).where(eq(journalEntry.id, id));
 
@@ -117,7 +117,7 @@ export async function deleteJournalEntry(id: string) {
 		)
 		.limit(1);
 	if (existing.length === 0) {
-		return { error: "Inregistrarea nu a fost gasita." };
+		return { error: "Înregistrarea nu a fost găsită." };
 	}
 	await db.delete(journalEntry).where(eq(journalEntry.id, id));
 	await logAudit({

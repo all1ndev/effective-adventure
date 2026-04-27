@@ -42,7 +42,7 @@ export function SymptomsList({ data, onUpdate }: SymptomsListProps) {
 				toast.error(result.error);
 				return;
 			}
-			toast.success("Raportul a fost sters.");
+			toast.success("Raportul a fost șters.");
 			onUpdate?.();
 		});
 	}

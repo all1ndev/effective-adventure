@@ -31,7 +31,7 @@ export function MessageInput({ onSend }: MessageInputProps) {
 				value={value}
 				onChange={(e) => setValue(e.target.value)}
 				onKeyDown={handleKeyDown}
-				placeholder="Scrieti un mesaj... (Enter pentru trimitere)"
+				placeholder="Scrieți un mesaj... (Enter pentru trimitere)"
 				rows={2}
 				className="resize-none"
 			/>

@@ -69,7 +69,7 @@ export async function updateVitalSign(id: string, values: unknown) {
 		.limit(1);
 
 	if (existing.length === 0) {
-		return { error: "Inregistrarea nu a fost gasita." };
+		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
 	const status = computeVitalStatus(parsed.data);
@@ -108,7 +108,7 @@ export async function deleteVitalSign(id: string) {
 		.limit(1);
 
 	if (existing.length === 0) {
-		return { error: "Inregistrarea nu a fost gasita." };
+		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
 	await db.delete(vitalSign).where(eq(vitalSign.id, id));

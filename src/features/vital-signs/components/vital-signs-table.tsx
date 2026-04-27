@@ -34,7 +34,7 @@ export function VitalSignsTable({ data, onUpdate }: VitalSignsTableProps) {
 				toast.error(result.error);
 				return;
 			}
-			toast.success("Inregistrarea a fost stearsa.");
+			toast.success("Înregistrarea a fost ștearsă.");
 			onUpdate?.();
 		});
 	}

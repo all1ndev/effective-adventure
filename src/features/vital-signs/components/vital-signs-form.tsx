@@ -102,16 +102,16 @@ export function VitalSignsForm({
 		<Card>
 			<CardHeader>
 				<CardTitle>
-					{editId ? "Editeaza semne vitale" : "Inregistreaza semne vitale"}
+					{editId ? "Editează semne vitale" : "Înregistrează semne vitale"}
 				</CardTitle>
-				<CardDescription>Completati valorile masurate astazi.</CardDescription>
+				<CardDescription>Completați valorile măsurate astăzi.</CardDescription>
 			</CardHeader>
 			<CardContent>
 				{submitted && (
 					<div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
 						{editId
 							? "Semnele vitale au fost actualizate cu succes."
-							: "Semnele vitale au fost inregistrate cu succes."}
+							: "Semnele vitale au fost înregistrate cu succes."}
 					</div>
 				)}
 				<Form {...form}>
@@ -124,7 +124,7 @@ export function VitalSignsForm({
 							name="systolic"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Tensiune sistolica (mmHg)</FormLabel>
+									<FormLabel>Tensiune sistolică (mmHg)</FormLabel>
 									<FormControl>
 										<Input
 											type="number"
@@ -145,7 +145,7 @@ export function VitalSignsForm({
 							name="diastolic"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Tensiune diastolica (mmHg)</FormLabel>
+									<FormLabel>Tensiune diastolică (mmHg)</FormLabel>
 									<FormControl>
 										<Input
 											type="number"
@@ -229,10 +229,10 @@ export function VitalSignsForm({
 						<div className="flex items-end">
 							<Button type="submit" className="w-full" disabled={isPending}>
 								{isPending
-									? "Se salveaza..."
+									? "Se salvează..."
 									: editId
-										? "Actualizeaza"
-										: "Salveaza"}
+										? "Actualizează"
+										: "Salvează"}
 							</Button>
 						</div>
 					</form>

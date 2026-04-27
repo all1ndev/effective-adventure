@@ -47,7 +47,7 @@ export function PatientDashboard() {
 					<div>
 						<h2 className="text-2xl font-bold tracking-tight">Bună ziua!</h2>
 						<p className="text-muted-foreground">
-							Iata un rezumat al starii tale de sanatate.
+							Iată un rezumat al stării tale de sănătate.
 						</p>
 					</div>
 
@@ -103,7 +103,7 @@ export function PatientDashboard() {
 					</div>
 
 					<div>
-						<h3 className="mb-3 text-lg font-semibold">Actiuni rapide</h3>
+						<h3 className="mb-3 text-lg font-semibold">Acțiuni rapide</h3>
 						<div className="grid gap-3 sm:grid-cols-3">
 							<Button
 								variant="outline"
@@ -111,7 +111,7 @@ export function PatientDashboard() {
 								asChild
 							>
 								<Link href="/vital-signs">
-									<span>Inregistreaza semne vitale</span>
+									<span>Înregistrează semne vitale</span>
 									<ArrowRight className="h-4 w-4" />
 								</Link>
 							</Button>
@@ -121,7 +121,7 @@ export function PatientDashboard() {
 								asChild
 							>
 								<Link href="/symptoms">
-									<span>Raporteaza simptome</span>
+									<span>Raportează simptome</span>
 									<ArrowRight className="h-4 w-4" />
 								</Link>
 							</Button>

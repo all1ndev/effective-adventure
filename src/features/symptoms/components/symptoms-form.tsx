@@ -98,10 +98,10 @@ export function SymptomsForm({
 		<Card>
 			<CardHeader>
 				<CardTitle>
-					{editId ? "Editeaza raport simptome" : "Raporteaza simptome"}
+					{editId ? "Editează raport simptome" : "Raportează simptome"}
 				</CardTitle>
 				<CardDescription>
-					Selectati simptomele pe care le resimtiti astazi.
+					Selectați simptomele pe care le resimțiți astăzi.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -162,13 +162,13 @@ export function SymptomsForm({
 									>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Selectati severitatea" />
+												<SelectValue placeholder="Selectați severitatea" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="usoara">Usoara</SelectItem>
-											<SelectItem value="moderata">Moderata</SelectItem>
-											<SelectItem value="severa">Severa</SelectItem>
+											<SelectItem value="usoara">Ușoară</SelectItem>
+											<SelectItem value="moderata">Moderată</SelectItem>
+											<SelectItem value="severa">Severă</SelectItem>
 										</SelectContent>
 									</Select>
 									<FormMessage />
@@ -183,7 +183,7 @@ export function SymptomsForm({
 									<FormLabel>Note suplimentare</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Descrieti mai detaliat ce simtiti..."
+											placeholder="Descrieți mai detaliat ce simțiți..."
 											rows={3}
 											{...field}
 										/>
@@ -194,9 +194,9 @@ export function SymptomsForm({
 						/>
 						<Button type="submit" disabled={isPending}>
 							{isPending
-								? "Se salveaza..."
+								? "Se salvează..."
 								: editId
-									? "Actualizeaza"
+									? "Actualizează"
 									: "Trimite raport"}
 						</Button>
 					</form>

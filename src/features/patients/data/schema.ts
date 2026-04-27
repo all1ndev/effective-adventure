@@ -175,7 +175,7 @@ export const addPatientFormSchema = z.object({
 	patientPhone: z.string().min(1, "Câmpul este obligatoriu."),
 	patientEmail: z
 		.string()
-		.email("Adresa de email invalida.")
+		.email("Adresa de email invalidă.")
 		.min(1, "Câmpul este obligatoriu."),
 	doctorAccount: z.string().min(1, "Câmpul este obligatoriu."),
 });

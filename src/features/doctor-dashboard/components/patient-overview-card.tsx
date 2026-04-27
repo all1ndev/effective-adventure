@@ -23,7 +23,7 @@ function getHealthStatus(patient: PatientSummary) {
 		return {
 			icon: AlertTriangle,
 			color: "text-orange-500 dark:text-orange-400",
-			label: "Atentie",
+			label: "Atenție",
 		};
 	}
 	return {

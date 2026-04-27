@@ -9,10 +9,10 @@ interface ArticleDetailProps {
 }
 
 const categoryLabels: Record<string, string> = {
-	"nutritie": "Nutritie",
-	"medicatie": "Medicatie",
-	"stil-de-viata": "Stil de viata",
-	"complicatii": "Complicatii",
+	"nutritie": "Nutriție",
+	"medicatie": "Medicație",
+	"stil-de-viata": "Stil de viață",
+	"complicatii": "Complicații",
 	"recuperare": "Recuperare",
 };
 
@@ -22,7 +22,7 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
 			{onBack && (
 				<Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
 					<ArrowLeft className="h-4 w-4" />
-					Inapoi la articole
+					Înapoi la articole
 				</Button>
 			)}
 			<div className="space-y-2">

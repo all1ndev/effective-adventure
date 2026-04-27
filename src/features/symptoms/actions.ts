@@ -67,7 +67,7 @@ export async function updateSymptomReport(id: string, values: unknown) {
 		.limit(1);
 
 	if (existing.length === 0) {
-		return { error: "Inregistrarea nu a fost gasita." };
+		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
 	await db
@@ -107,7 +107,7 @@ export async function deleteSymptomReport(id: string) {
 		.limit(1);
 
 	if (existing.length === 0) {
-		return { error: "Inregistrarea nu a fost gasita." };
+		return { error: "Înregistrarea nu a fost găsită." };
 	}
 
 	await db.delete(symptomReport).where(eq(symptomReport.id, id));

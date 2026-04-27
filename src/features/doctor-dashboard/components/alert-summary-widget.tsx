@@ -35,7 +35,7 @@ export function AlertSummaryWidget({ alerts }: AlertSummaryWidgetProps) {
 						<span className="text-2xl font-bold text-orange-600 dark:text-orange-400">
 							{warning}
 						</span>
-						<span className="text-xs text-muted-foreground">Atentie</span>
+						<span className="text-xs text-muted-foreground">Atenție</span>
 					</div>
 					<div className="flex flex-col items-center gap-1 rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
 						<Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />

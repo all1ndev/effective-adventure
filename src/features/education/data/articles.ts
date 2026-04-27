@@ -3,138 +3,138 @@ import { type Article } from "./schema";
 export const articles: Article[] = [
 	{
 		id: "1",
-		title: "Ce trebuie sa stiti dupa transplantul hepatic",
+		title: "Ce trebuie să știți după transplantul hepatic",
 		category: "recuperare",
-		content: `Transplantul hepatic este o interventie majora care necesita o ingrijire atenta dupa operatie. In primele luni, sistemul imunitar este suprimat pentru a preveni rejetul ficatului nou. Este esential sa urmati cu strictete schema de medicatie prescisa de medicul dumneavoastra.
+		content: `Transplantul hepatic este o intervenție majoră care necesită o îngrijire atentă după operație. În primele luni, sistemul imunitar este suprimat pentru a preveni rejetul ficatului nou. Este esențial să urmați cu strictețe schema de medicație prescrisă de medicul dumneavoastră.
 
-Vizitele de control regulate sunt cruciale pentru monitorizarea functiei hepatice si ajustarea dozelor de imunosupresoare. Nu ratati nicio programare si anuntati medicul daca apar simptome noi sau neobisnuite.
+Vizitele de control regulate sunt cruciale pentru monitorizarea funcției hepatice și ajustarea dozelor de imunosupresoare. Nu ratați nicio programare și anunțați medicul dacă apar simptome noi sau neobișnuite.
 
-Recuperarea completa dureaza de obicei 6-12 luni, dar multi pacienti se simt semnificativ mai bine dupa primele cateva saptamani.`,
+Recuperarea completă durează de obicei 6-12 luni, dar mulți pacienți se simt semnificativ mai bine după primele câteva săptămâni.`,
 		readTime: 5,
 	},
 	{
 		id: "2",
-		title: "Nutritie si alimentatie dupa transplant",
+		title: "Nutriție și alimentație după transplant",
 		category: "nutritie",
-		content: `O dieta echilibrata joaca un rol crucial in recuperarea dupa transplantul hepatic. Iata principalele recomandari:
+		content: `O dietă echilibrată joacă un rol crucial în recuperarea după transplantul hepatic. Iată principalele recomandări:
 
 **Alimente recomandate:**
-- Fructe si legume proaspete (bine spalate)
-- Proteine slabe: pui, peste, oua
+- Fructe și legume proaspete (bine spălate)
+- Proteine slabe: pui, pește, ouă
 - Cereale integrale
 - Lactate pasteurizate
 
 **Alimente de evitat:**
-- Grapefruit si suc de grapefruit (interactioneaza cu medicatia)
-- Alimente crude sau insuficient gatite
+- Grapefruit și suc de grapefruit (interacționează cu medicația)
+- Alimente crude sau insuficient gătite
 - Alcool (complet interzis)
-- Alimente bogate in sodiu (cresc tensiunea arteriala)
+- Alimente bogate în sodiu (cresc tensiunea arterială)
 
-Hidratati-va corespunzator cu minimum 2 litri de apa pe zi.`,
+Hidratați-vă corespunzător cu minimum 2 litri de apă pe zi.`,
 		readTime: 7,
 	},
 	{
 		id: "3",
-		title: "Medicatia imunosupresoare — ce trebuie sa stiti",
+		title: "Medicația imunosupresoare — ce trebuie să știți",
 		category: "medicatie",
-		content: `Medicatia imunosupresoare este esentiala dupa transplantul hepatic pentru a preveni rejetul organului transplantat. Este important sa intelegeti cum functioneaza si de ce trebuie luata cu strictete.
+		content: `Medicația imunosupresoare este esențială după transplantul hepatic pentru a preveni rejetul organului transplantat. Este important să înțelegeți cum funcționează și de ce trebuie luată cu strictețe.
 
 **Tipuri comune de imunosupresoare:**
-- **Tacrolimus (Prograf):** cel mai frecvent utilizat; monitorizeaza nivelurile serice
-- **Ciclosporina:** alternativa la tacrolimus
-- **Micofenolat mofetil:** adesea folosit in combinatie
+- **Tacrolimus (Prograf):** cel mai frecvent utilizat; monitorizează nivelurile serice
+- **Ciclosporina:** alternativă la tacrolimus
+- **Micofenolat mofetil:** adesea folosit în combinație
 - **Prednison:** corticosteroid, frecvent redus treptat
 
 **Reguli de aur:**
-1. Luati medicatia la aceleasi ore in fiecare zi
-2. Nu sarit nicio doza fara sa contactati medicul
-3. Nu ajustati dozele singuri
-4. Anuntati orice medic/dentist ca sunteti pe imunosupresoare`,
+1. Luați medicația la aceleași ore în fiecare zi
+2. Nu săriți nicio doză fără să contactați medicul
+3. Nu ajustați dozele singuri
+4. Anunțați orice medic/dentist că sunteți pe imunosupresoare`,
 		readTime: 8,
 	},
 	{
 		id: "4",
-		title: "Semnele de alerta — cand sa contactati medicul",
+		title: "Semnele de alertă — când să contactați medicul",
 		category: "complicatii",
-		content: `Dupa transplantul hepatic, este vital sa recunoasteti semnele de alerta care necesita atentie medicala imediata.
+		content: `După transplantul hepatic, este vital să recunoașteți semnele de alertă care necesită atenție medicală imediată.
 
-**Contactati medicul URGENT daca aveti:**
-- Febra peste 38°C
-- Icter (ingalbenirea pielii sau ochilor)
-- Durere severa in zona abdominala sau in dreptul ficatului
-- Urina foarte inchisa la culoare
-- Varsaturi persistente sau sangerare
+**Contactați medicul URGENT dacă aveți:**
+- Febră peste 38°C
+- Icter (îngălbenirea pielii sau ochilor)
+- Durere severă în zona abdominală sau în dreptul ficatului
+- Urină foarte închisă la culoare
+- Vărsături persistente sau sângerare
 - Confuzie sau dezorientare
-- Dificultati severe de respiratie
+- Dificultăți severe de respirație
 
-**Contactati medicul in 24 ore daca aveti:**
-- Tensiune arteriala anormal de mare (>140/90)
-- Umflaturi ale picioarelor sau abdomenului
-- Oboseala extrema sau neobisnuita
-- Pierdere rapida in greutate`,
+**Contactați medicul în 24 ore dacă aveți:**
+- Tensiune arterială anormal de mare (>140/90)
+- Umflături ale picioarelor sau abdomenului
+- Oboseală extremă sau neobișnuită
+- Pierdere rapidă în greutate`,
 		readTime: 6,
 	},
 	{
 		id: "5",
-		title: "Activitate fizica dupa transplant",
+		title: "Activitate fizică după transplant",
 		category: "stil-de-viata",
-		content: `Reluarea activitatii fizice dupa transplantul hepatic trebuie facuta gradual, sub indrumarea echipei medicale.
+		content: `Reluarea activității fizice după transplantul hepatic trebuie făcută gradual, sub îndrumarea echipei medicale.
 
-**Primele 6 saptamani:**
-- Plimbari scurte de 10-15 minute
-- Evitati ridicarea greutatilor peste 5 kg
-- Evitati efortul fizic intens
+**Primele 6 săptămâni:**
+- Plimbări scurte de 10-15 minute
+- Evitați ridicarea greutăților peste 5 kg
+- Evitați efortul fizic intens
 
 **Lunile 2-6:**
-- Cresteti treptat durata si intensitatea plimbarilor
-- Puteti incepe yoga sau exercitii usoare de stretching
-- Consultati medicul inainte de orice sport nou
+- Creșteți treptat durata și intensitatea plimbărilor
+- Puteți începe yoga sau exerciții ușoare de stretching
+- Consultați medicul înainte de orice sport nou
 
-**Dupa 6 luni:**
-- Majoritatea activitatilor fizice moderate sunt permise
-- Evitati sporturile de contact
-- Inotul este recomandat dupa vindecarea completa a inciziei
+**După 6 luni:**
+- Majoritatea activităților fizice moderate sunt permise
+- Evitați sporturile de contact
+- Înotul este recomandat după vindecarea completă a inciziei
 
-Exercitiile regulate ajuta la mentinerea greutatii optime, imbunatatesc calitatea somnului si reduc riscul bolilor cardiovasculare.`,
+Exercițiile regulate ajută la menținerea greutății optime, îmbunătățesc calitatea somnului și reduc riscul bolilor cardiovasculare.`,
 		readTime: 6,
 	},
 	{
 		id: "6",
-		title: "Sanatatea mentala dupa transplant",
+		title: "Sănătatea mentală după transplant",
 		category: "stil-de-viata",
-		content: `Transplantul hepatic este o experienta transformatoare care poate afecta starea psihologica. Este normal sa aveti o varietate de emotii dupa interventie.
+		content: `Transplantul hepatic este o experiență transformatoare care poate afecta starea psihologică. Este normal să aveți o varietate de emoții după intervenție.
 
-**Emotii frecvente:**
-- Gratitudine, dar si anxietate
-- Teama de rejet sau complicatii
-- Stres legat de medicatie si vizite medicale
-- Uneori, sentimente de vinovatie (supravietuitor)
+**Emoții frecvente:**
+- Gratitudine, dar și anxietate
+- Teamă de rejet sau complicații
+- Stres legat de medicație și vizite medicale
+- Uneori, sentimente de vinovăție (supraviețuitor)
 
 **Strategii de coping:**
-- Vorbiti cu un psiholog sau consilier specializat in transplant
-- Alaturati-va unui grup de suport pentru pacienti transplantati
-- Practicati tehnici de relaxare (meditatie, respiratie profunda)
-- Mentineti o rutina zilnica structurata
-- Comunicati deschis cu familia si echipa medicala`,
+- Vorbiți cu un psiholog sau consilier specializat în transplant
+- Alăturați-vă unui grup de suport pentru pacienți transplantați
+- Practicați tehnici de relaxare (meditație, respirație profundă)
+- Mențineți o rutină zilnică structurată
+- Comunicați deschis cu familia și echipa medicală`,
 		readTime: 5,
 	},
 	{
 		id: "7",
-		title: "Infectii — cum sa va protejati",
+		title: "Infecții — cum să vă protejați",
 		category: "complicatii",
-		content: `Datorita medicatiei imunosupresoare, sistemul dumneavoastra imunitar este mai putin activ, ceea ce creste riscul de infectii. Protectia impotriva infectiilor este una dintre prioritatile principale dupa transplant.
+		content: `Datorită medicației imunosupresoare, sistemul dumneavoastră imunitar este mai puțin activ, ceea ce crește riscul de infecții. Protecția împotriva infecțiilor este una dintre prioritățile principale după transplant.
 
-**Masuri de preventie:**
-- Spalati mainile frecvent cu apa si sapun
-- Evitati contactul cu persoane bolnave (gripa, raceala)
-- Nu consumati alimente crude sau insuficient preparate
-- Purtati masca in spatii aglomerate in sezonul de gripa
-- Mentineti igiena orala riguroasa
-- Vaccinati-va conform recomandarilor medicului (nu vaccinuri vii)
+**Măsuri de prevenție:**
+- Spălați mâinile frecvent cu apă și săpun
+- Evitați contactul cu persoane bolnave (gripă, răceală)
+- Nu consumați alimente crude sau insuficient preparate
+- Purtați mască în spații aglomerate în sezonul de gripă
+- Mențineți igiena orală riguroasă
+- Vaccinați-vă conform recomandărilor medicului (nu vaccinuri vii)
 
 **Animale de companie:**
-- Puteti pastra animale de companie, dar evitati contactul cu excrementele
-- Spalati mainile dupa orice contact cu animalele`,
+- Puteți păstra animale de companie, dar evitați contactul cu excrementele
+- Spălați mâinile după orice contact cu animalele`,
 		readTime: 7,
 	},
 ];

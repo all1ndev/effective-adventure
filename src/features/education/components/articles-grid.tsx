@@ -15,10 +15,10 @@ interface ArticlesGridProps {
 }
 
 const categoryLabels: Record<string, string> = {
-	"nutritie": "Nutritie",
-	"medicatie": "Medicatie",
-	"stil-de-viata": "Stil de viata",
-	"complicatii": "Complicatii",
+	"nutritie": "Nutriție",
+	"medicatie": "Medicație",
+	"stil-de-viata": "Stil de viață",
+	"complicatii": "Complicații",
 	"recuperare": "Recuperare",
 };
 

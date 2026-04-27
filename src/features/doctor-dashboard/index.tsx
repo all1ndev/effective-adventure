@@ -59,20 +59,20 @@ export function DoctorDashboard() {
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">Dashboard Medic</h2>
 					<p className="text-muted-foreground">
-						Privire de ansamblu asupra pacientilor monitorizati.
+						Privire de ansamblu asupra pacienților monitorizați.
 					</p>
 				</div>
 
 				<div className="grid gap-4 md:grid-cols-3">
 					<div className="rounded-lg border p-4 text-center">
 						<p className="text-3xl font-bold">{data.patients.length}</p>
-						<p className="text-sm text-muted-foreground">Total pacienti</p>
+						<p className="text-sm text-muted-foreground">Total pacienți</p>
 					</div>
 					<div className="rounded-lg border p-4 text-center">
 						<p className="text-3xl font-bold text-green-600">
 							{activePatients.length}
 						</p>
-						<p className="text-sm text-muted-foreground">Pacienti activi</p>
+						<p className="text-sm text-muted-foreground">Pacienți activi</p>
 					</div>
 					<AlertSummaryWidget alerts={data.alerts} />
 				</div>
@@ -80,7 +80,7 @@ export function DoctorDashboard() {
 				<ComplianceChart patients={data.patients} />
 
 				<div>
-					<h3 className="mb-3 text-lg font-semibold">Pacienti activi</h3>
+					<h3 className="mb-3 text-lg font-semibold">Pacienți activi</h3>
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{activePatients.map((p) => (
 							<PatientOverviewCard key={p.id} patient={p} />

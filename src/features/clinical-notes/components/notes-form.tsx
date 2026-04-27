@@ -50,15 +50,15 @@ export function NotesForm({ patientId, onSuccess }: NotesFormProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Nota clinica noua</CardTitle>
+				<CardTitle>Notă clinică nouă</CardTitle>
 				<CardDescription>
-					Adaugati observatii clinice pentru aceasta vizita.
+					Adăugați observații clinice pentru această vizită.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				{submitted && (
 					<div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
-						Nota a fost salvata cu succes.
+						Nota a fost salvată cu succes.
 					</div>
 				)}
 				<form onSubmit={handleSubmit} className="space-y-4">
@@ -73,10 +73,10 @@ export function NotesForm({ patientId, onSuccess }: NotesFormProps) {
 						/>
 					</div>
 					<div className="space-y-1.5">
-						<Label htmlFor="content">Observatii clinice</Label>
+						<Label htmlFor="content">Observații clinice</Label>
 						<Textarea
 							id="content"
-							placeholder="Descrieti starea pacientului, evolutia, recomandarile..."
+							placeholder="Descrieți starea pacientului, evoluția, recomandările..."
 							rows={6}
 							required
 							value={content}
@@ -84,7 +84,7 @@ export function NotesForm({ patientId, onSuccess }: NotesFormProps) {
 						/>
 					</div>
 					<Button type="submit" disabled={isPending}>
-						{isPending ? "Se salveaza..." : "Salveaza nota"}
+						{isPending ? "Se salvează..." : "Salvează nota"}
 					</Button>
 				</form>
 			</CardContent>
