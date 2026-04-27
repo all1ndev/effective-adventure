@@ -71,6 +71,13 @@ export function Messaging() {
 				if (firstActiveId && !skipAutoSelect) {
 					setActiveId(firstActiveId);
 					activeIdRef.current = firstActiveId;
+					if (userRole !== "admin") {
+						setConversations((prev) =>
+							prev.map((c) =>
+								c.id === firstActiveId ? { ...c, unreadCount: 0 } : c,
+							),
+						);
+					}
 					return getMessages(firstActiveId).then(setThreadMessages);
 				}
 			})
@@ -102,11 +109,19 @@ export function Messaging() {
 		return () => clearInterval(interval);
 	}, []);
 
-	const handleSelectConversation = useCallback((id: string) => {
-		setActiveId(id);
-		activeIdRef.current = id;
-		getMessages(id).then(setThreadMessages);
-	}, []);
+	const handleSelectConversation = useCallback(
+		(id: string) => {
+			setActiveId(id);
+			activeIdRef.current = id;
+			if (currentUserRole !== "admin") {
+				setConversations((prev) =>
+					prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)),
+				);
+			}
+			getMessages(id).then(setThreadMessages);
+		},
+		[currentUserRole],
+	);
 
 	const activeConv = conversations.find((c) => c.id === activeId);
 	const isAdminOrDoctor =
