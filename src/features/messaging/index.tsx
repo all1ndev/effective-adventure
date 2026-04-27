@@ -113,12 +113,15 @@ export function Messaging() {
 		(id: string) => {
 			setActiveId(id);
 			activeIdRef.current = id;
+			setThreadMessages([]);
 			if (currentUserRole !== "admin") {
 				setConversations((prev) =>
 					prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)),
 				);
 			}
-			getMessages(id).then(setThreadMessages);
+			getMessages(id).then((msgs) => {
+				if (activeIdRef.current === id) setThreadMessages(msgs);
+			});
 		},
 		[currentUserRole],
 	);
@@ -179,19 +182,21 @@ export function Messaging() {
 						{isAdminOrDoctor && (
 							<aside
 								className={cn(
-									"shrink-0 border-r p-4",
+									"flex shrink-0 flex-col border-r",
 									// Mobile: full width, hidden when a conversation is active
-									activeId ? "hidden md:block" : "w-full md:w-72",
+									activeId ? "hidden md:flex" : "w-full md:w-72",
 									// Desktop: always fixed width
 									"md:w-72",
 								)}
 							>
-								<h2 className="mb-3 text-lg font-bold">Mesagerie</h2>
-								<ConversationList
-									conversations={conversations}
-									activeId={activeId}
-									onSelect={handleSelectConversation}
-								/>
+								<h2 className="border-b p-4 text-lg font-bold">Mesagerie</h2>
+								<div className="min-h-0 flex-1 overflow-y-auto p-2">
+									<ConversationList
+										conversations={conversations}
+										activeId={activeId}
+										onSelect={handleSelectConversation}
+									/>
+								</div>
 							</aside>
 						)}
 						<div
@@ -243,16 +248,14 @@ export function Messaging() {
 									</div>
 									<div
 										ref={threadRef}
-										className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+										className="min-h-0 flex-1 overflow-y-auto"
 									>
-										<div className="mt-auto">
-											<MessageThread
-												messages={threadMessages}
-												currentUserId={currentUserId}
-												patientId={activeConv.patientId}
-												viewerRole={currentUserRole}
-											/>
-										</div>
+										<MessageThread
+											messages={threadMessages}
+											currentUserId={currentUserId}
+											patientId={activeConv.patientId}
+											viewerRole={currentUserRole}
+										/>
 									</div>
 									{currentUserRole !== "admin" && (
 										<MessageInput onSend={handleSend} />
