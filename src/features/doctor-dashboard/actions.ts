@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { patient } from "@/db/patient-schema";
 import { alert } from "@/db/alert-schema";
 import { medication, medicationLog } from "@/db/medication-schema";
+import { conversation } from "@/db/messaging-schema";
 
 export async function getDoctorDashboardData() {
 	const session = await getSessionOrThrow();
@@ -89,8 +90,26 @@ export async function getDoctorDashboardData() {
 		}),
 	);
 
+	const recentConversations =
+		patientUserIds.length > 0
+			? await db
+					.select({
+						id: conversation.id,
+						patientId: conversation.patientId,
+						patientName: conversation.patientName,
+						lastMessage: conversation.lastMessage,
+						lastMessageAt: conversation.lastMessageAt,
+						unreadCount: conversation.unreadCount,
+					})
+					.from(conversation)
+					.where(inArray(conversation.patientId, patientUserIds))
+					.orderBy(desc(conversation.lastMessageAt))
+					.limit(5)
+			: [];
+
 	return {
 		patients: patientSummaries,
 		alerts,
+		recentConversations,
 	};
 }
