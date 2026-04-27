@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, inArray, desc } from "drizzle-orm";
+import { eq, inArray, desc, and, gt, lte, asc, isNotNull } from "drizzle-orm";
 import { getSessionOrThrow } from "@/lib/auth-utils";
 import { isMedicRole } from "@/lib/roles";
 import { db } from "@/db";
@@ -8,6 +8,7 @@ import { patient } from "@/db/patient-schema";
 import { alert } from "@/db/alert-schema";
 import { medication, medicationLog } from "@/db/medication-schema";
 import { conversation } from "@/db/messaging-schema";
+import { notification } from "@/db/notification-schema";
 
 export async function getDoctorDashboardData() {
 	const session = await getSessionOrThrow();
@@ -107,9 +108,38 @@ export async function getDoctorDashboardData() {
 					.limit(5)
 			: [];
 
+	const now = new Date();
+	const sevenDaysAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+	const baseAppointmentFilters = and(
+		isNotNull(notification.scheduledAt),
+		gt(notification.scheduledAt, now),
+		lte(notification.scheduledAt, sevenDaysAhead),
+	);
+	const upcomingAppointments = await db
+		.select({
+			id: notification.id,
+			title: notification.title,
+			message: notification.message,
+			scheduledAt: notification.scheduledAt,
+			targetType: notification.targetType,
+			targetValue: notification.targetValue,
+		})
+		.from(notification)
+		.where(
+			session.user.role === "admin"
+				? baseAppointmentFilters
+				: and(
+						baseAppointmentFilters,
+						eq(notification.createdBy, session.user.id),
+					),
+		)
+		.orderBy(asc(notification.scheduledAt))
+		.limit(5);
+
 	return {
 		patients: patientSummaries,
 		alerts,
 		recentConversations,
+		upcomingAppointments,
 	};
 }

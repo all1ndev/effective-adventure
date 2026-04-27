@@ -11,6 +11,7 @@ import { PatientOverviewCard } from "./components/patient-overview-card";
 import { AlertSummaryWidget } from "./components/alert-summary-widget";
 import { ComplianceChart } from "./components/compliance-chart";
 import { RecentConversationsCard } from "./components/recent-conversations-card";
+import { UpcomingAppointmentsCard } from "./components/upcoming-appointments-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { getDoctorDashboardData } from "./actions";
@@ -66,21 +67,30 @@ export function DoctorDashboard() {
 				</div>
 
 				<div className="grid gap-4 md:grid-cols-3">
-					<Card>
-						<CardContent className="flex items-center justify-around gap-4 py-4">
-							<div className="text-center">
-								<p className="text-2xl font-bold">{data.patients.length}</p>
-								<p className="text-xs text-muted-foreground">Total pacienți</p>
-							</div>
-							<div className="h-10 w-px bg-border" />
-							<div className="text-center">
-								<p className="text-2xl font-bold text-green-600">
-									{activePatients.length}
-								</p>
-								<p className="text-xs text-muted-foreground">Pacienți activi</p>
-							</div>
-						</CardContent>
-					</Card>
+					<div className="flex flex-col gap-4">
+						<Card>
+							<CardContent className="flex items-center justify-around gap-4 py-4">
+								<div className="text-center">
+									<p className="text-2xl font-bold">{data.patients.length}</p>
+									<p className="text-xs text-muted-foreground">
+										Total pacienți
+									</p>
+								</div>
+								<div className="h-10 w-px bg-border" />
+								<div className="text-center">
+									<p className="text-2xl font-bold text-green-600">
+										{activePatients.length}
+									</p>
+									<p className="text-xs text-muted-foreground">
+										Pacienți activi
+									</p>
+								</div>
+							</CardContent>
+						</Card>
+						<UpcomingAppointmentsCard
+							appointments={data.upcomingAppointments}
+						/>
+					</div>
 					<AlertSummaryWidget alerts={data.alerts} />
 					<RecentConversationsCard conversations={data.recentConversations} />
 				</div>
