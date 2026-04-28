@@ -41,13 +41,14 @@ export function Messaging() {
 		activeIdRef.current = activeId;
 	}, [activeId]);
 
-	// Scroll to bottom when new messages arrive
+	// Scroll to bottom when conversation finishes loading or new messages arrive
 	useEffect(() => {
-		if (threadMessages.length > lastMsgCountRef.current && threadRef.current) {
-			threadRef.current.scrollTop = threadRef.current.scrollHeight;
-		}
+		if (threadLoading) return;
+		if (!threadRef.current) return;
+		if (threadMessages.length === 0) return;
+		threadRef.current.scrollTop = threadRef.current.scrollHeight;
 		lastMsgCountRef.current = threadMessages.length;
-	}, [threadMessages.length]);
+	}, [threadLoading, threadMessages.length]);
 
 	// Initial load
 	useEffect(() => {
