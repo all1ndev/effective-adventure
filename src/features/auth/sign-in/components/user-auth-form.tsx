@@ -49,8 +49,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 		setIsLoading(true);
 
 		const { error } = await signIn.email({
-			email: data.email,
-			password: data.password,
+			email: data.email.trim(),
+			password: data.password.trim(),
 		});
 
 		if (error) {
