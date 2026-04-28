@@ -14,6 +14,8 @@ import { NavGroup } from "./nav-group";
 import { NavUser } from "./nav-user";
 import { useSession } from "@/lib/auth-client";
 import { getUserRole } from "@/lib/roles";
+import { isPathAllowedPreTransplant } from "@/lib/transplant-status";
+import { useTransplantStatus } from "@/hooks/use-transplant-status";
 import { Stethoscope, User } from "lucide-react";
 
 function SidebarHeaderContent({ role }: { role: string }) {
@@ -46,6 +48,7 @@ export function AppSidebar() {
 	const { data: session } = useSession();
 	const role = getUserRole(session?.user?.role) ?? "user";
 	const data = getSidebarData(role);
+	const { isPreTransplant, isLoading } = useTransplantStatus(role === "user");
 
 	const user = session?.user
 		? {
@@ -55,13 +58,25 @@ export function AppSidebar() {
 			}
 		: data.user;
 
+	const navGroups =
+		role === "user" && !isLoading && isPreTransplant
+			? data.navGroups.map((group) => ({
+					...group,
+					items: group.items.filter((item) => {
+						const url = "url" in item ? item.url : undefined;
+						if (typeof url !== "string") return false;
+						return isPathAllowedPreTransplant(url);
+					}),
+				}))
+			: data.navGroups;
+
 	return (
 		<Sidebar collapsible={collapsible} variant={variant}>
 			<SidebarHeader>
 				<SidebarHeaderContent role={role} />
 			</SidebarHeader>
 			<SidebarContent>
-				{data.navGroups.map((props) => (
+				{navGroups.map((props) => (
 					<NavGroup key={props.title} {...props} />
 				))}
 			</SidebarContent>

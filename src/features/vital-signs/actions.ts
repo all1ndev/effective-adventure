@@ -9,6 +9,7 @@ import { vitalSign } from "@/db/vital-signs-schema";
 import {
 	resolvePatientUserId,
 	assertDoctorOwnsPatient,
+	assertPatientNotPreTransplant,
 } from "@/lib/patient-utils";
 import { vitalEntryFormSchema } from "./data/schema";
 import {
@@ -19,6 +20,7 @@ import { logAudit } from "@/lib/audit";
 
 export async function createVitalSign(values: unknown) {
 	const session = await getSessionOrThrow();
+	await assertPatientNotPreTransplant(session.user.role, session.user.id);
 	const parsed = vitalEntryFormSchema.safeParse(values);
 
 	if (!parsed.success) {
@@ -56,6 +58,7 @@ export async function createVitalSign(values: unknown) {
 
 export async function updateVitalSign(id: string, values: unknown) {
 	const session = await getSessionOrThrow();
+	await assertPatientNotPreTransplant(session.user.role, session.user.id);
 	const parsed = vitalEntryFormSchema.safeParse(values);
 
 	if (!parsed.success) {

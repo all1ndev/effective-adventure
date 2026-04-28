@@ -6,6 +6,7 @@ import { getSessionOrThrow } from "@/lib/auth-utils";
 import { db } from "@/db";
 import { journalEntry } from "@/db/journal-schema";
 import { patient } from "@/db/patient-schema";
+import { assertPatientNotPreTransplant } from "@/lib/patient-utils";
 import { journalEntryFormSchema } from "./data/schema";
 import { logAudit } from "@/lib/audit";
 import { sendPushToUser } from "@/lib/push";
@@ -41,6 +42,7 @@ async function notifyDoctorOfBadMood(patientUserId: string, mood: string) {
 
 export async function createJournalEntry(values: unknown) {
 	const session = await getSessionOrThrow();
+	await assertPatientNotPreTransplant(session.user.role, session.user.id);
 	const parsed = journalEntryFormSchema.safeParse(values);
 	if (!parsed.success) {
 		return { error: "Date invalide." };
@@ -69,6 +71,7 @@ export async function createJournalEntry(values: unknown) {
 
 export async function updateJournalEntry(id: string, values: unknown) {
 	const session = await getSessionOrThrow();
+	await assertPatientNotPreTransplant(session.user.role, session.user.id);
 	const parsed = journalEntryFormSchema.safeParse(values);
 	if (!parsed.success) {
 		return { error: "Date invalide." };

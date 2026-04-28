@@ -10,6 +10,7 @@ import { medicationReminder } from "@/db/medication-reminder-schema";
 import {
 	resolvePatientUserId,
 	assertDoctorOwnsPatient,
+	assertPatientNotPreTransplant,
 } from "@/lib/patient-utils";
 import {
 	medicationFormSchema,
@@ -410,6 +411,7 @@ export async function getMedicationLogsByPatientId(patientId: string) {
 
 export async function createMedicationLog(values: unknown) {
 	const session = await getSessionOrThrow();
+	await assertPatientNotPreTransplant(session.user.role, session.user.id);
 	const parsed = medicationLogFormSchema.safeParse(values);
 
 	if (!parsed.success) {
@@ -458,6 +460,7 @@ export async function createMedicationLog(values: unknown) {
 
 export async function createMedicationLogsBatch(values: unknown[]) {
 	const session = await getSessionOrThrow();
+	await assertPatientNotPreTransplant(session.user.role, session.user.id);
 
 	const parsedEntries = [];
 	for (const value of values) {

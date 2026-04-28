@@ -9,6 +9,7 @@ import { symptomReport } from "@/db/symptoms-schema";
 import {
 	resolvePatientUserId,
 	assertDoctorOwnsPatient,
+	assertPatientNotPreTransplant,
 } from "@/lib/patient-utils";
 import { symptomReportFormSchema } from "./data/schema";
 import { generateSymptomAlerts } from "@/features/alerts/generate-alerts";
@@ -16,6 +17,7 @@ import { logAudit } from "@/lib/audit";
 
 export async function createSymptomReport(values: unknown) {
 	const session = await getSessionOrThrow();
+	await assertPatientNotPreTransplant(session.user.role, session.user.id);
 	const parsed = symptomReportFormSchema.safeParse(values);
 
 	if (!parsed.success) {
@@ -49,6 +51,7 @@ export async function createSymptomReport(values: unknown) {
 
 export async function updateSymptomReport(id: string, values: unknown) {
 	const session = await getSessionOrThrow();
+	await assertPatientNotPreTransplant(session.user.role, session.user.id);
 	const parsed = symptomReportFormSchema.safeParse(values);
 
 	if (!parsed.success) {

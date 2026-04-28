@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { patient } from "@/db/patient-schema";
+import { isPreTransplant } from "@/lib/transplant-status";
 
 /**
  * Resolves a patient table ID to the associated user ID.
@@ -44,6 +45,25 @@ export async function assertDoctorOwnsPatient(
 	}
 	if (record[0].doctorId !== doctorUserId) {
 		throw new Error("Neautorizat");
+	}
+}
+
+/**
+ * Blocks pre-transplant patients from post-transplant-only features.
+ * Only checks when role is "user" (the patient themselves). No-op for doctors/admins.
+ */
+export async function assertPatientNotPreTransplant(
+	role: string | null | undefined,
+	userId: string,
+): Promise<void> {
+	if (role !== "user") return;
+	const result = await db
+		.select({ transplantDate: patient.transplantDate })
+		.from(patient)
+		.where(eq(patient.userId, userId))
+		.limit(1);
+	if (isPreTransplant(result[0]?.transplantDate ?? null)) {
+		throw new Error("Funcționalitate disponibilă doar după transplant.");
 	}
 }
 
